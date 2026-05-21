@@ -4,6 +4,7 @@ import IcaoFlagBadge from "@/components/ui/IcaoFlagBadge";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./DispatchRoom.module.css";
 import { mapAircraftCodeToSimbrief } from "@/lib/simbrief/aircraft-map";
+import { getSimbriefFlightNumber, extractPwgFlightNumber, buildPwgCallsign, generatePwgFlightNumber } from "@/lib/dispatch/flight-number";
 
 type AirportInfo = {
   ident?: string | null;
@@ -353,9 +354,10 @@ function buildPlanRoute(originIdent: string, destinationIdent: string) {
 }
 
 function buildFlightNumber(mode: DispatchMode, originIdent: string, destinationIdent: string) {
+  // Usar helper centralizado para consistencia
   const prefix = mode === "training_free" ? "PWT" : mode === "charter_official" ? "PWC" : "PWG";
-  const seed = `${originIdent}${destinationIdent}`.split("").reduce((total, char) => total + char.charCodeAt(0), 0);
-  return `${prefix}${String((seed % 900) + 100).padStart(3, "0")}`;
+  const num = generatePwgFlightNumber(originIdent, destinationIdent);
+  return `${prefix}${num}`;
 }
 
 function formatCountdown(expiresAt?: string | null, nowMs = Date.now()) {
@@ -765,7 +767,9 @@ function PlanStage({
   onGenerateSimbrief: () => void;
   onLoadSimbriefOfp: () => void;
 }) {
-  const flightNumber = buildFlightNumber(mode, originIdent, destinationIdent);
+  // Usar helper para flight number PWG correcto
+  const pwgFlight = getSimbriefFlightNumber(null, originIdent, destinationIdent);
+  const flightNumber = pwgFlight.callsign; // PWG###
   const aircraftModel = selectedAircraft?.model_code || "N/D";
   const routeValue = simbriefOfp?.route || routeText || "";
   const alternateValue = simbriefOfp?.alternate || alternateIdent || "";
@@ -938,7 +942,9 @@ function FinalStage({
   onCreateReservation: () => void;
   onSendToAcars: () => void;
 }) {
-  const flightNumber = buildFlightNumber(mode, originIdent, destinationIdent);
+  // Usar helper para flight number PWG correcto
+  const pwgFlight = getSimbriefFlightNumber(null, originIdent, destinationIdent);
+  const flightNumber = pwgFlight.callsign; // PWG###
   const endTime = "Por calcular";
   const reservation = reservationState.reservation ?? null;
   const hasReservationCredentials = Boolean(reservation?.id && reservation.dispatch_token);
@@ -1318,8 +1324,8 @@ export default function DispatchRoomClient({
     }
 
     const mapper = mapAircraftCodeToSimbrief(selectedAircraft?.model_code || "");
-    const flightNumber = selectedRoute?.route_code || buildFlightNumber(mode, originIdent, destinationIdent);
-    const callsign = selectedRoute?.route_code || pilot?.callsign || flightNumber;
+    // Usar helper para obtener número de vuelo PWG correcto (nunca SCTE-SCIE)
+    const pwgFlight = getSimbriefFlightNumber(selectedRoute?.route_code, originIdent, destinationIdent);
     const prefill = new URL("https://dispatch.simbrief.com/options/custom");
     if (simbriefUserId.trim()) prefill.searchParams.set("userid", simbriefUserId.trim());
     if (simbriefUsername.trim()) prefill.searchParams.set("username", simbriefUsername.trim());
@@ -1327,12 +1333,16 @@ export default function DispatchRoomClient({
     prefill.searchParams.set("dest", destinationIdent);
     prefill.searchParams.set("type", mapper.simbriefCode || (selectedAircraft?.model_code || ""));
     prefill.searchParams.set("reg", selectedAircraft?.registration || "");
-    prefill.searchParams.set("fltnum", flightNumber);
-    prefill.searchParams.set("callsign", callsign);
+    // fltnum debe ser SOLO el número (ej: "695"), no "PWG695" ni "SCTE-SCIE"
+    prefill.searchParams.set("fltnum", pwgFlight.flightNumber);
+    // callsign debe ser PWG + número (ej: "PWG695")
+    prefill.searchParams.set("callsign", pwgFlight.callsign);
+    // airline siempre PWG
+    prefill.searchParams.set("airline", "PWG");
     prefill.searchParams.set("route", effectiveRouteText || "");
     prefill.searchParams.set("pax", String(effectivePassengerCount));
     prefill.searchParams.set("cargo", String(effectiveCargoKg));
-    prefill.searchParams.set("airline", "PWG");
+    // Nota: airline ya se seteó arriba
 
     const popup = window.open(prefill.toString(), "_blank", "noopener,noreferrer");
     if (!popup) {
@@ -1348,7 +1358,10 @@ export default function DispatchRoomClient({
     setSimbriefMessage("Cargando OFP desde SimBrief...");
     try {
       const mapper = mapAircraftCodeToSimbrief(selectedAircraft?.model_code || "");
-      const expectedFlightNumber = (selectedRoute?.route_code || buildFlightNumber(mode, originIdent, destinationIdent)).toUpperCase();
+      // Usar helper para obtener flight number PWG correcto para validación
+      const pwgFlight = getSimbriefFlightNumber(selectedRoute?.route_code, originIdent, destinationIdent);
+      // Enviar tanto el número como el callsign completo para validación flexible
+      const expectedFlightNumber = pwgFlight.callsign; // PWG695
       const response = await fetch("/api/simbrief/ofp/latest", {
         method: "POST",
         credentials: "include",
