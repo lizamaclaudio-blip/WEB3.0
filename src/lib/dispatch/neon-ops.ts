@@ -50,6 +50,7 @@ type FleetRow = {
 
 type RouteRow = {
   id: string;
+  route_code: string | null;
   route_category: string | null;
   origin_ident: string | null;
   destination_ident: string | null;
@@ -120,6 +121,8 @@ export type AvailableAircraft = {
 
 export type AvailableRoute = {
   id: string;
+  routeId?: string;
+  route_id?: string;
   route_code: string;
   origin_ident: string;
   destination_ident: string;
@@ -322,8 +325,9 @@ export async function listAvailableRoutes(
   if (!context.ok) return { origin: "N/A", routes: [] };
 
   const rows = await dbQuery<RouteRow>(
-    `select
+     `select
        nr.id::text as id,
+       nr.route_code,
        nr.route_category,
        oa.ident as origin_ident,
        da.ident as destination_ident,
@@ -393,7 +397,12 @@ export async function listAvailableRoutes(
 
     return {
       id: row.id,
-      route_code: `${upper(row.origin_ident)}-${upper(row.destination_ident)}`,
+      routeId: row.id,
+      route_id: row.id,
+      route_code: safeText(
+        row.route_code,
+        `${upper(row.origin_ident)}-${upper(row.destination_ident)}`,
+      ),
       origin_ident: upper(row.origin_ident, "N/A"),
       destination_ident: upper(row.destination_ident, "N/A"),
       destination_name: safeText(row.destination_name, "No registrado"),

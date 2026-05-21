@@ -48,6 +48,8 @@ type AirportSearchItem = {
 
 type RouteItem = {
   id?: string | null;
+  routeId?: string | null;
+  route_id?: string | null;
   route_code?: string | null;
   origin_ident?: string | null;
   destination_ident?: string | null;
@@ -353,7 +355,15 @@ function isAircraftCapable(aircraft: AircraftItem, route: RouteItem | null) {
 }
 
 function routeKey(route: RouteItem) {
-  return route.id || route.route_code || `${route.origin_ident}-${route.destination_ident}`;
+  return getRouteId(route) || getRouteCode(route) || `${route.origin_ident}-${route.destination_ident}`;
+}
+
+function getRouteId(route?: RouteItem | null) {
+  return normalizeText(route?.id || route?.routeId || route?.route_id, "");
+}
+
+function getRouteCode(route?: RouteItem | null) {
+  return normalizeText(route?.route_code, "");
 }
 
 function buildDepartureOptions() {
@@ -1003,7 +1013,13 @@ export default function DispatchRoomClient({
         if (!mounted) return;
         setAuth(authJson);
         setAircraft(fleetJson?.aircraft ?? []);
-        setRoutes(routesJson?.routes ?? []);
+        const normalizedRoutes = (routesJson?.routes ?? []).map((route) => ({
+          ...route,
+          id: normalizeText(route.id || route.routeId || route.route_id, "") || null,
+          routeId: normalizeText(route.routeId || route.id || route.route_id, "") || null,
+          route_id: normalizeText(route.route_id || route.id || route.routeId, "") || null,
+        }));
+        setRoutes(normalizedRoutes);
         setOperationTypes(operationTypesJson?.operation_types ?? []);
         const currentIdent = airportCode(authJson?.current_airport);
         if (currentIdent && mode !== "training_free") {
@@ -1112,6 +1128,7 @@ export default function DispatchRoomClient({
   const currentAirport = auth?.current_airport || null;
   const rankCode = normalizeText(pilot?.rank_code, "CADET").toUpperCase();
   const selectedRoute = useMemo(() => routes.find((route) => routeKey(route) === selectedRouteId) || null, [routes, selectedRouteId]);
+  const selectedRouteInternalId = getRouteId(selectedRoute);
   const selectedAircraft = useMemo(() => aircraft.find((item) => item.id === aircraftId || item.registration === aircraftId || aircraftValue(item) === aircraftId) || null, [aircraft, aircraftId]);
   const operationCode = operationCodeForMode(mode, rankCode);
   const selectedOperation = useMemo(() => operationTypes.find((operation) => operation.code === operationCode) || null, [operationCode, operationTypes]);
@@ -1130,7 +1147,7 @@ export default function DispatchRoomClient({
   const requiresSelectedRoute = mode === "official_route" || mode === "cargo_official";
   const canContinueWeight = Boolean(selectedAircraft && fuelKg > 0 && (!isCargo || cargoKg > 0));
   const reservationCountdown = formatCountdown(reservationState.reservation?.expires_at, nowMs);
-  const canCreateReservation = Boolean(originIdent && destinationIdent && selectedAircraft && fuelKg > 0 && operationAllowed && (!requiresSelectedRoute || selectedRoute?.id) && (!isCargo || cargoKg > 0));
+  const canCreateReservation = Boolean(originIdent && destinationIdent && selectedAircraft && fuelKg > 0 && operationAllowed && (!requiresSelectedRoute || selectedRouteInternalId) && (!isCargo || cargoKg > 0));
   const hasValidReservation = Boolean(reservationState.reservation?.id && reservationState.reservation?.dispatch_token);
   const reservedAircraftLabel = reservationState.reservation
     ? `${normalizeText(reservationState.reservation.aircraft_model_code, selectedAircraft?.model_code || "Modelo")} - ${normalizeText(reservationState.reservation.aircraft_registration, selectedAircraft?.registration || "Sin matricula")}`
@@ -1211,31 +1228,52 @@ export default function DispatchRoomClient({
 
   async function createTemporaryReservation() {
     if (!canCreateReservation || !selectedAircraft) return;
+    if (requiresSelectedRoute && !selectedRouteInternalId) {
+      setReservationState({
+        status: "error",
+        message: "No se pudo identificar el ID interno de la ruta seleccionada. Recarga el despacho o vuelve a seleccionar la ruta.",
+        reservation: null,
+        acarsPayload: null,
+      });
+      return;
+    }
     setReservationState({ status: "creating", message: "Creando reserva temporal...", reservation: null, acarsPayload: null });
     try {
+      const reservationPayload = {
+        operationType: operationCode,
+        aircraftId: selectedAircraft.id || selectedAircraft.registration,
+        aircraftCode: selectedAircraft.model_code,
+        aircraftRegistration: selectedAircraft.registration,
+        routeId: selectedRouteInternalId || null,
+        routeCode: getRouteCode(selectedRoute) || null,
+        originIdent,
+        destinationIdent,
+        alternateIdent,
+        departureTime,
+        flightLevel,
+        routeText: effectiveRouteText,
+        passengerCount: effectivePassengerCount,
+        cargoKg,
+        fuelKg,
+        fuelPolicy,
+        isCargo,
+      };
+      console.log("[dispatch] createReservation payload", {
+        selectedRoute,
+        routeId: reservationPayload.routeId,
+        originIdent,
+        destinationIdent,
+        selectedAircraft,
+        aircraftId: reservationPayload.aircraftId,
+        aircraftCode: reservationPayload.aircraftCode,
+        registration: reservationPayload.aircraftRegistration,
+        operationType: reservationPayload.operationType,
+      });
       const response = await fetch("/api/dispatch/training-reservations", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          operationType: operationCode,
-          aircraftId: selectedAircraft.id || selectedAircraft.registration,
-          aircraftCode: selectedAircraft.model_code,
-          aircraftRegistration: selectedAircraft.registration,
-          routeId: selectedRoute?.id || null,
-          routeCode: selectedRoute?.route_code || null,
-          originIdent,
-          destinationIdent,
-          alternateIdent,
-          departureTime,
-          flightLevel,
-          routeText: effectiveRouteText,
-          passengerCount: effectivePassengerCount,
-          cargoKg,
-          fuelKg,
-          fuelPolicy,
-          isCargo,
-        }),
+        body: JSON.stringify(reservationPayload),
       });
       const payload = (await response.json().catch(() => null)) as {
         ok?: boolean;
