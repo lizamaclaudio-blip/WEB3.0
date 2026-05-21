@@ -69,25 +69,53 @@ export async function POST(request: Request) {
 
   const ofp = normalizeSimbriefOfp(payload);
   
-  // Logging seguro para diagnóstico - Aircraft raw data
+  // Logging seguro para diagnóstico - Raw y normalizado
   const rawAircraft = (payload as any)?.aircraft;
   const rawGeneral = (payload as any)?.general;
   const rawParams = (payload as any)?.params;
+  const rawAlternate = (payload as any)?.alternate;
+  const rawAirports = (payload as any)?.airports;
+  const rawFuel = (payload as any)?.fuel;
+  const rawWeights = (payload as any)?.weights;
+  
   console.info(`[simbrief-ofp] pilot=${user.callsign}`);
+  console.info(`[simbrief-ofp] normalized=${JSON.stringify({
+    origin: ofp.origin,
+    destination: ofp.destination,
+    alternate: ofp.alternate,
+    flightNumber: ofp.flightNumber,
+    aircraft: ofp.aircraftIcao,
+    flightLevel: ofp.flightLevel,
+    altitude: ofp.cruiseAltitude,
+    route: ofp.route?.substring(0, 50),
+    blockFuelKg: ofp.blockFuelKg,
+    tripFuelKg: ofp.tripFuelKg,
+    payloadKg: ofp.payloadKg,
+    pax: ofp.passengerCount,
+    cargoKg: ofp.cargoKg,
+  })}`);
+  console.info(`[simbrief-ofp] rawAlternate=${JSON.stringify({
+    alternate_obj: typeof rawAlternate,
+    alternate_icao: rawAlternate?.icao_code || rawAlternate?.icao,
+    airports_altn: rawAirports?.altn,
+  })}`);
+  console.info(`[simbrief-ofp] rawFuel=${JSON.stringify({
+    plan_ramp: rawFuel?.plan_ramp,
+    enroute_burn: rawFuel?.enroute_burn,
+    units: rawFuel?.units,
+  })}`);
+  console.info(`[simbrief-ofp] rawWeights=${JSON.stringify({
+    payload: rawWeights?.payload,
+    pax: rawWeights?.pax_count,
+    cargo: rawWeights?.cargo,
+    units: rawWeights?.units,
+  })}`);
   console.info(`[simbrief-ofp] aircraftRaw=${JSON.stringify({
-    aircraft_icaocode: rawAircraft?.icaocode || rawAircraft?.icao_code,
-    aircraft_name: rawAircraft?.name,
-    aircraft_type: rawAircraft?.type,
-    aircraft_basetype: rawAircraft?.basetype,
-    general_icaoairline: rawGeneral?.icao_airline,
-    general_aircrafticao: rawGeneral?.aircraft_icao,
-    general_icaotype: rawGeneral?.icao_type,
-    general_aircraft: rawGeneral?.aircraft,
-    params_aircraft: rawParams?.aircraft,
+    icaocode: rawAircraft?.icaocode,
+    name: rawAircraft?.name,
     normalized: ofp.aircraftIcao,
     expected: expectedAircraftCode,
   })}`);
-  console.info(`[simbrief-ofp] ofpOrigin=${ofp.origin} ofpDest=${ofp.destination} ofpFlightNum=${ofp.flightNumber} ofpAircraft=${ofp.aircraftIcao}`);
   
   if (!ofp.origin || !ofp.destination) {
     console.warn("[simbrief-ofp] OFP missing origin/destination");
