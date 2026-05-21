@@ -12,6 +12,7 @@ import {
 } from "@/lib/dispatch/manifest-types";
 import { getRouteEconomyEstimate, mapDbEstimateToEconomyEstimate } from "@/lib/economy/db";
 import { calculateFlightEconomyEstimate } from "@/lib/economy/calculator";
+import { extractPwgFlightNumber, buildPwgCallsign } from "@/lib/dispatch/flight-number";
 
 const FALLBACK_DISPATCH_TTL_MINUTES = 15;
 const UUID_PATTERN =
@@ -86,6 +87,7 @@ type TrainingReservationRow = {
   aircraft_registration: string | null;
   aircraft_model_code: string | null;
   route_id: string | null;
+  route_code: string | null;
   origin_ident: string;
   destination_ident: string;
   operation_type: string;
@@ -628,6 +630,7 @@ async function rotateReservationToken(reservationId: string) {
         aircraft_registration,
         aircraft_model_code,
         route_id::text,
+        route_code,
         origin_ident,
         destination_ident,
         operation_type,
@@ -898,6 +901,7 @@ export async function createTrainingFreeReservation(
         aircraft_registration,
         aircraft_model_code,
         route_id::text,
+        route_code,
         origin_ident,
         destination_ident,
         operation_type,
@@ -982,6 +986,7 @@ type TrainingDispatchRow = {
   aircraft_registration: string | null;
   aircraft_model_code: string | null;
   route_id: string | null;
+  route_code: string | null;
   origin_ident: string;
   destination_ident: string;
   origin_name: string | null;
@@ -1056,6 +1061,10 @@ function buildTrainingAcarsPayload(
       ? (row.simbrief_ofp_json as Record<string, unknown>)
       : null;
 
+  // Construir flight info desde route_code si existe
+  const flightNumber = extractPwgFlightNumber(row.route_code) || "000";
+  const callsign = buildPwgCallsign(flightNumber);
+
   return {
     payload_version: "pw3-dispatch-v1",
     generated_at: new Date().toISOString(),
@@ -1067,6 +1076,13 @@ function buildTrainingAcarsPayload(
     is_cargo: isCargo,
     reservation_status: "ACARS_READY",
     expires_at: row.expires_at,
+    flight: {
+      airline_icao: "PWG",
+      airline_iata: null,
+      flight_number: flightNumber,
+      callsign: callsign,
+      route_code: row.route_code || callsign,
+    },
     pilot: {
       user_id: user.userId,
       callsign: row.pilot_callsign ?? user.callsign,
@@ -1163,6 +1179,7 @@ export async function prepareTrainingReservationForAcars(
         r.aircraft_registration,
         r.aircraft_model_code,
         r.route_id::text,
+        r.route_code,
         r.origin_ident,
         r.destination_ident,
         origin.name as origin_name,
