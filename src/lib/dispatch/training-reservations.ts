@@ -156,6 +156,24 @@ function toNumeric(value: unknown, fallback = 0) {
   return Math.max(0, parsed);
 }
 
+function parseDurationToMinutes(value: unknown) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return 0;
+  if (/^\d+$/.test(raw)) return Math.max(0, Math.round(Number(raw)));
+  const m = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return 0;
+  return Math.max(0, Number(m[1]) * 60 + Number(m[2]));
+}
+
+function calculateLocalArrival(departureLocalHHmm: string, blockMinutes: number) {
+  const m = String(departureLocalHHmm ?? "").trim().match(/^(\d{1,2}):(\d{2})$/);
+  if (!m || blockMinutes <= 0) return "";
+  const total = (Number(m[1]) * 60 + Number(m[2]) + blockMinutes) % (24 * 60);
+  const hh = Math.floor(total / 60);
+  const mm = total % 60;
+  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+}
+
 function hashDispatchToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
@@ -1174,6 +1192,17 @@ function buildTrainingAcarsPayload(
     row.simbrief_ofp_json && typeof row.simbrief_ofp_json === "object"
       ? (row.simbrief_ofp_json as Record<string, unknown>)
       : null;
+  const departureLocalTime = normalizeText(row.departure_time, "00:00");
+  const blockMinutes = parseDurationToMinutes(
+    simbriefRaw?.blockTimeMinutes ??
+      simbriefRaw?.estBlockTimeMinutes ??
+      simbriefRaw?.blockTime ??
+      simbriefRaw?.est_time_block,
+  );
+  const flightMinutes = parseDurationToMinutes(
+    simbriefRaw?.flightTimeMinutes ?? simbriefRaw?.estFlightTimeMinutes ?? simbriefRaw?.flightTime,
+  );
+  const estimatedArrivalLocalTime = calculateLocalArrival(departureLocalTime, blockMinutes);
 
   const flightNumber = normalizeText(row.assigned_flight_number, "000");
   const callsign = normalizeText(row.assigned_callsign, `PWG${flightNumber}`);
@@ -1223,6 +1252,13 @@ function buildTrainingAcarsPayload(
       flight_level: normalizeText(row.flight_level, "FL070"),
       departure_time: normalizeText(row.departure_time, "Ahora"),
     },
+    schedule: {
+      departureLocalTime,
+      estimatedArrivalLocalTime: estimatedArrivalLocalTime || null,
+      estimatedBlockMinutes: blockMinutes > 0 ? blockMinutes : null,
+      estimatedFlightMinutes: flightMinutes > 0 ? flightMinutes : null,
+      source: "simbrief_ofp",
+    },
     loading: {
       passenger_count: effectivePax,
       cargo_kg: cargoKg,
@@ -1248,6 +1284,10 @@ function buildTrainingAcarsPayload(
           cruiseAltitude: normalizeText(simbriefRaw.cruiseAltitude),
           blockFuelKg: Number(simbriefRaw.blockFuelKg ?? 0),
           tripFuelKg: Number(simbriefRaw.tripFuelKg ?? 0),
+          blockTimeMinutes: blockMinutes > 0 ? blockMinutes : Number(simbriefRaw.blockTimeMinutes ?? 0),
+          flightTimeMinutes: flightMinutes > 0 ? flightMinutes : Number(simbriefRaw.flightTimeMinutes ?? 0),
+          departureTimeUtc: normalizeText(simbriefRaw.departureTimeUtc),
+          arrivalTimeUtc: normalizeText(simbriefRaw.arrivalTimeUtc),
           payloadKg: Number(simbriefRaw.payloadKg ?? 0),
           passengerCount: Number(simbriefRaw.passengerCount ?? effectivePax),
           cargoKg: Number(simbriefRaw.cargoKg ?? cargoKg),

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionTokenFromCookies } from "@/lib/session/server";
 import { getAuthenticatedPilot } from "@/lib/auth/service";
 import { dbOne } from "@/lib/db/client";
-import { normalizeSimbriefOfp } from "@/lib/simbrief/ofp";
+import { normalizeSimbriefOfp, validateIfrRoute } from "@/lib/simbrief/ofp";
 import { isSamePwgFlight, normalizePwgFlightNumber } from "@/lib/dispatch/flight-number";
 import { isSameDispatchAircraft, normalizeAircraftCode } from "@/lib/simbrief/aircraft-map";
 
@@ -130,6 +130,14 @@ export async function POST(request: Request) {
   if (expectedDestination && ofp.destination !== expectedDestination) {
     console.warn(`[simbrief-ofp] Destination mismatch: got ${ofp.destination}, expected ${expectedDestination}`);
     return error("SIMBRIEF_DESTINATION_MISMATCH");
+  }
+
+  const routeValidation = validateIfrRoute(ofp.route, ofp.origin, ofp.destination);
+  if (!routeValidation.valid) {
+    return error("SIMBRIEF_ROUTE_MISSING");
+  }
+  if (ofp.mtowLimited) {
+    return error("SIMBRIEF_PAYLOAD_LIMITED_BY_MTOW");
   }
   
   // Comparación flexible de flight number (acepta PWG695 vs 695)

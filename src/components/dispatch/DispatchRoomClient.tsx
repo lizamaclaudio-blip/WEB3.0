@@ -175,6 +175,13 @@ type SimbriefOfp = {
   costIndex?: string;
   blockFuelKg?: number;
   tripFuelKg?: number;
+  blockTimeMinutes?: number;
+  flightTimeMinutes?: number;
+  departureTimeUtc?: string;
+  arrivalTimeUtc?: string;
+  estimatedBlockDisplay?: string;
+  mtowLimited?: boolean;
+  warnings?: string[];
   payloadKg?: number;
   passengerCount?: number;
   cargoKg?: number;
@@ -379,6 +386,26 @@ function formatNm(value: unknown) {
   const parsed = asNumber(value, NaN);
   if (!Number.isFinite(parsed)) return "Por calcular";
   return `${Math.round(parsed)} NM`;
+}
+
+function parseDurationToMinutes(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) return Math.max(0, Math.round(value));
+  const raw = normalizeText(value, "");
+  if (!raw) return 0;
+  if (/^\d+$/.test(raw)) return Math.max(0, Number(raw));
+  const m = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m) return 0;
+  return Number(m[1]) * 60 + Number(m[2]);
+}
+
+function calculateLocalArrival(departureLocalHHmm: string, blockMinutes: number) {
+  const m = departureLocalHHmm.match(/^(\d{1,2}):(\d{2})$/);
+  if (!m || blockMinutes <= 0) return "Por calcular";
+  const baseMinutes = Number(m[1]) * 60 + Number(m[2]);
+  const total = (baseMinutes + blockMinutes) % (24 * 60);
+  const hh = Math.floor(total / 60);
+  const mm = total % 60;
+  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 }
 
 function isAircraftCapable(aircraft: AircraftItem, route: RouteItem | null) {
@@ -943,6 +970,7 @@ function FinalStage({
   departureTime,
   selectedAircraft,
   flightLevel,
+  simbriefOfp,
   reservationState,
   reservationCountdown,
   canCreateReservation,
@@ -956,6 +984,7 @@ function FinalStage({
   departureTime: string;
   selectedAircraft: AircraftItem | null;
   flightLevel: string;
+  simbriefOfp: SimbriefOfp | null;
   reservationState: ReservationState;
   reservationCountdown: string;
   canCreateReservation: boolean;
@@ -965,7 +994,8 @@ function FinalStage({
   // Usar helper para flight number PWG correcto
   const pwgFlight = getSimbriefFlightNumber(null, originIdent, destinationIdent);
   const flightNumber = pwgFlight.callsign; // PWG###
-  const endTime = "Por calcular";
+  const blockMinutes = parseDurationToMinutes(simbriefOfp?.blockTimeMinutes);
+  const endTime = blockMinutes > 0 ? calculateLocalArrival(departureTime, blockMinutes) : "Por calcular";
   const reservation = reservationState.reservation ?? null;
   const hasReservationCredentials = Boolean(reservation?.id && reservation.dispatch_token);
   const isReady = ["ready", "sending", "acars_ready"].includes(reservationState.status) && hasReservationCredentials;
@@ -1018,6 +1048,7 @@ function FinalStage({
           <span className={styles.sopBadge}>{isAcarsReady ? "ACARS READY" : isReady ? "TEMP ACTIVO" : "PRE-ACTIVO"}</span>
           <strong>Procedimiento de Operaciones</strong>
           <p>{operationLabel}: verificar origen, destino, aeronave, nivel de vuelo {flightLevel}, combustible y condiciones meteorologicas antes de enviar a ACARS.</p>
+          {blockMinutes > 0 ? <p>Según OFP SimBrief: {Math.floor(blockMinutes / 60)}h {blockMinutes % 60}m</p> : null}
           <p>Esta reserva bloquea la aeronave por 15 minutos. La ruta sigue disponible para otros pilotos.</p>
         </div>
       </section>
@@ -1372,38 +1403,20 @@ export default function DispatchRoomClient({
     // Forzar unidades KG para SimBrief
     prefill.searchParams.set("units", "KGS");
     
-    // Calcular passengers/cargo inteligente basado en perfil técnico si no hay OFP cargado
+    // Solo cargo oficial envía payload a SimBrief. Passenger no impone load sheet.
     const techProfile = selectedAircraft?.model_code ? getAircraftTechnicalProfile(selectedAircraft.model_code) : null;
     
-    let prefillPax = effectivePassengerCount;
-    let prefillCargo = effectiveCargoKg;
+    let prefillPax = 0;
+    let prefillCargo = 0;
     
-    // REGLA DE PAYLOAD: Separar equipaje (baggage) de carga comercial (cargo)
-    // Passenger flight: pax > 0, baggageKg > 0, commercialCargoKg = 0
-    // Cargo flight: pax = 0, baggageKg = 0, commercialCargoKg > 0
-    
-    let passengerWeightKg = 0;
-    let baggageKg = 0;
     let commercialCargoKg = 0;
     
     // Si no hay OFP cargado, usar defaults del perfil técnico
     if (!simbriefOfp && techProfile) {
       if (isCargo) {
-        // Vuelo CARGO: pax = 0, baggage = 0, carga comercial desde escenario/default
         prefillPax = 0;
-        passengerWeightKg = 0;
-        baggageKg = 0;
-        // Carga comercial desde default del perfil (conservador) o escenario
         commercialCargoKg = techProfile.simbrief.defaultCargoKg ?? Math.round(techProfile.maxCargoKg * 0.3);
         prefillCargo = commercialCargoKg;
-      } else {
-        // Vuelo PASSENGER: pax > 0, equipaje calculado, carga comercial = 0
-        prefillPax = techProfile.simbrief.defaultPassengers ?? Math.round(techProfile.passengerCapacity * 0.5);
-        passengerWeightKg = prefillPax * (techProfile.standardPassengerWeightKg ?? 84);
-        baggageKg = prefillPax * techProfile.baggagePerPassengerKg;
-        commercialCargoKg = 0; // Vuelos pax NO llevan carga comercial
-        // SimBrief solo tiene un campo "cargo" → enviamos equipaje allí (conceptualmente es baggage)
-        prefillCargo = baggageKg;
       }
     }
     
@@ -1416,18 +1429,13 @@ export default function DispatchRoomClient({
         const maxAllowedCargo = techProfile.maxCargoKg;
         commercialCargoKg = Math.min(prefillCargo, maxAllowedCargo);
         prefillCargo = commercialCargoKg;
-      } else {
-        // Passenger flight: limitar equipaje por capacidad de bodega
-        const maxBaggageKg = prefillPax * techProfile.baggagePerPassengerKg;
-        baggageKg = Math.min(prefillCargo, maxBaggageKg, techProfile.maxBaggageKg);
-        commercialCargoKg = 0;
-        // SimBrief cargo field = equipaje (no hay carga comercial en vuelos pax)
-        prefillCargo = baggageKg;
       }
     }
-    
-    prefill.searchParams.set("pax", String(prefillPax));
-    prefill.searchParams.set("cargo", String(prefillCargo));
+    if (isCargo) {
+      prefill.searchParams.set("pax", String(prefillPax));
+      prefill.searchParams.set("cargo", String(prefillCargo));
+      prefill.searchParams.set("remarks", `PW Cargo: scenario - ${prefillCargo} kg`);
+    }
     
     // Nota: airline ya se seteó arriba
 
@@ -1480,26 +1488,24 @@ export default function DispatchRoomClient({
           SIMBRIEF_USER_NOT_CONFIGURED: "Configura tu usuario SimBrief en tu perfil.",
           SIMBRIEF_IFR_ROUTE_MISSING: "El OFP no contiene una ruta IFR válida. Selecciona una ruta sugerida en SimBrief, genera nuevamente el OFP y vuelve a cargarlo.",
           SIMBRIEF_IFR_ROUTE_INVALID: "La ruta del OFP no es una ruta IFR válida (waypoints, aerovías, SID/STAR). Selecciona una ruta sugerida en SimBrief.",
+          SIMBRIEF_ROUTE_MISSING:
+            "El OFP no contiene una ruta válida. Selecciona o genera una ruta en SimBrief y vuelve a cargar el OFP.",
+          SIMBRIEF_PAYLOAD_LIMITED_BY_MTOW:
+            "SimBrief limitó el payload por MTOW. Ajusta el load sheet en SimBrief o selecciona otra aeronave.",
         };
         setSimbriefMessage(errorMessages[code as keyof typeof errorMessages] || `Error al cargar OFP (${code}).`);
         return;
       }
       
-      // REGLA: Siempre guardar datos del OFP que ya cargaron correctamente
-      // La validación de ruta es solo advertencia, no debe bloquear datos válidos
       const routeValidation = validateIfrRoute(payload.ofp.route, originIdent, destinationIdent);
-      
-      // Guardar OFP independientemente de advertencias de ruta
+      if (!routeValidation.valid) {
+        setSimbriefStatus("error");
+        setSimbriefMessage("El OFP no contiene una ruta válida. Selecciona o genera una ruta en SimBrief y vuelve a cargar el OFP.");
+        return;
+      }
       setSimbriefOfp(payload.ofp);
       setSimbriefStatus("loaded");
-      
-      // Mensaje: Éxito principal, advertencia secundaria si aplica
-      if (!routeValidation.valid) {
-        // Ruta con problemas pero OFP válido - mostrar advertencia pero permitir continuar
-        setSimbriefMessage(`OFP cargado. ${routeValidation.errorMessage || "Revisa la ruta en SimBrief."}`);
-      } else {
-        setSimbriefMessage("OFP cargado correctamente desde SimBrief.");
-      }
+      setSimbriefMessage("OFP cargado correctamente desde SimBrief.");
     } catch {
       setSimbriefStatus("error");
       setSimbriefMessage("No se pudo cargar OFP desde SimBrief.");
@@ -1781,7 +1787,7 @@ export default function DispatchRoomClient({
                   <div className={styles.navButtons}><button type="button" className={styles.backButton} onClick={() => setStep(3)}>Volver</button><button type="button" className={styles.continueButton} disabled={!canContinueWeight} onClick={() => setStep(5)}>Validar y preparar ACARS</button></div>
                 </>
               ) : null}
-              {step === 5 ? <FinalStage mode={mode} operationLabel={selectedOperationLabel} originIdent={originIdent} destinationIdent={destinationIdent} departureTime={departureTime} selectedAircraft={selectedAircraft} flightLevel={flightLevel} reservationState={reservationState} reservationCountdown={reservationCountdown} canCreateReservation={canCreateReservation} onCreateReservation={createTemporaryReservation} onSendToAcars={prepareAcarsDispatch} /> : null}
+              {step === 5 ? <FinalStage mode={mode} operationLabel={selectedOperationLabel} originIdent={originIdent} destinationIdent={destinationIdent} departureTime={departureTime} selectedAircraft={selectedAircraft} flightLevel={flightLevel} simbriefOfp={simbriefOfp} reservationState={reservationState} reservationCountdown={reservationCountdown} canCreateReservation={canCreateReservation} onCreateReservation={createTemporaryReservation} onSendToAcars={prepareAcarsDispatch} /> : null}
             </section>
           </section>
           <aside className={styles.sideCard}>

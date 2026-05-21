@@ -48,12 +48,22 @@ checkContains("src/components/dispatch/DispatchRoomClient.tsx", [
   "Cargar OFP",
   "const canContinuePlan = requiresSimbrief",
   "readOnly={requiresSimbrief}",
+  "if (isCargo) {",
+  "prefill.searchParams.set(\"pax\"",
+  "prefill.searchParams.set(\"cargo\"",
 ]);
 
 checkContains("src/lib/dispatch/training-reservations.ts", [
   "simbrief_ofp_json",
   "simbrief:",
   "fuel_planned_kg",
+  "schedule:",
+]);
+
+checkContains("src/lib/simbrief/ofp.ts", [
+  "general.route_ifps",
+  "general.route_navigraph",
+  "SIMBRIEF_IFR_ROUTE_INVALID",
 ]);
 
 const fixture = JSON.parse(read("scripts/fixtures/simbrief-ofp-scte-scpf.json"));

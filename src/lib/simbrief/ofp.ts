@@ -51,8 +51,53 @@ export type NormalizedSimbriefOfp = {
   landingWeightKg: number;
   estBlockTimeMinutes: number;
   estFlightTimeMinutes: number;
+  departureTimeUtc: string;
+  arrivalTimeUtc: string;
+  blockTimeMinutes: number;
+  flightTimeMinutes: number;
+  estimatedBlockDisplay: string;
+  mtowLimited: boolean;
+  warnings: string[];
   raw: AnyObj;
 };
+
+function parseDurationToMinutes(value: unknown) {
+  if (typeof value === "number" && Number.isFinite(value)) return Math.max(0, Math.round(value));
+  const raw = text(value);
+  if (!raw) return 0;
+  if (/^\d+$/.test(raw)) return Math.max(0, Number(raw));
+  const match = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if (!match) return 0;
+  return Math.max(0, Number(match[1]) * 60 + Number(match[2]));
+}
+
+function formatBlockDisplay(minutes: number) {
+  if (minutes <= 0) return "";
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}h ${m}m`;
+}
+
+function collectTextWarnings(raw: AnyObj) {
+  const warningText = [
+    text((raw.text as AnyObj)?.plan),
+    text((raw.text as AnyObj)?.route),
+    text((raw.general as AnyObj)?.remarks),
+    text((raw.atc as AnyObj)?.remarks),
+    text((raw as AnyObj)?.remarks),
+  ]
+    .join(" ")
+    .toLowerCase();
+  const patterns = [
+    "payload limited by mtow",
+    "cargo limited by mtow",
+    "limited by mtow",
+    "mtow limited",
+    "payload limited",
+    "cargo limited",
+  ];
+  return patterns.filter((p) => warningText.includes(p));
+}
 
 // Helper para extraer ICAO de objeto o string
 function extractAirportIdent(value: unknown): string {
@@ -137,16 +182,18 @@ export function normalizeSimbriefOfp(raw: AnyObj): NormalizedSimbriefOfp {
   const textPlan = (raw.text as AnyObj) ?? {};
   const fms = (raw.fms as AnyObj) ?? {};
   const selectedRoute = (raw.selected_route as AnyObj) ?? {};
+  const selectedRouteCamel = (raw.selectedRoute as AnyObj) ?? {};
   
   const routeCandidates = [
     // Prioridad 1: Campos oficiales de ruta
     general.route,
     general.route_ifps,
+    general.route_navigraph,
     atc.route,
     params.route,
     apiParams.route,
     selectedRoute.route,
-    // Prioridad 2: Plan de vuelo textual
+    selectedRouteCamel.route,
     textPlan.plan,
     textPlan.route,
     // Prioridad 3: Navlog/FMS
@@ -177,6 +224,16 @@ export function normalizeSimbriefOfp(raw: AnyObj): NormalizedSimbriefOfp {
   let routeText = first(...routeCandidates);
   const originIdent = upper(first(origin.icao_code, general.orig_icao, raw.orig));
   const destIdent = upper(first(destination.icao_code, general.dest_icao, raw.dest));
+
+  if (!routeText) {
+    const navlogArray = Array.isArray((navlog as AnyObj).fix) ? ((navlog as AnyObj).fix as AnyObj[]) : [];
+    const built = navlogArray
+      .map((f) => upper(first(f.ident, f.name, f.fix, f.wpt)))
+      .filter((token) => token && !/^\d{2,4}[NS]\d{3,5}[EW]$/.test(token));
+    const dedup = built.filter((token, idx) => token !== built[idx - 1]);
+    const useful = dedup.filter((token) => token !== originIdent && token !== destIdent);
+    if (useful.length > 0) routeText = useful.join(" ");
+  }
   
   // NO construir fallback automático - eso oculta problemas de ruta
   // La web NO debe inventar rutas, debe usar la ruta real del OFP SimBrief
@@ -202,6 +259,10 @@ export function normalizeSimbriefOfp(raw: AnyObj): NormalizedSimbriefOfp {
     raw.aircraft_icao,
     raw.aircraft,
   ));
+
+  const blockTimeMinutes = parseDurationToMinutes(first(times.est_time_block, times.block, raw.est_block_minutes));
+  const flightTimeMinutes = parseDurationToMinutes(first(times.est_time_enroute, times.enroute, raw.est_flight_minutes));
+  const warnings = collectTextWarnings(raw);
 
   return {
     simbriefId: first(general.ofp_id, general.id, raw.ofp_id),
@@ -232,6 +293,13 @@ export function normalizeSimbriefOfp(raw: AnyObj): NormalizedSimbriefOfp {
     landingWeightKg: num(first(weights.est_ldw, raw.ldw)),
     estBlockTimeMinutes: Math.round(num(first(times.est_time_block, raw.est_block_minutes))),
     estFlightTimeMinutes: Math.round(num(first(times.est_time_enroute, raw.est_flight_minutes))),
+    departureTimeUtc: first(times.est_out, times.dep_time, times.off, raw.departure_time_utc),
+    arrivalTimeUtc: first(times.est_in, times.arr_time, times.on, raw.arrival_time_utc),
+    blockTimeMinutes,
+    flightTimeMinutes,
+    estimatedBlockDisplay: formatBlockDisplay(blockTimeMinutes || Math.round(num(first(times.est_time_block, raw.est_block_minutes)))),
+    mtowLimited: warnings.length > 0,
+    warnings,
     raw,
   };
 }
@@ -276,7 +344,7 @@ export function validateIfrRoute(
   
   // REGLA: Rechazar SOLO si la ruta es exactamente el destino (ej: "SCIE")
   // Esto indica que SimBrief no generó una ruta válida
-  if (destination && routeClean === destination) {
+  if (destination && routeClean.toUpperCase() === destination.toUpperCase()) {
     return {
       valid: false,
       errorCode: "SIMBRIEF_IFR_ROUTE_INVALID",

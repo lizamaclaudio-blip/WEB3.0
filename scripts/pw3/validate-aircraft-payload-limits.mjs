@@ -17,8 +17,9 @@ function check(ok, label) {
 check(profile.includes("getAircraftTechnicalProfile"), "technical profile helper present");
 check(profile.includes("defaultCargoKg"), "default cargo profile value present");
 check(profile.includes("maxPassengerFlightCargoKg"), "passenger cargo cap profile value present");
-check(dispatch.includes("passengerWeightKg"), "dispatch computes passenger weight");
-check(dispatch.includes("baggageKg"), "dispatch computes baggage");
+check(dispatch.includes("if (isCargo) {"), "dispatch separates cargo/passenger prefill logic");
+check(!dispatch.includes("prefill.searchParams.set(\"pax\"") || dispatch.includes("if (isCargo) {"), "passenger does not force pax prefill");
+check(!dispatch.includes("prefill.searchParams.set(\"cargo\"") || dispatch.includes("if (isCargo) {"), "passenger does not force cargo prefill");
 check(dispatch.includes("commercialCargoKg"), "dispatch computes commercial cargo");
 check(dispatch.includes("prefill.searchParams.set(\"units\", \"KGS\")"), "simbrief prefill uses KGS");
 
