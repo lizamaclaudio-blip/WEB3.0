@@ -4,6 +4,8 @@ import path from "node:path";
 const root = process.cwd();
 const libPath = path.join(root, "src/lib/dispatch/training-reservations.ts");
 const text = fs.existsSync(libPath) ? fs.readFileSync(libPath, "utf8") : "";
+const directPath = path.join(root, "src/app/api/dispatch/send-to-acars/route.ts");
+const direct = fs.existsSync(directPath) ? fs.readFileSync(directPath, "utf8") : "";
 
 let failed = 0;
 function check(ok, label) {
@@ -21,6 +23,7 @@ check(text.includes("flight: {"), "flight block in payload exists");
 check(text.includes("route_code"), "route code included for identity (not blocking)");
 check(text.includes("dispatch_token"), "dispatchToken included");
 check(text.includes("reservation_id"), "reservationId included");
+check(direct.includes("WEB_DIRECT_ACARS"), "legacy reservation validator: direct ACARS mode detected");
 
 if (failed > 0) {
   console.error(`\n[fail] validate-dispatch-route-reservation-acars: ${failed} check(s) failed`);
