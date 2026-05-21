@@ -16,6 +16,7 @@ function errorResponse(error: unknown) {
     DESTINATION_NOT_FOUND: "El aeropuerto de destino no existe o no esta activo.",
     AIRCRAFT_NOT_ALLOWED_FOR_PILOT: "La aeronave no esta disponible para tu rango, ubicacion operacional o tipo de despacho.",
     ACTIVE_RESERVATION_EXISTS: "Ya tienes una reserva activa. Finaliza o cancela la actual antes de crear una nueva.",
+    ACTIVE_FLIGHT_IN_PROGRESS: "Tienes un vuelo activo en progreso. Finaliza o evalua el vuelo actual antes de crear uno nuevo.",
     TRAINING_RESERVATION_FAILED: "Error al crear la reserva temporal. Intenta nuevamente.",
     DB_TRANSACTION_FAILED: "Error de base de datos al crear la reserva. Contacte soporte.",
   };

@@ -349,9 +349,22 @@ export async function createTrainingFreeReservation(
     [user.userId],
   );
 
-  if (activeReservation) {
-    console.warn(`[dispatch] ACTIVE_RESERVATION_EXISTS pilot=${user.callsign} reservation=${activeReservation.id} status=${activeReservation.status}`);
-    throw new Error("ACTIVE_RESERVATION_EXISTS");
+  // Si hay reserva en estado final (ya en vuelo), bloquear
+  if (activeReservation && 
+      ['ACARS_CLAIMED','RESERVED','DISPATCHED','IN_FLIGHT','LANDED','PENDING_EVALUATION','EVALUATED'].includes(activeReservation.status)) {
+    console.warn(`[dispatch] FLIGHT_ACTIVE_BLOCKS_RESERVATION pilot=${user.callsign} reservation=${activeReservation.id} status=${activeReservation.status}`);
+    throw new Error("ACTIVE_FLIGHT_IN_PROGRESS");
+  }
+
+  // Si hay reserva temporal activa, la cancelamos para crear una nueva
+  if (activeReservation && ['TEMP_RESERVED','ACARS_READY'].includes(activeReservation.status)) {
+    console.info(`[dispatch] CANCELLING_OLD_TEMP_RESERVATION pilot=${user.callsign} oldReservation=${activeReservation.id}`);
+    await dbQuery(
+      `update public.training_dispatch_reservations 
+       set status = 'CANCELLED', updated_at = now() 
+       where id = $1::uuid`,
+      [activeReservation.id]
+    );
   }
 
   const reservationId = randomUUID();
