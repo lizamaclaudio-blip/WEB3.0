@@ -23,6 +23,27 @@ export type EconomyLedgerType =
 export type EconomyLedgerDirection = "credit" | "debit";
 export type EconomyLedgerStatus = "estimated" | "pending" | "posted" | "paid" | "void";
 
+// Profitability adjustment reasons
+export type ProfitabilityAdjustmentReason =
+  | "MINIMUM_ROUTE_FARE"
+  | "REGIONAL_SUBSIDY"
+  | "CARGO_CONTRACT_PREMIUM"
+  | "OPERATIONAL_CONTRACT_FEE"
+  | "POST_FLIGHT_MINIMUM_MARGIN"
+  | "CHARTER_PREMIUM"
+  | "REMOTE_ROUTE_INCENTIVE";
+
+// Profitability floor configuration
+export type ProfitabilityFloorConfig = {
+  minimumProfitUsd: number;
+  minimumProfitMarginPct: number;
+  remoteRegionalMinimumMarginPct: number;
+  cargoMinimumMarginPct: number;
+  charterMinimumMarginPct: number;
+  regionalSubsidyEnabled: boolean;
+  cargoContractPremiumEnabled: boolean;
+};
+
 export type RouteCategoryEconomyRate = {
   ticketBaseFareUsd?: number;
   ticketYieldPerNmUsd?: number;
@@ -107,6 +128,8 @@ export type FlightEconomyEstimate = {
   cargoHandlingCostUsd: number;
   totalCostUsd: number;
   netProfitUsd: number;
+  profitabilityAdjustmentUsd?: number;
+  profitabilityAdjustmentReason?: ProfitabilityAdjustmentReason;
   pilotAccrualUsd: number;
   airlineNetUsd: number;
   economyEligible: boolean;
@@ -123,7 +146,8 @@ export type FlightEconomyEstimate = {
       excessBaggageRevenueUsd: number;
       onboardSalesUsd: number;
       passengerServiceCostUsd: number;
-      operationalSupportRevenueUsd?: number;
+      profitabilityAdjustmentUsd?: number;
+      profitabilityAdjustmentReason?: ProfitabilityAdjustmentReason;
     };
     cargoEconomy?: {
       cargoCapacityKg: number;
@@ -134,6 +158,8 @@ export type FlightEconomyEstimate = {
       cargoHandlingCostUsd: number;
       specialCargoFeeUsd: number;
       passengerCountForcedZero: boolean;
+      profitabilityAdjustmentUsd?: number;
+      profitabilityAdjustmentReason?: ProfitabilityAdjustmentReason;
     };
     aircraftWear?: {
       baseWearPercent: number;
@@ -191,6 +217,10 @@ export type EconomySnapshot = {
   
   estimatedProfitUsd: number;
   estimatedPilotAccrualUsd: number;
+  
+  // Profitability floor adjustment
+  profitabilityAdjustmentUsd?: number;
+  profitabilityAdjustmentReason?: ProfitabilityAdjustmentReason;
   
   // Cargo scenario if applicable
   cargoScenario?: {

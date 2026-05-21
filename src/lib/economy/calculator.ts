@@ -9,9 +9,10 @@ import { getAircraftTechnicalProfile } from "@/lib/aircraft/technical-profiles";
 import {
   getAircraftEconomyProfile,
   getAirportEconomyFeeUsd,
+  getProfitabilityFloorConfig,
   getRouteEconomyRate,
 } from "./catalog";
-import type { FlightEconomyEstimate, EconomySnapshot } from "./types";
+import type { FlightEconomyEstimate, EconomySnapshot, ProfitabilityAdjustmentReason } from "./types";
 
 export type FlightEconomyEstimateInput = {
   routeId: string;
@@ -168,10 +169,35 @@ export function calculateRouteEconomyEstimate(
       passengerServiceCostUsd +
       cargoHandlingCostUsd,
   );
+  // Apply profitability floor - ensure no negative utility
+  const floor = getProfitabilityFloorConfig();
   let netProfitUsd = signedMoney(grossRevenueUsd - totalCostUsd);
-  const operationalSupportRevenueUsd = !isCargo && netProfitUsd <= 0 ? nonNegativeMoney(Math.abs(netProfitUsd) + 120) : 0;
-  if (operationalSupportRevenueUsd > 0) {
-    grossRevenueUsd = nonNegativeMoney(grossRevenueUsd + operationalSupportRevenueUsd);
+  
+  // Calculate target profit (minimum $25 or 8% of costs)
+  const targetProfitUsd = Math.max(
+    floor.minimumProfitUsd,
+    totalCostUsd * floor.minimumProfitMarginPct
+  );
+  
+  // Determine adjustment reason based on route type
+  let profitabilityAdjustmentUsd: number | undefined;
+  let profitabilityAdjustmentReason: ProfitabilityAdjustmentReason | undefined;
+  
+  if (netProfitUsd < targetProfitUsd) {
+    profitabilityAdjustmentUsd = nonNegativeMoney(targetProfitUsd - netProfitUsd);
+    
+    // Select reason based on flight type and route
+    if (isCargo && floor.cargoContractPremiumEnabled) {
+      profitabilityAdjustmentReason = "CARGO_CONTRACT_PREMIUM";
+    } else if (route.routeCategory.includes("regional") && floor.regionalSubsidyEnabled) {
+      profitabilityAdjustmentReason = "REGIONAL_SUBSIDY";
+    } else if (route.routeCategory.includes("cargo")) {
+      profitabilityAdjustmentReason = "OPERATIONAL_CONTRACT_FEE";
+    } else {
+      profitabilityAdjustmentReason = "MINIMUM_ROUTE_FARE";
+    }
+    
+    grossRevenueUsd = nonNegativeMoney(grossRevenueUsd + profitabilityAdjustmentUsd);
     netProfitUsd = signedMoney(grossRevenueUsd - totalCostUsd);
   }
   const rawPilotAccrual = netProfitUsd > 0
@@ -202,6 +228,8 @@ export function calculateRouteEconomyEstimate(
     cargoHandlingCostUsd,
     totalCostUsd,
     netProfitUsd,
+    profitabilityAdjustmentUsd,
+    profitabilityAdjustmentReason,
     pilotAccrualUsd,
     airlineNetUsd,
     economyEligible,
@@ -220,7 +248,7 @@ export function calculateRouteEconomyEstimate(
             excessBaggageRevenueUsd,
             onboardSalesUsd,
             passengerServiceCostUsd,
-            operationalSupportRevenueUsd,
+            profitabilityAdjustmentUsd,
           },
       cargoEconomy: isCargo
         ? {
@@ -232,6 +260,8 @@ export function calculateRouteEconomyEstimate(
             cargoHandlingCostUsd,
             specialCargoFeeUsd,
             passengerCountForcedZero: true,
+            profitabilityAdjustmentUsd,
+            profitabilityAdjustmentReason,
           }
         : undefined,
       aircraftWear: {
@@ -390,13 +420,39 @@ export function calculateEconomySnapshotFromOfp(params: {
     cargoRevenueUsd = cargoScenario ? baseRevenue * cargoScenario.revenueMultiplier : baseRevenue;
   }
 
-  const totalRevenueUsd = nonNegativeMoney(passengerRevenueUsd + baggageRevenueUsd + cargoRevenueUsd);
+  let totalRevenueUsd = nonNegativeMoney(passengerRevenueUsd + baggageRevenueUsd + cargoRevenueUsd);
 
   // Total costs
   const totalCostUsd = nonNegativeMoney(fuelCostUsd + airportFeesUsd + maintenanceReserveUsd + wearReserveUsd + rate.crewCostUsd);
 
-  // Profit and pilot accrual
-  const estimatedProfitUsd = signedMoney(totalRevenueUsd - totalCostUsd);
+  // Apply profitability floor - ensure no negative utility
+  const floor = getProfitabilityFloorConfig();
+  let estimatedProfitUsd = signedMoney(totalRevenueUsd - totalCostUsd);
+  
+  // Calculate target profit (minimum $25 or 8% of costs)
+  const targetProfitUsd = Math.max(
+    floor.minimumProfitUsd,
+    totalCostUsd * floor.minimumProfitMarginPct
+  );
+  
+  let profitabilityAdjustmentUsd: number | undefined;
+  let profitabilityAdjustmentReason: ProfitabilityAdjustmentReason | undefined;
+  
+  if (estimatedProfitUsd < targetProfitUsd) {
+    profitabilityAdjustmentUsd = nonNegativeMoney(targetProfitUsd - estimatedProfitUsd);
+    
+    // Select reason based on flight type
+    if (isCargo && floor.cargoContractPremiumEnabled) {
+      profitabilityAdjustmentReason = "CARGO_CONTRACT_PREMIUM";
+    } else {
+      profitabilityAdjustmentReason = "POST_FLIGHT_MINIMUM_MARGIN";
+    }
+    
+    totalRevenueUsd = nonNegativeMoney(totalRevenueUsd + profitabilityAdjustmentUsd);
+    estimatedProfitUsd = signedMoney(totalRevenueUsd - totalCostUsd);
+  }
+  
+  // Pilot accrual
   const rawPilotAccrual = estimatedProfitUsd > 0
     ? Math.max(rate.pilotAccrualMinimumUsd, estimatedProfitUsd * rate.pilotAccrualRate)
     : 0;
@@ -425,6 +481,8 @@ export function calculateEconomySnapshotFromOfp(params: {
     totalCostUsd,
     estimatedProfitUsd,
     estimatedPilotAccrualUsd,
+    profitabilityAdjustmentUsd,
+    profitabilityAdjustmentReason,
     cargoScenario: cargoScenario
       ? { code: cargoScenario.code, title: cargoScenario.title, revenueMultiplier: cargoScenario.revenueMultiplier }
       : undefined,

@@ -367,6 +367,15 @@
     "patagonia_hub": 420
   },
   "initialPilotWalletGrantUsd": 25000,
+  "profitabilityFloor": {
+    "minimumProfitUsd": 25,
+    "minimumProfitMarginPct": 0.08,
+    "remoteRegionalMinimumMarginPct": 0.12,
+    "cargoMinimumMarginPct": 0.15,
+    "charterMinimumMarginPct": 0.18,
+    "regionalSubsidyEnabled": true,
+    "cargoContractPremiumEnabled": true
+  },
   "progressionExpenses": [
     {
       "code": "THEORY_BASIC",

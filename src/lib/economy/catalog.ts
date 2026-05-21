@@ -5,6 +5,7 @@ import type {
   AircraftCategoryEconomyProfile,
   AircraftEconomyProfile,
   EconomyCurrency,
+  ProfitabilityFloorConfig,
   ProgressionExpenseCatalogItem,
   RouteCategoryEconomyRate,
 } from "./types";
@@ -20,6 +21,7 @@ export const economyCatalog = rawCatalog as {
   routeCategoryRates: Record<string, RouteCategoryEconomyRate>;
   aircraftCategoryProfiles: Record<string, AircraftCategoryEconomyProfile>;
   airportCategoryFeesUsd: Record<string, number>;
+  profitabilityFloor: ProfitabilityFloorConfig;
   progressionExpenses: ProgressionExpenseCatalogItem[];
 };
 
@@ -94,4 +96,16 @@ export function getEconomyCatalogVersion() {
 
 export function getInitialPilotWalletGrant() {
   return economyCatalog.initialPilotWalletGrantUsd ?? 25000;
+}
+
+export function getProfitabilityFloorConfig(): ProfitabilityFloorConfig {
+  return economyCatalog.profitabilityFloor ?? {
+    minimumProfitUsd: 25,
+    minimumProfitMarginPct: 0.08,
+    remoteRegionalMinimumMarginPct: 0.12,
+    cargoMinimumMarginPct: 0.15,
+    charterMinimumMarginPct: 0.18,
+    regionalSubsidyEnabled: true,
+    cargoContractPremiumEnabled: true,
+  };
 }
