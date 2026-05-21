@@ -205,9 +205,38 @@ Reserva de prueba limpiada:
 - Reserva dc4f6e7b-79fa-4bc6-8a11-1d211f10d13d -> CANCELLED.
 - Reservas activas PWG001 despues del cleanup: 0.
 
-## Pendiente post-push
+## Deploy Vercel
 
-- git commit.
-- git push.
-- deploy Vercel.
-- prueba produccion manual PWG001 SCTE -> SCPF BE58/CC-PBA.
+- Primer deploy Git para commit ddae567: READY.
+- Produccion fallo inicialmente por env faltante: DATABASE_URL no esta configurada.
+- Se agregaron env vars de .env.local a Vercel Production sin imprimir secretos.
+- Redeploy remoto desde Vercel: READY.
+- Alias productivo validado: https://web-30-ashen.vercel.app.
+
+## Validacion produccion
+
+Comando:
+
+```bash
+PW3_VALIDATE_BASE_URL=https://web-30-ashen.vercel.app node scripts/pw3/validate-dispatch-temporary-reservation.mjs
+```
+
+Resultado:
+
+- PWG001 existe y esta ACTIVE.
+- PWG001 current_airport = SCTE.
+- Ruta SCTE -> SCPF activa existe.
+- BE58 / CC-PBA existe, esta AVAILABLE y esta en SCTE.
+- POST /api/dispatch/training-reservations respondio OK en produccion.
+- reservationId devuelto: si.
+- dispatchToken devuelto: si.
+- expiresAt aproximadamente 15 minutos: si.
+- Segunda llamada reutilizo la misma reserva: si.
+- send-to-acars respondio OK en produccion.
+- payloadVersion = pw3-dispatch-v1.
+- claimUrl devuelto.
+- DB quedo temporalmente en ACARS_READY y luego cleanup marco CANCELLED.
+
+Reserva de prueba produccion limpiada:
+
+- 1ca61227-b913-4cef-b990-2628f864cbd0 -> CANCELLED
