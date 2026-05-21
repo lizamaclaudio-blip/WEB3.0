@@ -11,7 +11,7 @@
   "mandatory": false,
   "required": false,
   "forceUpdate": false,
-  "notes": "ACARS 7.1.2 - Hotfix Login Web 3.0: corregido login email payload. Sin Supabase.",
+  "notes": "ACARS 7.1.2 - Hotfix login Web 3.0. Autoupdate via Patagonia Wings Web. Sin Supabase.",
   "releaseDate": "2026-05-21",
   "minVersion": "1.0.0",
   "storageProvider": "web"
