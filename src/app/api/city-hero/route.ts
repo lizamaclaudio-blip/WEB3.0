@@ -23,6 +23,14 @@ type CacheRow = {
   title: string | null;
 };
 
+type HeroImageResult = {
+  imageUrl: string;
+  source: string;
+  attribution: string;
+  sourceUrl: string | null;
+  title: string;
+};
+
 function sanitize(value: string | null | undefined) {
   return (value ?? "").trim();
 }
@@ -35,6 +43,17 @@ function jsonResponse(body: unknown) {
   return NextResponse.json(body, {
     headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
   });
+}
+
+function looksLikeLogoOrWordmark(imageUrl?: string | null, title?: string | null) {
+  const combined = `${imageUrl ?? ""} ${title ?? ""}`.toLowerCase();
+  return (
+    combined.includes("logo") ||
+    combined.includes("wordmark") ||
+    combined.includes("brand") ||
+    combined.includes("aeropuerto") ||
+    combined.includes("airport")
+  );
 }
 
 async function ensureCityImageCacheTable() {
@@ -88,7 +107,7 @@ async function findAirportByCode(code: string) {
   );
 }
 
-async function fetchWikipediaImageByTitle(title: string) {
+async function fetchWikipediaImageByTitle(title: string): Promise<HeroImageResult | null> {
   const url = new URL("https://en.wikipedia.org/w/api.php");
   url.searchParams.set("action", "query");
   url.searchParams.set("format", "json");
@@ -108,16 +127,18 @@ async function fetchWikipediaImageByTitle(title: string) {
   const page = Object.values(payload?.query?.pages ?? {}).find((item) => item?.thumbnail?.source);
   if (!page?.thumbnail?.source) return null;
 
-  return {
+  const result = {
     imageUrl: page.thumbnail.source,
     source: "wikimedia",
     attribution: page.fullurl ? `Imagen: Wikimedia - ${page.fullurl}` : "Imagen: Wikimedia",
     sourceUrl: page.fullurl ?? null,
     title: page.title ?? title,
   };
+  if (looksLikeLogoOrWordmark(result.imageUrl, result.title)) return null;
+  return result;
 }
 
-async function fetchPexelsFallback(query: string) {
+async function fetchPexelsFallback(query: string): Promise<HeroImageResult | null> {
   const key = process.env.PEXELS_API_KEY;
   if (!key) return null;
 
@@ -139,13 +160,15 @@ async function fetchPexelsFallback(query: string) {
   const imageUrl = photo?.src?.landscape || photo?.src?.large;
   if (!imageUrl) return null;
 
-  return {
+  const result = {
     imageUrl,
     source: "pexels",
     attribution: `Photo by ${photo?.photographer ?? "Pexels"}${photo?.url ? ` - ${photo.url}` : ""}`,
     sourceUrl: photo?.url ?? null,
     title: query,
   };
+  if (looksLikeLogoOrWordmark(result.imageUrl, result.title)) return null;
+  return result;
 }
 
 function defaultImage(code: string) {
@@ -165,7 +188,7 @@ export async function GET(request: NextRequest) {
   await ensureCityImageCacheTable();
   const cacheKey = `airport:${code}`;
   const cached = await getCached(cacheKey);
-  if (cached) {
+  if (cached && !looksLikeLogoOrWordmark(cached.image_url, cached.title)) {
     console.info(`[hero] source=${cached.source} hidden_attribution=true`);
     return jsonResponse({ imageUrl: cached.image_url, source: cached.source, attribution: cached.attribution, sourceUrl: null, title: cached.title });
   }
@@ -175,28 +198,9 @@ export async function GET(request: NextRequest) {
   const country = sanitize(airport?.country || airport?.iso_country);
   const airportName = sanitize(airport?.name);
 
-  const wikiFromLink = sanitize(airport?.wikipedia_link).split("/").pop()?.replaceAll("_", " ");
-  if (wikiFromLink) {
-    const image = await fetchWikipediaImageByTitle(wikiFromLink);
-    if (image) {
-      await setCache(cacheKey, { image_url: image.imageUrl, source: image.source, attribution: image.attribution, title: image.title });
-      console.info("[hero] source=wikimedia hidden_attribution=true");
-      return jsonResponse(image);
-    }
-  }
-
   const cityQuery = [city, country].filter(Boolean).join(", ");
   if (cityQuery) {
     const image = await fetchWikipediaImageByTitle(cityQuery);
-    if (image) {
-      await setCache(cacheKey, { image_url: image.imageUrl, source: image.source, attribution: image.attribution, title: image.title });
-      console.info("[hero] source=wikimedia hidden_attribution=true");
-      return jsonResponse(image);
-    }
-  }
-
-  if (airportName) {
-    const image = await fetchWikipediaImageByTitle(airportName);
     if (image) {
       await setCache(cacheKey, { image_url: image.imageUrl, source: image.source, attribution: image.attribution, title: image.title });
       console.info("[hero] source=wikimedia hidden_attribution=true");
