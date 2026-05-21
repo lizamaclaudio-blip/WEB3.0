@@ -5,12 +5,13 @@ import {
   getPassengerRoutes,
 } from "@/lib/airline/route-network";
 import type { AirlineRoute } from "@/lib/airline/routes";
+import { getAircraftTechnicalProfile } from "@/lib/aircraft/technical-profiles";
 import {
   getAircraftEconomyProfile,
   getAirportEconomyFeeUsd,
   getRouteEconomyRate,
 } from "./catalog";
-import type { FlightEconomyEstimate } from "./types";
+import type { FlightEconomyEstimate, EconomySnapshot } from "./types";
 
 export type FlightEconomyEstimateInput = {
   routeId: string;
@@ -312,4 +313,120 @@ export function calculateRouteEconomyByAircraft(route: AirlineRoute): RouteEcono
 export function getRecommendedEconomyEstimateForRoute(route: AirlineRoute) {
   if (route.flightType !== "itinerary" && route.flightType !== "cargo") return null;
   return calculateRouteEconomyEstimate(route);
+}
+
+// Calculate economy snapshot from SimBrief OFP data
+export function calculateEconomySnapshotFromOfp(params: {
+  routeId?: string;
+  origin: string;
+  destination: string;
+  distanceNm: number;
+  aircraftCode: string;
+  blockFuelKg: number;
+  tripFuelKg: number;
+  payloadKg: number;
+  passengerCount: number;
+  cargoKg: number;
+  isCargo: boolean;
+  cargoScenario?: { code: string; title: string; revenueMultiplier: number } | null;
+}): EconomySnapshot {
+  const {
+    routeId,
+    origin,
+    destination,
+    distanceNm,
+    aircraftCode,
+    blockFuelKg,
+    tripFuelKg,
+    payloadKg,
+    passengerCount,
+    cargoKg,
+    isCargo,
+    cargoScenario,
+  } = params;
+
+  const techProfile = getAircraftTechnicalProfile(aircraftCode);
+  const rate = getRouteEconomyRate("regional"); // Default, could be derived from route
+
+  // Fuel cost based on actual OFP fuel
+  const fuelPricePerKgUsd = 0.8; // Jet A-1 avg price
+  const fuelCostUsd = nonNegativeMoney(blockFuelKg * fuelPricePerKgUsd);
+
+  // Airport fees
+  const airportFeesUsd = nonNegativeMoney(
+    getAirportEconomyFeeUsd(origin) + getAirportEconomyFeeUsd(destination) + rate.airportFeeUsd,
+  );
+
+  // Maintenance and wear
+  const maintenanceReserveUsd = nonNegativeMoney(distanceNm * (techProfile?.economy.maintenanceReserveUsdPerHour ?? 100) * 0.5);
+  const wearReserveUsd = nonNegativeMoney(techProfile?.economy.wearReserveUsdPerLanding ?? 25);
+
+  // Revenue calculations
+  let passengerRevenueUsd = 0;
+  let baggageRevenueUsd = 0;
+
+  if (!isCargo && passengerCount > 0) {
+    const ticketBaseFareUsd = rate.ticketBaseFareUsd ?? 45;
+    const ticketYieldPerNmUsd = rate.ticketYieldPerNmUsd ?? rate.passengerRevenuePerPassengerNm;
+    passengerRevenueUsd = nonNegativeMoney(passengerCount * (ticketBaseFareUsd + distanceNm * ticketYieldPerNmUsd));
+
+    // Baggage revenue
+    const baggagePerPax = techProfile?.baggagePerPassengerKg ?? 20;
+    const excessBaggageFeePerKgUsd = 1.4;
+    const baggageIncludedKgPerPassenger = rate.baggageIncludedKgPerPassenger ?? 18;
+    const totalBaggageKg = passengerCount * baggagePerPax;
+    const includedBaggageKg = passengerCount * baggageIncludedKgPerPassenger;
+    const excessBaggageKg = Math.max(0, totalBaggageKg - includedBaggageKg);
+    baggageRevenueUsd = nonNegativeMoney(excessBaggageKg * excessBaggageFeePerKgUsd);
+  }
+
+  // Cargo revenue
+  let cargoRevenueUsd = 0;
+  if (isCargo && cargoKg > 0) {
+    const cargoRatePerKgNmUsd = rate.cargoRatePerKgNmUsd ?? rate.cargoRevenuePerKgNm;
+    const cargoBaseFeeUsd = rate.cargoBaseFeeUsd ?? 180;
+    const baseRevenue = nonNegativeMoney(cargoKg * distanceNm * cargoRatePerKgNmUsd + cargoBaseFeeUsd);
+    // Apply scenario multiplier if applicable
+    cargoRevenueUsd = cargoScenario ? baseRevenue * cargoScenario.revenueMultiplier : baseRevenue;
+  }
+
+  const totalRevenueUsd = nonNegativeMoney(passengerRevenueUsd + baggageRevenueUsd + cargoRevenueUsd);
+
+  // Total costs
+  const totalCostUsd = nonNegativeMoney(fuelCostUsd + airportFeesUsd + maintenanceReserveUsd + wearReserveUsd + rate.crewCostUsd);
+
+  // Profit and pilot accrual
+  const estimatedProfitUsd = signedMoney(totalRevenueUsd - totalCostUsd);
+  const rawPilotAccrual = estimatedProfitUsd > 0
+    ? Math.max(rate.pilotAccrualMinimumUsd, estimatedProfitUsd * rate.pilotAccrualRate)
+    : 0;
+  const estimatedPilotAccrualUsd = nonNegativeMoney(Math.min(estimatedProfitUsd, rawPilotAccrual));
+
+  return {
+    source: "simbrief_ofp",
+    routeId,
+    origin,
+    destination,
+    distanceNm,
+    aircraftCode,
+    blockFuelKg,
+    tripFuelKg,
+    payloadKg,
+    passengerCount,
+    cargoKg,
+    passengerRevenueUsd,
+    cargoRevenueUsd,
+    baggageRevenueUsd,
+    totalRevenueUsd,
+    fuelCostUsd,
+    airportFeesUsd,
+    maintenanceReserveUsd,
+    wearReserveUsd,
+    totalCostUsd,
+    estimatedProfitUsd,
+    estimatedPilotAccrualUsd,
+    cargoScenario: cargoScenario
+      ? { code: cargoScenario.code, title: cargoScenario.title, revenueMultiplier: cargoScenario.revenueMultiplier }
+      : undefined,
+  };
 }

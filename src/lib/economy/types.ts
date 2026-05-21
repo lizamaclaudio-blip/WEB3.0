@@ -161,6 +161,45 @@ export type FlightEconomyEstimate = {
   };
 };
 
+// Economy snapshot for payload pw3-dispatch-v1
+export type EconomySnapshot = {
+  source: "catalog" | "simbrief_ofp";
+  routeId?: string;
+  origin: string;
+  destination: string;
+  distanceNm: number;
+  aircraftCode: string;
+  
+  // OFP data (when available)
+  blockFuelKg?: number;
+  tripFuelKg?: number;
+  payloadKg?: number;
+  passengerCount?: number;
+  cargoKg?: number;
+  
+  // Calculated economy
+  passengerRevenueUsd: number;
+  cargoRevenueUsd: number;
+  baggageRevenueUsd: number;
+  totalRevenueUsd: number;
+  
+  fuelCostUsd: number;
+  airportFeesUsd: number;
+  maintenanceReserveUsd: number;
+  wearReserveUsd: number;
+  totalCostUsd: number;
+  
+  estimatedProfitUsd: number;
+  estimatedPilotAccrualUsd: number;
+  
+  // Cargo scenario if applicable
+  cargoScenario?: {
+    code: string;
+    title: string;
+    revenueMultiplier: number;
+  };
+};
+
 export type PilotEconomyProfile = {
   pilotId: string;
   callsign: string;

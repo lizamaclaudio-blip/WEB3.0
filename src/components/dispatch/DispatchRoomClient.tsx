@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import styles from "./DispatchRoom.module.css";
 import { mapAircraftCodeToSimbrief } from "@/lib/simbrief/aircraft-map";
 import { getSimbriefFlightNumber, extractPwgFlightNumber, buildPwgCallsign, generatePwgFlightNumber } from "@/lib/dispatch/flight-number";
+import { getAircraftTechnicalProfile } from "@/lib/aircraft/technical-profiles";
 
 type AirportInfo = {
   ident?: string | null;
@@ -1340,8 +1341,39 @@ export default function DispatchRoomClient({
     // airline siempre PWG
     prefill.searchParams.set("airline", "PWG");
     prefill.searchParams.set("route", effectiveRouteText || "");
-    prefill.searchParams.set("pax", String(effectivePassengerCount));
-    prefill.searchParams.set("cargo", String(effectiveCargoKg));
+    
+    // Forzar unidades KG para SimBrief
+    prefill.searchParams.set("units", "KGS");
+    
+    // Calcular passengers/cargo inteligente basado en perfil técnico si no hay OFP cargado
+    const techProfile = selectedAircraft?.model_code ? getAircraftTechnicalProfile(selectedAircraft.model_code) : null;
+    
+    let prefillPax = effectivePassengerCount;
+    let prefillCargo = effectiveCargoKg;
+    
+    // Si no hay OFP cargado, usar defaults del perfil técnico
+    if (!simbriefOfp && techProfile) {
+      if (isCargo) {
+        // Vuelo cargo: pax siempre 0, cargo desde default del perfil
+        prefillPax = 0;
+        prefillCargo = techProfile.simbrief.defaultCargoKg ?? Math.round(techProfile.maxCargoKg * 0.4);
+      } else {
+        // Vuelo pax: usar default del perfil o 50% de capacidad
+        prefillPax = techProfile.simbrief.defaultPassengers ?? Math.round(techProfile.passengerCapacity * 0.5);
+        prefillCargo = techProfile.simbrief.defaultCargoKg ?? Math.round(prefillPax * techProfile.baggagePerPassengerKg);
+      }
+    }
+    
+    // Validar límites de aeronave
+    if (techProfile) {
+      prefillPax = Math.min(prefillPax, techProfile.passengerCapacity);
+      const maxBaggage = prefillPax * techProfile.baggagePerPassengerKg;
+      prefillCargo = Math.min(prefillCargo, techProfile.maxCargoKg - maxBaggage);
+    }
+    
+    prefill.searchParams.set("pax", String(prefillPax));
+    prefill.searchParams.set("cargo", String(prefillCargo));
+    
     // Nota: airline ya se seteó arriba
 
     const popup = window.open(prefill.toString(), "_blank", "noopener,noreferrer");
