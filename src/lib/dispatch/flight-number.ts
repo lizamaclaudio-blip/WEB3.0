@@ -52,6 +52,37 @@ export function isValidPwgFlightNumber(value: string): boolean {
 }
 
 /**
+ * Normaliza un flight number para comparación
+ * - "PWG695" → "695"
+ * - "695" → "695"
+ * - "PWG1204" → "1204"
+ */
+export function normalizePwgFlightNumber(value: string | null | undefined): string | null {
+  if (!value) return null;
+  // Quitar prefijo PWG si existe
+  const withoutPrefix = value.replace(/^PWG/i, "");
+  // Validar que queden 3-4 dígitos
+  if (!/^\d{3,4}$/.test(withoutPrefix)) return null;
+  return withoutPrefix;
+}
+
+/**
+ * Compara dos flight numbers PWG de forma flexible
+ * Acepta: "PWG695" vs "695" → true
+ * Acepta: "PWG695" vs "PWG695" → true
+ * Acepta: "695" vs "695" → true
+ */
+export function isSamePwgFlight(
+  a: string | null | undefined,
+  b: string | null | undefined,
+): boolean {
+  const normA = normalizePwgFlightNumber(a);
+  const normB = normalizePwgFlightNumber(b);
+  if (!normA || !normB) return false;
+  return normA === normB;
+}
+
+/**
  * Obtiene número de vuelo para SimBrief desde route_code
  * Si route_code es inválido (SCTE-SCIE), genera uno nuevo
  */

@@ -1379,9 +1379,15 @@ export default function DispatchRoomClient({
       if (!response.ok || !payload?.ok || !payload.ofp) {
         const code = payload?.code || "SIMBRIEF_FETCH_FAILED";
         setSimbriefStatus(code.includes("MISMATCH") ? "mismatch" : "error");
-        setSimbriefMessage(code === "SIMBRIEF_DESTINATION_MISMATCH" || code === "SIMBRIEF_ORIGIN_MISMATCH"
-          ? `El OFP cargado no corresponde a la ruta seleccionada ${originIdent} -> ${destinationIdent}.`
-          : `No se pudo cargar OFP (${code}).`);
+        const errorMessages = {
+          SIMBRIEF_ORIGIN_MISMATCH: `El OFP no coincide: origen ${payload?.ofp?.origin || "?"} vs ${originIdent}.`,
+          SIMBRIEF_DESTINATION_MISMATCH: `El OFP no coincide: destino ${payload?.ofp?.destination || "?"} vs ${destinationIdent}.`,
+          SIMBRIEF_FLIGHT_MISMATCH: `El OFP no coincide: vuelo ${payload?.ofp?.flightNumber || "?"} vs PWG${extractPwgFlightNumber(expectedFlightNumber) || expectedFlightNumber}.`,
+          SIMBRIEF_AIRCRAFT_MISMATCH: `El OFP no coincide: aeronave ${payload?.ofp?.aircraftIcao || "?"} vs ${mapper.simbriefCode}.`,
+          SIMBRIEF_OFP_NOT_FOUND: "No se encontró OFP en SimBrief. Genera primero el plan de vuelo.",
+          SIMBRIEF_USER_NOT_CONFIGURED: "Configura tu usuario SimBrief en tu perfil.",
+        };
+        setSimbriefMessage(errorMessages[code as keyof typeof errorMessages] || `Error al cargar OFP (${code}).`);
         return;
       }
       setSimbriefOfp(payload.ofp);

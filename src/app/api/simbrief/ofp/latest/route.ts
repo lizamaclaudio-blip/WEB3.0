@@ -3,6 +3,7 @@ import { getSessionTokenFromCookies } from "@/lib/session/server";
 import { getAuthenticatedPilot } from "@/lib/auth/service";
 import { dbOne } from "@/lib/db/client";
 import { normalizeSimbriefOfp } from "@/lib/simbrief/ofp";
+import { isSamePwgFlight, normalizePwgFlightNumber } from "@/lib/dispatch/flight-number";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -66,15 +67,45 @@ export async function POST(request: Request) {
   if (!payload) return error("SIMBRIEF_PARSE_FAILED", 502);
 
   const ofp = normalizeSimbriefOfp(payload);
-  if (!ofp.origin || !ofp.destination) return error("SIMBRIEF_OFP_NOT_FOUND", 404);
-  if (expectedOrigin && ofp.origin !== expectedOrigin) return error("SIMBRIEF_ORIGIN_MISMATCH");
-  if (expectedDestination && ofp.destination !== expectedDestination) return error("SIMBRIEF_DESTINATION_MISMATCH");
-  if (expectedFlightNumber && ofp.flightNumber && ofp.flightNumber !== expectedFlightNumber) {
-    return error("SIMBRIEF_OFP_NOT_FOUND");
+  
+  // Logging seguro para diagnóstico
+  console.info(`[simbrief-ofp] pilot=${user.callsign} userId=${simbriefUserId ? "***" : "none"} username=${simbriefUsername ? "***" : "none"}`);
+  console.info(`[simbrief-ofp] ofpOrigin=${ofp.origin} ofpDest=${ofp.destination} ofpFlightNum=${ofp.flightNumber} ofpAircraft=${ofp.aircraftIcao}`);
+  console.info(`[simbrief-ofp] expectedOrigin=${expectedOrigin} expectedDest=${expectedDestination} expectedFlightNum=${expectedFlightNumber}`);
+  
+  if (!ofp.origin || !ofp.destination) {
+    console.warn("[simbrief-ofp] OFP missing origin/destination");
+    return error("SIMBRIEF_OFP_NOT_FOUND", 404);
   }
+  
+  if (expectedOrigin && ofp.origin !== expectedOrigin) {
+    console.warn(`[simbrief-ofp] Origin mismatch: got ${ofp.origin}, expected ${expectedOrigin}`);
+    return error("SIMBRIEF_ORIGIN_MISMATCH");
+  }
+  
+  if (expectedDestination && ofp.destination !== expectedDestination) {
+    console.warn(`[simbrief-ofp] Destination mismatch: got ${ofp.destination}, expected ${expectedDestination}`);
+    return error("SIMBRIEF_DESTINATION_MISMATCH");
+  }
+  
+  // Comparación flexible de flight number (acepta PWG695 vs 695)
+  if (expectedFlightNumber && ofp.flightNumber) {
+    const matches = isSamePwgFlight(ofp.flightNumber, expectedFlightNumber);
+    const normOfp = normalizePwgFlightNumber(ofp.flightNumber);
+    const normExp = normalizePwgFlightNumber(expectedFlightNumber);
+    console.info(`[simbrief-ofp] flightNumCompare: ofp=${ofp.flightNumber}(norm=${normOfp}) expected=${expectedFlightNumber}(norm=${normExp}) matches=${matches}`);
+    
+    if (!matches) {
+      console.warn(`[simbrief-ofp] Flight number mismatch: got ${ofp.flightNumber}, expected ${expectedFlightNumber}`);
+      return error("SIMBRIEF_FLIGHT_MISMATCH");
+    }
+  }
+  
   if (expectedAircraftCode && ofp.aircraftIcao && !ofp.aircraftIcao.includes(expectedAircraftCode)) {
+    console.warn(`[simbrief-ofp] Aircraft mismatch: got ${ofp.aircraftIcao}, expected ${expectedAircraftCode}`);
     return error("SIMBRIEF_AIRCRAFT_MISMATCH");
   }
 
+  console.info(`[simbrief-ofp] OFP loaded successfully for ${user.callsign}`);
   return NextResponse.json({ ok: true, ofp });
 }
