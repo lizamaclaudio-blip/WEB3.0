@@ -1,0 +1,343 @@
+.shell {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+}
+
+.intro {
+  overflow: hidden;
+  border: 1px solid #dbe4ef;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
+}
+
+.introHeader {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 13px 16px;
+}
+
+.introHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.introBody {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.introBody p {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.metric {
+  min-width: 0;
+  border: 1px solid #dbe4ef;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 11px 12px;
+}
+
+.metric span {
+  display: block;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.metric strong {
+  display: block;
+  margin-top: 4px;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.section {
+  display: grid;
+  gap: 10px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #dbe4ef;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 10px 12px;
+}
+
+.sectionHeader h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.sectionHeader p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.sectionHeader span {
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #0b4f8a;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.schoolSection .sectionHeader {
+  border-style: dashed;
+  background: #f8fafc;
+}
+
+.routeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.routeCard {
+  overflow: hidden;
+  border: 1px solid #dbe4ef;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
+}
+
+.routeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #0f172a;
+  color: #ffffff;
+  padding: 10px 12px;
+}
+
+.routePair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.routePair b {
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+.routeBadge {
+  border-radius: 999px;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.routeBody {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.cityLine {
+  margin: 0;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.detail {
+  min-width: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  padding: 8px;
+}
+
+.detail span {
+  display: block;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.detail strong {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aircraftList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.economyStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border: 1px solid #fde68a;
+  border-radius: 7px;
+  background: #fffbeb;
+  padding: 8px;
+}
+
+.economyStrip span,
+.economyStrip strong {
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.economyStripPositive {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.economyStripPositive strong {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.economyStripNegative {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.economyStripNegative strong {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.economyStrip span {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.aircraftList span,
+.returnOk,
+.returnWarn {
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.aircraftChip {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.aircraftChip:hover {
+  background: #cbd5e1;
+  color: #0f172a;
+}
+
+.aircraftChipSelected {
+  border-color: #0f172a;
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.aircraftChipRecommended:not(.aircraftChipSelected) {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+.returnOk {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.returnWarn {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.hubLine {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hubLine span {
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #0b4f8a;
+  padding: 5px 8px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+@media (max-width: 1100px) {
+  .summaryGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .routeGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .summaryGrid,
+  .detailGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionHeader,
+  .routeHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

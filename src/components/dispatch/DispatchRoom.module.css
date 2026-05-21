@@ -1,0 +1,1293 @@
+.pageShell {
+  min-height: 100vh;
+  background: #eef2f7;
+  color: #111827;
+  padding: 22px 16px 40px;
+}
+
+.pageFrame {
+  width: min(100%, 1220px);
+  margin: 0 auto;
+  background: #fff;
+  border-top: 3px solid #ef4444;
+  box-shadow: 0 10px 35px rgba(15, 23, 42, .14);
+}
+
+.topbar {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 44px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+
+.brand {
+  width: 44px;
+  height: 36px;
+  border-radius: 7px;
+  background: #0b4f8a;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.topbar nav {
+  display: flex;
+  gap: 22px;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.topbar nav a {
+  color: #111827;
+  text-decoration: none;
+}
+
+.blackHeader {
+  min-height: 82px;
+  background: #151515;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 44px;
+  border-bottom: 3px solid #ef4444;
+}
+
+.blackHeader h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 400;
+}
+
+.layoutGrid {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 30px;
+  padding: 34px 44px 56px;
+}
+
+.mainColumn {
+  min-width: 0;
+}
+
+.startBlock h2,
+.dispatchPanel h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 22px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.startBlock h2::after,
+.dispatchPanel h2::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: #d6dde8;
+}
+
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: start;
+  gap: 16px;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.stepper::before {
+  content: "";
+  position: absolute;
+  top: 17px;
+  left: 7%;
+  right: 7%;
+  height: 3px;
+  background: #d1d5db;
+}
+
+.stepItem {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 11px;
+  text-align: center;
+  z-index: 1;
+}
+
+.stepItem span {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: #c9cdd3;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  border: 3px solid #fff;
+}
+
+.stepItem strong {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.stepItemActive span {
+  background: #fff;
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.stepItemActive strong {
+  color: #111827;
+}
+
+.dispatchPanel {
+  margin-top: 8px;
+}
+
+.instructions {
+  border: 1px solid #dbe4ef;
+  border-radius: 5px;
+  background: #f8fafc;
+  padding: 16px 18px;
+  color: #334155;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.airportGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.airportCard {
+  border: 1px solid #dbe4ef;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.originHeader,
+.destinationHeader {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  padding: 0 18px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.originHeader {
+  background: #1f6fae;
+}
+
+.destinationHeader {
+  background: #1f9254;
+}
+
+.originHeader span,
+.destinationHeader span {
+  font-size: 26px;
+}
+
+.airportCardBody {
+  padding: 14px 16px 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.searchInput,
+.select,
+.inlineSelect {
+  width: 100%;
+  min-height: 35px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+  color: #111827;
+  padding: 7px 10px;
+  font-size: 14px;
+}
+
+.airportCardBody p {
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.airportCardBody small {
+  color: #0b4f8a;
+  font-weight: 800;
+}
+
+.selectedAirport,
+.badgeLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: #334155;
+  font-size: 13px;
+}
+
+.flightInfoBox {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.flightInfoBox > div {
+  border: 1px solid #dbe4ef;
+  border-radius: 6px;
+  background: #f8fafc;
+  padding: 14px 16px;
+}
+
+.flightInfoBox span {
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-weight: 900;
+}
+
+.flightInfoBox strong {
+  display: block;
+  margin-top: 4px;
+  color: #0f172a;
+}
+
+.flightInfoBox p {
+  margin: 7px 0 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.inlineSelect {
+  margin-top: 10px;
+}
+
+.actionRow {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.continueButton {
+  border: 0;
+  border-radius: 5px;
+  background: #0891b2;
+  color: #fff;
+  min-height: 42px;
+  padding: 0 22px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.continueButton:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.timerBox {
+  margin-top: 18px;
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+
+.timerBox p {
+  margin: 5px 0 0;
+  line-height: 1.5;
+}
+
+.sideCard {
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  align-self: start;
+}
+
+.sideCard header {
+  background: #16a34a;
+  color: #fff;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 18px;
+  text-align: center;
+}
+
+.sideBody {
+  padding: 18px 20px 22px;
+  text-align: center;
+}
+
+.sideBody h3 {
+  margin: 0 0 10px;
+  font-weight: 900;
+}
+
+.sideBody p {
+  margin: 6px 0;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sideDivider {
+  height: 1px;
+  background: #dbe4ef;
+  margin: 15px 0;
+}
+
+.smallNote {
+  text-align: left;
+  line-height: 1.45;
+}
+
+@media (max-width: 980px) {
+  .layoutGrid,
+  .airportGrid,
+  .flightInfoBox {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar,
+  .blackHeader,
+  .layoutGrid {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .stepper {
+    grid-template-columns: 1fr;
+  }
+
+  .stepper::before {
+    display: none;
+  }
+}
+
+
+/* PW3 Dispatch Room step 2 */
+.aircraftStage {
+  display: grid;
+  gap: 18px;
+}
+
+.aircraftStage h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 17px;
+  font-weight: 600;
+  border-bottom: 1px solid #d6dde8;
+  padding-bottom: 8px;
+}
+
+.aircraftSelectedCard {
+  border: 1px solid #dbe4ef;
+  border-radius: 6px;
+  background: #fff;
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 16px;
+  padding: 14px;
+  align-items: stretch;
+}
+
+.aircraftImageBox {
+  position: relative;
+  isolation: isolate;
+  min-height: 118px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #0b4f8a, #38bdf8 55%, #e0f2fe);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  overflow: hidden;
+}
+
+.aircraftImageBox::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 56%;
+  height: 56%;
+  background: url('/branding/patagonia-logo.png') top right / contain no-repeat;
+  opacity: .34;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, .45));
+}
+
+.aircraftImageBox span {
+  width: 58px;
+  height: 48px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, .18);
+  border: 1px solid rgba(255, 255, 255, .35);
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.aircraftMainInfo {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.aircraftTitleRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: start;
+}
+
+.aircraftTitleRow h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.aircraftTitleRow p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.registrationBadge,
+.pendingBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  border-radius: 5px;
+  padding: 5px 10px;
+  color: #fff;
+  background: #111827;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.pendingBadge {
+  background: #f59e0b;
+  color: #111827;
+}
+
+.aircraftMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.aircraftMetaGrid > div {
+  min-height: 58px;
+  padding: 9px 12px;
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  text-align: center;
+  border-right: 1px solid #e5e7eb;
+}
+
+.aircraftMetaGrid > div:last-child {
+  border-right: 0;
+}
+
+.aircraftMetaGrid span,
+.flightPlanSummary span,
+.healthMini span {
+  color: #64748b;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-weight: 900;
+}
+
+.aircraftHealthStrip {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.healthMini {
+  display: grid;
+  gap: 5px;
+}
+
+.healthTrack {
+  height: 18px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.healthFill {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  border-radius: inherit;
+  background: repeating-linear-gradient(45deg, #16a34a 0 8px, #22c55e 8px 16px);
+}
+
+.scheduleBlock {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  gap: 16px;
+  align-items: center;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  background: #f0fdf4;
+  padding: 12px 14px;
+}
+
+.noticeGreenLite {
+  display: grid;
+  gap: 4px;
+  color: #166534;
+}
+
+.noticeGreenLite strong {
+  font-weight: 900;
+}
+
+.noticeGreenLite span {
+  font-size: 13px;
+}
+
+.timeSelect {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+  color: #111827;
+  padding: 7px 9px;
+  font-weight: 700;
+}
+
+.flightPlanSummary {
+  border: 1px solid #dbe4ef;
+  border-radius: 6px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+.flightPlanSummary > div {
+  min-height: 64px;
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  padding: 10px;
+  text-align: center;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.flightPlanSummary > div:nth-child(3n) {
+  border-right: 0;
+}
+
+.flightPlanSummary > div:nth-last-child(-n + 3) {
+  border-bottom: 0;
+}
+
+.simulatorPanel {
+  border: 1px solid #dbe4ef;
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 1fr minmax(220px, 320px);
+  gap: 16px;
+  align-items: center;
+  background: #fff;
+}
+
+.simulatorPanel strong {
+  display: block;
+  color: #0f172a;
+}
+
+.simulatorPanel p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.panelIcon {
+  display: inline-flex;
+  margin-right: 8px;
+  color: #0b4f8a;
+}
+
+.flightPlanNotice {
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1e40af;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.flightPlanNotice strong {
+  font-weight: 900;
+}
+
+.flightPlanNotice span {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.navButtons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.backButton {
+  border: 0;
+  border-radius: 5px;
+  background: #1f2937;
+  color: #fff;
+  min-height: 42px;
+  padding: 0 20px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.badgeLineCentered {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+
+@media (max-width: 760px) {
+  .aircraftSelectedCard,
+  .aircraftTitleRow,
+  .aircraftMetaGrid,
+  .aircraftHealthStrip,
+  .scheduleBlock,
+  .flightPlanSummary,
+  .simulatorPanel,
+  .flightPlanNotice {
+    grid-template-columns: 1fr;
+  }
+
+  .aircraftMetaGrid > div,
+  .flightPlanSummary > div {
+    border-right: 0;
+  }
+}
+
+/* PW3 Dispatch Room steps 3, 4 and 5 */
+.planStage,
+.weightStage,
+.finalStage {
+  display: grid;
+  gap: 18px;
+}
+
+.planStage h3,
+.weightStage h3,
+.finalStage h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 500;
+  border-bottom: 1px solid #d6dde8;
+  padding-bottom: 9px;
+}
+
+.simbriefNotice {
+  border: 1px solid #bbf7d0;
+  border-radius: 5px;
+  background: #dcfce7;
+  color: #166534;
+  padding: 12px 14px;
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 13px;
+}
+
+.darkPanel {
+  border: 1px solid #dbe4ef;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.darkPanel > header {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  background: #1f2937;
+  color: #fff;
+  font-weight: 900;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.routeConfigGrid,
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+}
+
+.routeConfigGrid label,
+.formGrid label {
+  border: 1px solid #dbe4ef;
+  border-radius: 5px;
+  background: #f8fafc;
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.routeConfigGrid span,
+.formGrid span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.routeConfigGrid input,
+.routeConfigGrid select,
+.formGrid input,
+.formGrid select {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+  color: #111827;
+  padding: 7px 9px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.routeInputWide {
+  grid-column: span 2;
+}
+
+.destinationCard {
+  display: grid;
+  grid-template-columns: 170px 1fr;
+  gap: 14px;
+  padding: 14px;
+  align-items: center;
+}
+
+.destinationImage {
+  min-height: 95px;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #0b4f8a, #14b8a6 65%, #dcfce7);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 900;
+}
+
+.destinationImage span {
+  width: 54px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .18);
+  border: 1px solid rgba(255, 255, 255, .35);
+}
+
+.destinationInfo {
+  display: grid;
+  gap: 12px;
+}
+
+.destinationStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.destinationStats > div {
+  border: 1px solid #dbe4ef;
+  border-radius: 5px;
+  background: #f8fafc;
+  min-height: 58px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 8px 10px;
+}
+
+.destinationStats span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.destinationStats strong {
+  color: #0f172a;
+}
+
+.instructionsCompact {
+  border: 1px solid #bfdbfe;
+  border-radius: 5px;
+  background: #eff6ff;
+  color: #1e40af;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.weightGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.fuelValidationBox {
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  background: #fffbeb;
+  color: #92400e;
+  padding: 14px 16px;
+  display: grid;
+  gap: 7px;
+}
+
+.fuelValidationBox strong {
+  color: #78350f;
+}
+
+.fuelValidationBox p,
+.fuelValidationBox ul {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.fuelValidationBox ul {
+  padding-left: 18px;
+}
+
+.finalTable {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-top: 1px solid #dbe4ef;
+  border-bottom: 1px solid #dbe4ef;
+  background: #f8fafc;
+  overflow-x: auto;
+}
+
+.finalTable > div {
+  min-height: 70px;
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  padding: 10px 12px;
+  border-right: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.finalTable > div:last-child {
+  border-right: 0;
+}
+
+.finalTable span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.greenTime {
+  color: #16a34a;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.programmedText {
+  color: #16a34a;
+}
+
+.finalButtons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 18px 0 26px;
+}
+
+.finalButtons button,
+.finalButtons a {
+  min-height: 42px;
+  border: 0;
+  border-radius: 5px;
+  padding: 0 18px;
+  color: #fff;
+  font-weight: 900;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.finalButtons button:first-child {
+  background: #ef4444;
+}
+
+.finalButtons button:nth-child(2) {
+  background: #0ea5e9;
+}
+
+.finalButtons button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.finalButtons a {
+  background: #0891b2;
+}
+
+.sopPanel {
+  border: 1px solid #dbe4ef;
+  border-left: 4px solid #22c55e;
+  border-radius: 6px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.sopPanel header {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.sopPanel > div {
+  padding: 16px 18px;
+  display: grid;
+  gap: 12px;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.sopBadge {
+  width: max-content;
+  border-radius: 4px;
+  padding: 5px 8px;
+  background: #16a34a;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+@media (max-width: 980px) {
+  .routeConfigGrid,
+  .formGrid,
+  .destinationCard,
+  .weightGrid,
+  .finalTable {
+    grid-template-columns: 1fr;
+  }
+
+  .routeInputWide {
+    grid-column: auto;
+  }
+
+  .finalTable > div {
+    border-right: 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+}
+
+/* PW3 TRAINING FLOW 01: reserva temporal entrenamiento libre */
+.reservationBox,
+.reservationReadyBox {
+  margin: 18px 0 10px;
+  border-radius: 7px;
+  border: 1px solid #dbe4ef;
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+  background: #f8fafc;
+}
+
+.reservationReadyBox {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.reservationBox span,
+.reservationReadyBox span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 4px;
+}
+
+.reservationBox strong,
+.reservationReadyBox strong {
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.reservationBox p,
+.reservationReadyBox p {
+  margin: 7px 0 0;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.reservationBox button,
+.reservationReadyBox button {
+  min-height: 42px;
+  border: 0;
+  border-radius: 5px;
+  padding: 0 18px;
+  background: #16a34a;
+  color: #ffffff;
+  font-weight: 900;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.reservationBox button:disabled,
+.reservationReadyBox button:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+}
+
+.reservationError {
+  color: #b91c1c !important;
+  font-weight: 800;
+}
+
+.reservationHint {
+  color: #166534 !important;
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .reservationBox,
+  .reservationReadyBox {
+    grid-template-columns: 1fr;
+  }
+
+  .reservationBox button,
+  .reservationReadyBox button {
+    width: 100%;
+  }
+}
+
+/* PW3 TRAINING FLOW 02: ACARS payload prepared */
+.acarsReadyText {
+  color: #0369a1 !important;
+  font-weight: 900;
+}
+
+/* PW3 DISPATCH FLOW 04: seleccion de ruta oficial antes de aeronave */
+.routePickList {
+  display: grid;
+  gap: 12px;
+}
+
+.routePickCard {
+  width: 100%;
+  border: 1px solid #dbe4ef;
+  border-radius: 7px;
+  background: #ffffff;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  color: #111827;
+}
+
+.routePickCard:hover,
+.routePickCardActive {
+  border-color: #0b4f8a;
+  box-shadow: 0 0 0 2px rgba(11, 79, 138, .10);
+}
+
+.routePickCard small {
+  display: block;
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.routePickCard em {
+  min-width: 92px;
+  border-radius: 5px;
+  padding: 7px 9px;
+  background: #16a34a;
+  color: #ffffff;
+  font-style: normal;
+  font-weight: 900;
+  text-align: center;
+  font-size: 12px;
+}
+
+.routePickCardActive em {
+  background: #0b4f8a;
+}
+
+.routeBadgesInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 760px) {
+  .routePickCard {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* PW3: sala de despacho embebida dentro del tab Despachos */
+.embeddedShell {
+  width: 100%;
+  color: #111827;
+}
+
+.embeddedFrame {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #dbe4ef;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .06);
+}
+
+.embeddedRoomHeader {
+  min-height: 62px;
+  border-bottom: 1px solid #dbe4ef;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+}
+
+.embeddedRoomHeader span {
+  display: block;
+  margin-bottom: 3px;
+  color: #0b4f8a;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.embeddedRoomHeader h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.embeddedRoomHeader button {
+  min-height: 36px;
+  border: 1px solid #0b4f8a;
+  border-radius: 5px;
+  background: #ffffff;
+  color: #0b4f8a;
+  font-weight: 900;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.embeddedLayoutGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 24px;
+  padding: 22px 24px 28px;
+}
+
+@media (max-width: 980px) {
+  .embeddedLayoutGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .embeddedRoomHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .embeddedRoomHeader button {
+    width: 100%;
+  }
+
+  .embeddedLayoutGrid {
+    padding: 16px;
+  }
+}

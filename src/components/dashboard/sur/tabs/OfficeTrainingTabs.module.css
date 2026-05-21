@@ -1,0 +1,335 @@
+.shell {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+}
+
+.heroCard {
+  overflow: hidden;
+  border: 1px solid #dbe4ef;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
+}
+
+.heroTitle {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #073763, #0b4f8a);
+  color: #ffffff;
+  font-family: var(--font-rajdhani), system-ui, sans-serif;
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 900;
+  letter-spacing: .01em;
+}
+
+.heroBody {
+  display: grid;
+  gap: 6px;
+  padding: 16px 18px;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.heroBody p {
+  margin: 0;
+}
+
+.alert {
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  padding: 13px 15px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.card {
+  overflow: hidden;
+  border: 1px solid #dbe4ef;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid #dbe4ef;
+  background: #f8fafc;
+  padding: 13px 16px;
+}
+
+.cardHeader h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.cardHeader span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.cardBody {
+  padding: 16px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metricCard,
+.infoCard {
+  min-width: 0;
+  border: 1px solid #dbe4ef;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 13px 14px;
+}
+
+.metricCard span,
+.infoCard span {
+  display: block;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.metricCard strong,
+.infoCard strong {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metricCard small,
+.infoCard small {
+  display: block;
+  margin-top: 4px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.twoColumn {
+  display: grid;
+  grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+  gap: 16px;
+}
+
+.stack {
+  display: grid;
+  gap: 12px;
+}
+
+.chipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip,
+.planeBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #0b4f8a;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.planeBadge {
+  border-radius: 5px;
+  background: #1e293b;
+  color: #ffffff;
+}
+
+.emptyText {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #dbe4ef;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.table {
+  width: 100%;
+  min-width: 820px;
+  border-collapse: collapse;
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.trainingTable {
+  min-width: 1040px;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 10px 11px;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table th {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.table tbody tr:hover {
+  background: #eff6ff;
+}
+
+.leftCell {
+  text-align: left !important;
+}
+
+.aircraftCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 210px;
+  text-align: left;
+}
+
+.aircraftCell strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status,
+.action,
+.cost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.statusSuccess {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.statusInfo {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.statusWarning {
+  background: #fef3c7;
+  color: #a16207;
+}
+
+.statusMuted {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.cost {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.action {
+  border: 1px solid #0b4f8a;
+  background: #0b4f8a;
+  color: #ffffff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.actionMuted {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.policyList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.policyList li {
+  border-bottom: 1px solid #eef2f7;
+  padding: 10px 0;
+  color: #334155;
+  font-size: 13px;
+}
+
+.policyList li:last-child {
+  border-bottom: 0;
+}
+
+@media (max-width: 980px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .twoColumn {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .heroTitle {
+    min-height: 62px;
+    padding: 15px;
+  }
+
+  .cardHeader {
+    display: grid;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}

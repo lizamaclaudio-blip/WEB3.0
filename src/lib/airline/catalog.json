@@ -1,0 +1,2924 @@
+{
+  "flightTypes": [
+    "itinerary",
+    "charter",
+    "training",
+    "cargo"
+  ],
+  "airports": [
+    {
+      "icao": "SCPF",
+      "name": "Marcel Marchant Airport",
+      "city": "Puerto Montt",
+      "country": "Chile",
+      "lat": -41.455685,
+      "lon": -72.918704,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "local",
+      "cargoCategory": "none",
+      "active": true
+    },
+    {
+      "icao": "SCTE",
+      "name": "El Tepual International Airport",
+      "city": "Puerto Montt",
+      "country": "Chile",
+      "lat": -41.443093,
+      "lon": -73.094065,
+      "isPassengerHub": true,
+      "isCargoHub": true,
+      "hubCategory": "mixed_hub",
+      "airportCategory": "regional",
+      "cargoCategory": "cargo_hub",
+      "active": true
+    },
+    {
+      "icao": "SCAC",
+      "name": "Pupelde Airport",
+      "city": "Ancud",
+      "country": "Chile",
+      "lat": -41.904251,
+      "lon": -73.796571,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "local",
+      "cargoCategory": "none",
+      "active": true
+    },
+    {
+      "icao": "SCJO",
+      "name": "Canal Bajo Carlos Hott Siebert Airport",
+      "city": "Osorno",
+      "country": "Chile",
+      "lat": -40.611198,
+      "lon": -73.060997,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "regional",
+      "cargoCategory": "none",
+      "active": true
+    },
+    {
+      "icao": "SCST",
+      "name": "Gamboa Airport",
+      "city": "Castro",
+      "country": "Chile",
+      "lat": -42.490299,
+      "lon": -73.772797,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "remote",
+      "cargoCategory": "regional_cargo",
+      "active": true
+    },
+    {
+      "icao": "SCVD",
+      "name": "Pichoy Airport",
+      "city": "Valdivia",
+      "country": "Chile",
+      "lat": -39.650002,
+      "lon": -73.086098,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "regional",
+      "cargoCategory": "regional_cargo",
+      "active": true
+    },
+    {
+      "icao": "SCIE",
+      "name": "Carriel Sur International Airport",
+      "city": "Concepcion",
+      "country": "Chile",
+      "lat": -36.77235,
+      "lon": -73.062828,
+      "isPassengerHub": true,
+      "isCargoHub": true,
+      "hubCategory": "mixed_hub",
+      "airportCategory": "interregional",
+      "cargoCategory": "cargo_hub",
+      "active": true
+    },
+    {
+      "icao": "SCEL",
+      "name": "Comodoro Arturo Merino Benitez International Airport",
+      "city": "Santiago",
+      "country": "Chile",
+      "lat": -33.393002,
+      "lon": -70.785797,
+      "isPassengerHub": true,
+      "isCargoHub": true,
+      "hubCategory": "main_hub",
+      "airportCategory": "international",
+      "cargoCategory": "cargo_hub",
+      "active": true
+    },
+    {
+      "icao": "SCFA",
+      "name": "Andres Sabella Galvez International Airport",
+      "city": "Antofagasta",
+      "country": "Chile",
+      "lat": -23.445274,
+      "lon": -70.445232,
+      "isPassengerHub": true,
+      "isCargoHub": true,
+      "hubCategory": "mixed_hub",
+      "airportCategory": "national",
+      "cargoCategory": "cargo_hub",
+      "active": true
+    },
+    {
+      "icao": "SCDA",
+      "name": "Diego Aracena International Airport",
+      "city": "Iquique",
+      "country": "Chile",
+      "lat": -20.536273,
+      "lon": -70.181373,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "national",
+      "cargoCategory": "national_cargo",
+      "active": true
+    },
+    {
+      "icao": "SCAR",
+      "name": "Chacalluta International Airport",
+      "city": "Arica",
+      "country": "Chile",
+      "lat": -18.348499,
+      "lon": -70.338699,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "national",
+      "cargoCategory": "national_cargo",
+      "active": true
+    },
+    {
+      "icao": "SCBA",
+      "name": "Balmaceda Airport",
+      "city": "Balmaceda",
+      "country": "Chile",
+      "lat": -45.915968,
+      "lon": -71.689499,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "remote",
+      "cargoCategory": "regional_cargo",
+      "active": true
+    },
+    {
+      "icao": "SCCI",
+      "name": "President Carlos Ibanez International Airport",
+      "city": "Punta Arenas",
+      "country": "Chile",
+      "lat": -53.002602,
+      "lon": -70.854599,
+      "isPassengerHub": true,
+      "isCargoHub": true,
+      "hubCategory": "mixed_hub",
+      "airportCategory": "patagonia_hub",
+      "cargoCategory": "cargo_hub",
+      "active": true
+    },
+    {
+      "icao": "SCIP",
+      "name": "Mataveri International Airport",
+      "city": "Isla de Pascua",
+      "country": "Chile",
+      "lat": -27.165411,
+      "lon": -109.421027,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "remote",
+      "cargoCategory": "long_range_cargo",
+      "active": true
+    },
+    {
+      "icao": "SAEZ",
+      "name": "Ezeiza International Airport",
+      "city": "Buenos Aires",
+      "country": "Argentina",
+      "lat": -34.8222,
+      "lon": -58.5358,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "international",
+      "cargoCategory": "international_cargo",
+      "active": true
+    },
+    {
+      "icao": "SBGR",
+      "name": "Sao Paulo Guarulhos International Airport",
+      "city": "Sao Paulo",
+      "country": "Brazil",
+      "lat": -23.431274,
+      "lon": -46.469954,
+      "isPassengerHub": false,
+      "isCargoHub": true,
+      "hubCategory": "cargo_hub",
+      "airportCategory": "international",
+      "cargoCategory": "cargo_hub",
+      "active": true
+    },
+    {
+      "icao": "SPIM",
+      "name": "Jorge Chavez International Airport",
+      "city": "Lima",
+      "country": "Peru",
+      "lat": -12.0219,
+      "lon": -77.114305,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "international",
+      "cargoCategory": "international_cargo",
+      "active": true
+    },
+    {
+      "icao": "SUMU",
+      "name": "Carrasco International Airport",
+      "city": "Montevideo",
+      "country": "Uruguay",
+      "lat": -34.835647,
+      "lon": -56.026497,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "international",
+      "cargoCategory": "international_cargo",
+      "active": true
+    },
+    {
+      "icao": "KMIA",
+      "name": "Miami International Airport",
+      "city": "Miami",
+      "country": "United States",
+      "lat": 25.796011,
+      "lon": -80.289751,
+      "isPassengerHub": false,
+      "isCargoHub": true,
+      "hubCategory": "cargo_hub",
+      "airportCategory": "international",
+      "cargoCategory": "cargo_hub",
+      "active": true
+    },
+    {
+      "icao": "KJFK",
+      "name": "John F. Kennedy International Airport",
+      "city": "New York",
+      "country": "United States",
+      "lat": 40.639447,
+      "lon": -73.779317,
+      "isPassengerHub": false,
+      "isCargoHub": false,
+      "hubCategory": "none",
+      "airportCategory": "international",
+      "cargoCategory": "long_range_cargo",
+      "active": true
+    }
+  ],
+  "aircraft": [
+    {
+      "code": "C172",
+      "aliases": [
+        "C172",
+        "C172_MSFS",
+        "C172_ASOBO"
+      ],
+      "name": "Cessna 172 Skyhawk",
+      "category": "single_engine",
+      "rangeNm": 640,
+      "minRank": "CADET",
+      "supportsPassenger": true,
+      "supportsCargo": false,
+      "cargoCapacityKg": 0,
+      "passengerCapacity": 4,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CADET",
+        "SECOND_OFFICER",
+        "FIRST_OFFICER",
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "BE58",
+      "aliases": [
+        "BE58",
+        "BE58_MSFS",
+        "BE58_BLACKSQUARE",
+        "BE58_BS_PRO",
+        "BE58_BLACKSQUARE_PRO"
+      ],
+      "name": "Beechcraft Baron 58",
+      "category": "piston_twin",
+      "rangeNm": 950,
+      "minRank": "CADET",
+      "supportsPassenger": true,
+      "supportsCargo": false,
+      "cargoCapacityKg": 0,
+      "passengerCapacity": 6,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CADET",
+        "SECOND_OFFICER",
+        "FIRST_OFFICER",
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "C208",
+      "aliases": [
+        "C208",
+        "C208_MSFS",
+        "C208_BLACKSQUARE"
+      ],
+      "name": "Cessna Grand Caravan",
+      "category": "cargo_turboprop",
+      "rangeNm": 900,
+      "minRank": "CADET",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 1600,
+      "passengerCapacity": 12,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CADET",
+        "SECOND_OFFICER",
+        "FIRST_OFFICER",
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "TBM9",
+      "aliases": [
+        "TBM9",
+        "TBM9_MSFS",
+        "TBM8",
+        "TBM8_BLACKSQUARE",
+        "TBM9_BLACKSQUARE"
+      ],
+      "name": "Daher TBM 930/940",
+      "category": "turboprop_single",
+      "rangeNm": 1500,
+      "minRank": "SECOND_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": false,
+      "cargoCapacityKg": 0,
+      "passengerCapacity": 6,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "ACARS manifest",
+        "training catalog"
+      ],
+      "allowedRanks": [
+        "SECOND_OFFICER",
+        "FIRST_OFFICER",
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B350",
+      "aliases": [
+        "B350",
+        "B350_MSFS",
+        "B350_BLACKSQUARE"
+      ],
+      "name": "Beechcraft King Air 350",
+      "category": "turboprop_twin",
+      "rangeNm": 1500,
+      "minRank": "SECOND_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 1300,
+      "passengerCapacity": 10,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "SECOND_OFFICER",
+        "FIRST_OFFICER",
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "DHC6",
+      "aliases": [
+        "DHC6",
+        "DHC6_AEROSOFT"
+      ],
+      "name": "De Havilland DHC-6 Twin Otter",
+      "category": "turboprop_twin",
+      "rangeNm": 700,
+      "minRank": "FIRST_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 1800,
+      "passengerCapacity": 19,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "FIRST_OFFICER",
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "ATR72",
+      "aliases": [
+        "ATR72",
+        "AT76",
+        "ATR72_MSFS"
+      ],
+      "name": "ATR 72",
+      "category": "regional_turboprop",
+      "rangeNm": 820,
+      "minRank": "FIRST_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 7500,
+      "passengerCapacity": 72,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "FIRST_OFFICER",
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "AT76",
+      "aliases": [
+        "AT76",
+        "ATR72",
+        "ATR72_MSFS"
+      ],
+      "name": "ATR 72-600",
+      "category": "regional_turboprop",
+      "rangeNm": 850,
+      "minRank": "FIRST_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 7800,
+      "passengerCapacity": 76,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "training catalog"
+      ],
+      "allowedRanks": [
+        "FIRST_OFFICER",
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "E170",
+      "aliases": [
+        "E170",
+        "E170_FLIGHTSIM"
+      ],
+      "name": "Embraer E170",
+      "category": "regional_jet",
+      "rangeNm": 2100,
+      "minRank": "FIRST_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 8000,
+      "passengerCapacity": 76,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "FIRST_OFFICER",
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "E175",
+      "aliases": [
+        "E175",
+        "E175_FLIGHTSIM"
+      ],
+      "name": "Embraer E175",
+      "category": "regional_jet",
+      "rangeNm": 2200,
+      "minRank": "FIRST_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 9000,
+      "passengerCapacity": 88,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "FIRST_OFFICER",
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "E190",
+      "aliases": [
+        "E190",
+        "E190_FLIGHTSIM"
+      ],
+      "name": "Embraer E190",
+      "category": "regional_jet",
+      "rangeNm": 2400,
+      "minRank": "SENIOR_FIRST_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 11000,
+      "passengerCapacity": 100,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "E195",
+      "aliases": [
+        "E195",
+        "E195_FLIGHTSIM"
+      ],
+      "name": "Embraer E195",
+      "category": "regional_jet",
+      "rangeNm": 2300,
+      "minRank": "SENIOR_FIRST_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 12000,
+      "passengerCapacity": 120,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "SU95",
+      "aliases": [
+        "SU95",
+        "SU95_HEADWIND"
+      ],
+      "name": "Sukhoi Superjet 95",
+      "category": "regional_jet",
+      "rangeNm": 1600,
+      "minRank": "SENIOR_FIRST_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 10000,
+      "passengerCapacity": 95,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "A319",
+      "aliases": [
+        "A319",
+        "A319_FENIX",
+        "A319_LATINVFR"
+      ],
+      "name": "Airbus A319",
+      "category": "narrow_body",
+      "rangeNm": 3700,
+      "minRank": "SENIOR_FIRST_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 14000,
+      "passengerCapacity": 140,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "A320",
+      "aliases": [
+        "A320",
+        "A320_FENIX",
+        "A320_LATINVFR"
+      ],
+      "name": "Airbus A320",
+      "category": "narrow_body",
+      "rangeNm": 3300,
+      "minRank": "CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 16000,
+      "passengerCapacity": 180,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "A20N",
+      "aliases": [
+        "A20N",
+        "A20N_FBW"
+      ],
+      "name": "Airbus A320neo",
+      "category": "long_range_narrow_body",
+      "rangeNm": 3500,
+      "minRank": "CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 16000,
+      "passengerCapacity": 186,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "A321",
+      "aliases": [
+        "A321",
+        "A321_FENIX"
+      ],
+      "name": "Airbus A321",
+      "category": "narrow_body",
+      "rangeNm": 3200,
+      "minRank": "CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 19000,
+      "passengerCapacity": 220,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "A21N",
+      "aliases": [
+        "A21N",
+        "A21N_LATINVFR"
+      ],
+      "name": "Airbus A321neo",
+      "category": "long_range_narrow_body",
+      "rangeNm": 4000,
+      "minRank": "CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 20000,
+      "passengerCapacity": 220,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "A339",
+      "aliases": [
+        "A339",
+        "A339_HEADWIND"
+      ],
+      "name": "Airbus A330-900neo",
+      "category": "wide_body",
+      "rangeNm": 7200,
+      "minRank": "SENIOR_CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 45000,
+      "passengerCapacity": 300,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "A359",
+      "aliases": [
+        "A359",
+        "A359_INIBUILDS"
+      ],
+      "name": "Airbus A350-900",
+      "category": "wide_body",
+      "rangeNm": 8100,
+      "minRank": "COMMANDER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 50000,
+      "passengerCapacity": 325,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B736",
+      "aliases": [
+        "B736",
+        "B736_PMDG"
+      ],
+      "name": "Boeing 737-600",
+      "category": "narrow_body",
+      "rangeNm": 3000,
+      "minRank": "SENIOR_FIRST_OFFICER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 13000,
+      "passengerCapacity": 130,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "SENIOR_FIRST_OFFICER",
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B737",
+      "aliases": [
+        "B737",
+        "B737_PMDG"
+      ],
+      "name": "Boeing 737-700",
+      "category": "narrow_body",
+      "rangeNm": 3300,
+      "minRank": "CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 15000,
+      "passengerCapacity": 149,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B738",
+      "aliases": [
+        "B738",
+        "B738_PMDG"
+      ],
+      "name": "Boeing 737-800",
+      "category": "narrow_body",
+      "rangeNm": 3000,
+      "minRank": "CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 18000,
+      "passengerCapacity": 189,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B739",
+      "aliases": [
+        "B739",
+        "B739_PMDG"
+      ],
+      "name": "Boeing 737-900",
+      "category": "narrow_body",
+      "rangeNm": 3200,
+      "minRank": "CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 19000,
+      "passengerCapacity": 215,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B38M",
+      "aliases": [
+        "B38M",
+        "B38M_IFLY"
+      ],
+      "name": "Boeing 737 MAX 8",
+      "category": "long_range_narrow_body",
+      "rangeNm": 3500,
+      "minRank": "CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 19000,
+      "passengerCapacity": 189,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B748",
+      "aliases": [
+        "B748",
+        "B748_SALTY"
+      ],
+      "name": "Boeing 747-8F",
+      "category": "freighter",
+      "rangeNm": 4300,
+      "minRank": "COMMANDER",
+      "supportsPassenger": false,
+      "supportsCargo": true,
+      "cargoCapacityKg": 137000,
+      "passengerCapacity": 0,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B772",
+      "aliases": [
+        "B772",
+        "B772_PMDG"
+      ],
+      "name": "Boeing 777-200ER",
+      "category": "wide_body",
+      "rangeNm": 7000,
+      "minRank": "COMMANDER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 65000,
+      "passengerCapacity": 314,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B77F",
+      "aliases": [
+        "B77F",
+        "B77F_PMDG"
+      ],
+      "name": "Boeing 777F",
+      "category": "freighter",
+      "rangeNm": 4900,
+      "minRank": "COMMANDER",
+      "supportsPassenger": false,
+      "supportsCargo": true,
+      "cargoCapacityKg": 102000,
+      "passengerCapacity": 0,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B77W",
+      "aliases": [
+        "B77W",
+        "B77W_PMDG"
+      ],
+      "name": "Boeing 777-300ER",
+      "category": "wide_body",
+      "rangeNm": 7300,
+      "minRank": "COMMANDER",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 70000,
+      "passengerCapacity": 396,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B789",
+      "aliases": [
+        "B789",
+        "B789_HORIZONS"
+      ],
+      "name": "Boeing 787-9",
+      "category": "wide_body",
+      "rangeNm": 7600,
+      "minRank": "SENIOR_CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 45000,
+      "passengerCapacity": 290,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "B78X",
+      "aliases": [
+        "B78X",
+        "B78X_MSFS"
+      ],
+      "name": "Boeing 787-10 Dreamliner",
+      "category": "wide_body",
+      "rangeNm": 6400,
+      "minRank": "SENIOR_CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 50000,
+      "passengerCapacity": 330,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "MD82",
+      "aliases": [
+        "MD82",
+        "MD82_MADDOG"
+      ],
+      "name": "McDonnell Douglas MD-82",
+      "category": "narrow_body",
+      "rangeNm": 2000,
+      "minRank": "CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 14000,
+      "passengerCapacity": 155,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "MD83",
+      "aliases": [
+        "MD83",
+        "MD83_MADDOG"
+      ],
+      "name": "McDonnell Douglas MD-83",
+      "category": "narrow_body",
+      "rangeNm": 2400,
+      "minRank": "CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 15000,
+      "passengerCapacity": 165,
+      "source": [
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    },
+    {
+      "code": "MD88",
+      "aliases": [
+        "MD88",
+        "MD88_MADDOG"
+      ],
+      "name": "McDonnell Douglas MD-88",
+      "category": "narrow_body",
+      "rangeNm": 2200,
+      "minRank": "CAPTAIN",
+      "supportsPassenger": true,
+      "supportsCargo": true,
+      "cargoCapacityKg": 14000,
+      "passengerCapacity": 149,
+      "source": [
+        "run-pw3-sql-015",
+        "supabase-008",
+        "Neon",
+        "training catalog",
+        "ACARS manifest"
+      ],
+      "allowedRanks": [
+        "CAPTAIN",
+        "SENIOR_CAPTAIN",
+        "TRAINING_CAPTAIN",
+        "COMMANDER",
+        "SENIOR_COMMANDER",
+        "CHIEF_PILOT"
+      ],
+      "active": true,
+      "includedInNetwork": true
+    }
+  ],
+  "ranks": [
+    {
+      "rankCode": "CADET",
+      "rankName": "Cadet",
+      "level": 1,
+      "allowedAircraft": [
+        "C172",
+        "BE58",
+        "C208"
+      ],
+      "maxRouteCategory": "escuela_local",
+      "canFlyCargo": false,
+      "canFlyInternational": false,
+      "canFlyLongHaul": false
+    },
+    {
+      "rankCode": "SECOND_OFFICER",
+      "rankName": "Second Officer",
+      "level": 2,
+      "allowedAircraft": [
+        "C172",
+        "BE58",
+        "C208",
+        "TBM9",
+        "B350"
+      ],
+      "maxRouteCategory": "regional",
+      "canFlyCargo": false,
+      "canFlyInternational": false,
+      "canFlyLongHaul": false
+    },
+    {
+      "rankCode": "FIRST_OFFICER",
+      "rankName": "First Officer",
+      "level": 3,
+      "allowedAircraft": [
+        "C172",
+        "BE58",
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175"
+      ],
+      "maxRouteCategory": "nacional",
+      "canFlyCargo": true,
+      "canFlyInternational": false,
+      "canFlyLongHaul": false
+    },
+    {
+      "rankCode": "SENIOR_FIRST_OFFICER",
+      "rankName": "Senior First Officer",
+      "level": 4,
+      "allowedAircraft": [
+        "C172",
+        "BE58",
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "B736"
+      ],
+      "maxRouteCategory": "nacional",
+      "canFlyCargo": true,
+      "canFlyInternational": false,
+      "canFlyLongHaul": false
+    },
+    {
+      "rankCode": "CAPTAIN",
+      "rankName": "Captain",
+      "level": 5,
+      "allowedAircraft": [
+        "C172",
+        "BE58",
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "maxRouteCategory": "internacional_regional",
+      "canFlyCargo": true,
+      "canFlyInternational": true,
+      "canFlyLongHaul": false
+    },
+    {
+      "rankCode": "SENIOR_CAPTAIN",
+      "rankName": "Senior Captain",
+      "level": 6,
+      "allowedAircraft": [
+        "C172",
+        "BE58",
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88",
+        "A339",
+        "B789",
+        "B78X"
+      ],
+      "maxRouteCategory": "largo_radio",
+      "canFlyCargo": true,
+      "canFlyInternational": true,
+      "canFlyLongHaul": true
+    },
+    {
+      "rankCode": "TRAINING_CAPTAIN",
+      "rankName": "Training Captain",
+      "level": 7,
+      "allowedAircraft": [
+        "C172",
+        "BE58",
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88",
+        "A339",
+        "B789",
+        "B78X"
+      ],
+      "maxRouteCategory": "largo_radio",
+      "canFlyCargo": true,
+      "canFlyInternational": true,
+      "canFlyLongHaul": true
+    },
+    {
+      "rankCode": "COMMANDER",
+      "rankName": "Commander",
+      "level": 8,
+      "allowedAircraft": [
+        "C172",
+        "BE58",
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "A339",
+        "A359",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "B748",
+        "B772",
+        "B77F",
+        "B77W",
+        "B789",
+        "B78X",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "maxRouteCategory": "largo_radio",
+      "canFlyCargo": true,
+      "canFlyInternational": true,
+      "canFlyLongHaul": true
+    },
+    {
+      "rankCode": "SENIOR_COMMANDER",
+      "rankName": "Senior Commander",
+      "level": 9,
+      "allowedAircraft": [
+        "C172",
+        "BE58",
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "A339",
+        "A359",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "B748",
+        "B772",
+        "B77F",
+        "B77W",
+        "B789",
+        "B78X",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "maxRouteCategory": "largo_radio",
+      "canFlyCargo": true,
+      "canFlyInternational": true,
+      "canFlyLongHaul": true
+    },
+    {
+      "rankCode": "CHIEF_PILOT",
+      "rankName": "Chief Pilot",
+      "level": 10,
+      "allowedAircraft": [
+        "C172",
+        "BE58",
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "A339",
+        "A359",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "B748",
+        "B772",
+        "B77F",
+        "B77W",
+        "B789",
+        "B78X",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "maxRouteCategory": "largo_radio",
+      "canFlyCargo": true,
+      "canFlyInternational": true,
+      "canFlyLongHaul": true
+    }
+  ],
+  "passengerLinks": [
+    {
+      "origin": "SCPF",
+      "destination": "SCTE",
+      "routeCategory": "escuela_local",
+      "flightType": "training",
+      "minRank": "CADET",
+      "baseAircraft": [
+        "C172",
+        "BE58",
+        "C208"
+      ],
+      "recommendedAircraft": [
+        "C172",
+        "BE58"
+      ]
+    },
+    {
+      "origin": "SCPF",
+      "destination": "SCAC",
+      "routeCategory": "escuela_local",
+      "flightType": "training",
+      "minRank": "CADET",
+      "baseAircraft": [
+        "C172",
+        "BE58",
+        "C208"
+      ],
+      "recommendedAircraft": [
+        "C172",
+        "BE58"
+      ]
+    },
+    {
+      "origin": "SCPF",
+      "destination": "SCJO",
+      "routeCategory": "escuela_local",
+      "flightType": "training",
+      "minRank": "CADET",
+      "baseAircraft": [
+        "C172",
+        "BE58",
+        "C208"
+      ],
+      "recommendedAircraft": [
+        "C172",
+        "BE58"
+      ]
+    },
+    {
+      "origin": "SCPF",
+      "destination": "SCST",
+      "routeCategory": "escuela_local",
+      "flightType": "training",
+      "minRank": "CADET",
+      "baseAircraft": [
+        "C172",
+        "BE58",
+        "C208"
+      ],
+      "recommendedAircraft": [
+        "C172",
+        "BE58"
+      ]
+    },
+    {
+      "origin": "SCPF",
+      "destination": "SCVD",
+      "routeCategory": "escuela_local",
+      "flightType": "training",
+      "minRank": "CADET",
+      "baseAircraft": [
+        "C172",
+        "BE58",
+        "C208"
+      ],
+      "recommendedAircraft": [
+        "C172",
+        "BE58"
+      ]
+    },
+    {
+      "origin": "SCTE",
+      "destination": "SCVD",
+      "routeCategory": "regional",
+      "flightType": "itinerary",
+      "minRank": "SECOND_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "SU95"
+      ],
+      "recommendedAircraft": [
+        "C208",
+        "B350",
+        "AT76"
+      ]
+    },
+    {
+      "origin": "SCTE",
+      "destination": "SCJO",
+      "routeCategory": "regional",
+      "flightType": "itinerary",
+      "minRank": "SECOND_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "SU95"
+      ],
+      "recommendedAircraft": [
+        "C208",
+        "B350",
+        "AT76"
+      ]
+    },
+    {
+      "origin": "SCTE",
+      "destination": "SCST",
+      "routeCategory": "regional",
+      "flightType": "itinerary",
+      "minRank": "SECOND_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "SU95"
+      ],
+      "recommendedAircraft": [
+        "C208",
+        "B350",
+        "AT76"
+      ]
+    },
+    {
+      "origin": "SCTE",
+      "destination": "SCAC",
+      "routeCategory": "regional",
+      "flightType": "itinerary",
+      "minRank": "SECOND_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "SU95"
+      ],
+      "recommendedAircraft": [
+        "C208",
+        "B350",
+        "AT76"
+      ]
+    },
+    {
+      "origin": "SCTE",
+      "destination": "SCIE",
+      "routeCategory": "interregional",
+      "flightType": "itinerary",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "B736",
+        "B737"
+      ],
+      "recommendedAircraft": [
+        "AT76",
+        "E175",
+        "B350"
+      ]
+    },
+    {
+      "origin": "SCTE",
+      "destination": "SCBA",
+      "routeCategory": "patagonia",
+      "flightType": "itinerary",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "B736",
+        "B737",
+        "B738"
+      ],
+      "recommendedAircraft": [
+        "AT76",
+        "A319",
+        "B737"
+      ]
+    },
+    {
+      "origin": "SCTE",
+      "destination": "SCCI",
+      "routeCategory": "patagonia",
+      "flightType": "itinerary",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "B736",
+        "B737",
+        "B738"
+      ],
+      "recommendedAircraft": [
+        "AT76",
+        "A319",
+        "B737"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCTE",
+      "routeCategory": "nacional",
+      "flightType": "itinerary",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCIE",
+      "routeCategory": "nacional",
+      "flightType": "itinerary",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCFA",
+      "routeCategory": "nacional",
+      "flightType": "itinerary",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCDA",
+      "routeCategory": "nacional",
+      "flightType": "itinerary",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCAR",
+      "routeCategory": "nacional",
+      "flightType": "itinerary",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCBA",
+      "routeCategory": "patagonia",
+      "flightType": "itinerary",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "B736",
+        "B737",
+        "B738"
+      ],
+      "recommendedAircraft": [
+        "AT76",
+        "A319",
+        "B737"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCCI",
+      "routeCategory": "nacional",
+      "flightType": "itinerary",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCIE",
+      "destination": "SCFA",
+      "routeCategory": "interregional",
+      "flightType": "itinerary",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "B736",
+        "B737"
+      ],
+      "recommendedAircraft": [
+        "AT76",
+        "E175",
+        "B350"
+      ]
+    },
+    {
+      "origin": "SCFA",
+      "destination": "SCDA",
+      "routeCategory": "regional",
+      "flightType": "itinerary",
+      "minRank": "SECOND_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "SU95"
+      ],
+      "recommendedAircraft": [
+        "C208",
+        "B350",
+        "AT76"
+      ]
+    },
+    {
+      "origin": "SCFA",
+      "destination": "SCAR",
+      "routeCategory": "regional",
+      "flightType": "itinerary",
+      "minRank": "SECOND_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "SU95"
+      ],
+      "recommendedAircraft": [
+        "C208",
+        "B350",
+        "AT76"
+      ]
+    },
+    {
+      "origin": "SCDA",
+      "destination": "SCAR",
+      "routeCategory": "regional",
+      "flightType": "itinerary",
+      "minRank": "SECOND_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "TBM9",
+        "B350",
+        "DHC6",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "SU95"
+      ],
+      "recommendedAircraft": [
+        "C208",
+        "B350",
+        "AT76"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SAEZ",
+      "routeCategory": "internacional_regional",
+      "flightType": "itinerary",
+      "minRank": "CAPTAIN",
+      "baseAircraft": [
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88",
+        "A339",
+        "B789",
+        "B78X"
+      ],
+      "recommendedAircraft": [
+        "A20N",
+        "A321",
+        "B38M"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SUMU",
+      "routeCategory": "internacional_regional",
+      "flightType": "itinerary",
+      "minRank": "CAPTAIN",
+      "baseAircraft": [
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88",
+        "A339",
+        "B789",
+        "B78X"
+      ],
+      "recommendedAircraft": [
+        "A20N",
+        "A321",
+        "B38M"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SPIM",
+      "routeCategory": "internacional_regional",
+      "flightType": "itinerary",
+      "minRank": "CAPTAIN",
+      "baseAircraft": [
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88",
+        "A339",
+        "B789",
+        "B78X"
+      ],
+      "recommendedAircraft": [
+        "A20N",
+        "A321",
+        "B38M"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SBGR",
+      "routeCategory": "internacional_regional",
+      "flightType": "itinerary",
+      "minRank": "CAPTAIN",
+      "baseAircraft": [
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88",
+        "A339",
+        "B789",
+        "B78X"
+      ],
+      "recommendedAircraft": [
+        "A20N",
+        "A321",
+        "B38M"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCIP",
+      "routeCategory": "largo_radio",
+      "flightType": "itinerary",
+      "minRank": "COMMANDER",
+      "baseAircraft": [
+        "A339",
+        "A359",
+        "B772",
+        "B77W",
+        "B789",
+        "B78X"
+      ],
+      "recommendedAircraft": [
+        "B789",
+        "B78X",
+        "A359"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "KMIA",
+      "routeCategory": "largo_radio",
+      "flightType": "itinerary",
+      "minRank": "COMMANDER",
+      "baseAircraft": [
+        "A339",
+        "A359",
+        "B772",
+        "B77W",
+        "B789",
+        "B78X"
+      ],
+      "recommendedAircraft": [
+        "B789",
+        "B78X",
+        "A359"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "KJFK",
+      "routeCategory": "largo_radio",
+      "flightType": "itinerary",
+      "minRank": "COMMANDER",
+      "baseAircraft": [
+        "A339",
+        "A359",
+        "B772",
+        "B77W",
+        "B789",
+        "B78X"
+      ],
+      "recommendedAircraft": [
+        "B789",
+        "B78X",
+        "A359"
+      ]
+    }
+  ],
+  "cargoLinks": [
+    {
+      "origin": "SCTE",
+      "destination": "SCVD",
+      "routeCategory": "carga_regional",
+      "flightType": "cargo",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "DHC6",
+        "B350",
+        "ATR72",
+        "AT76"
+      ],
+      "recommendedAircraft": [
+        "C208",
+        "B350"
+      ]
+    },
+    {
+      "origin": "SCTE",
+      "destination": "SCST",
+      "routeCategory": "carga_regional",
+      "flightType": "cargo",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "DHC6",
+        "B350",
+        "ATR72",
+        "AT76"
+      ],
+      "recommendedAircraft": [
+        "C208",
+        "B350"
+      ]
+    },
+    {
+      "origin": "SCTE",
+      "destination": "SCBA",
+      "routeCategory": "carga_regional",
+      "flightType": "cargo",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "DHC6",
+        "B350",
+        "ATR72",
+        "AT76"
+      ],
+      "recommendedAircraft": [
+        "C208",
+        "B350"
+      ]
+    },
+    {
+      "origin": "SCTE",
+      "destination": "SCCI",
+      "routeCategory": "carga_interregional",
+      "flightType": "cargo",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "DHC6",
+        "B350",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "A319",
+        "A320",
+        "A20N",
+        "B736",
+        "B737",
+        "B738"
+      ],
+      "recommendedAircraft": [
+        "AT76",
+        "B350",
+        "A319"
+      ]
+    },
+    {
+      "origin": "SCTE",
+      "destination": "SCIE",
+      "routeCategory": "carga_interregional",
+      "flightType": "cargo",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "DHC6",
+        "B350",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "A319",
+        "A320",
+        "A20N",
+        "B736",
+        "B737",
+        "B738"
+      ],
+      "recommendedAircraft": [
+        "AT76",
+        "B350",
+        "A319"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCTE",
+      "routeCategory": "carga_nacional",
+      "flightType": "cargo",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "DHC6",
+        "B350",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCIE",
+      "routeCategory": "carga_nacional",
+      "flightType": "cargo",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "DHC6",
+        "B350",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCFA",
+      "routeCategory": "carga_nacional",
+      "flightType": "cargo",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "DHC6",
+        "B350",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCDA",
+      "routeCategory": "carga_nacional",
+      "flightType": "cargo",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "DHC6",
+        "B350",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCAR",
+      "routeCategory": "carga_nacional",
+      "flightType": "cargo",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "DHC6",
+        "B350",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SCCI",
+      "routeCategory": "carga_nacional",
+      "flightType": "cargo",
+      "minRank": "FIRST_OFFICER",
+      "baseAircraft": [
+        "C208",
+        "DHC6",
+        "B350",
+        "ATR72",
+        "AT76",
+        "E170",
+        "E175",
+        "E190",
+        "E195",
+        "SU95",
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88"
+      ],
+      "recommendedAircraft": [
+        "A320",
+        "A20N",
+        "B738"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SAEZ",
+      "routeCategory": "carga_internacional",
+      "flightType": "cargo",
+      "minRank": "CAPTAIN",
+      "baseAircraft": [
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88",
+        "A339",
+        "A359",
+        "B772",
+        "B77W",
+        "B789",
+        "B78X",
+        "B77F",
+        "B748"
+      ],
+      "recommendedAircraft": [
+        "B77F",
+        "B748",
+        "B789"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "SBGR",
+      "routeCategory": "carga_internacional",
+      "flightType": "cargo",
+      "minRank": "CAPTAIN",
+      "baseAircraft": [
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88",
+        "A339",
+        "A359",
+        "B772",
+        "B77W",
+        "B789",
+        "B78X",
+        "B77F",
+        "B748"
+      ],
+      "recommendedAircraft": [
+        "B77F",
+        "B748",
+        "B789"
+      ]
+    },
+    {
+      "origin": "SCEL",
+      "destination": "KMIA",
+      "routeCategory": "carga_internacional",
+      "flightType": "cargo",
+      "minRank": "COMMANDER",
+      "baseAircraft": [
+        "A319",
+        "A320",
+        "A20N",
+        "A321",
+        "A21N",
+        "B736",
+        "B737",
+        "B738",
+        "B739",
+        "B38M",
+        "MD82",
+        "MD83",
+        "MD88",
+        "A339",
+        "A359",
+        "B772",
+        "B77W",
+        "B789",
+        "B78X",
+        "B77F",
+        "B748"
+      ],
+      "recommendedAircraft": [
+        "B77F",
+        "B748",
+        "B789"
+      ]
+    }
+  ]
+}

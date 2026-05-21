@@ -1,0 +1,655 @@
+{
+  "version": "PW3_ECONOMY_V1",
+  "currency": "USD",
+  "virtualOnly": true,
+  "baseAirlineCashUsd": 2500000,
+  "routeCategoryRates": {
+    "escuela_local": {
+      "passengerRevenuePerPassengerNm": 0.22,
+      "cargoRevenuePerKgNm": 0,
+      "loadFactor": 0.42,
+      "cargoLoadFactor": 0,
+      "airportFeeUsd": 110,
+      "crewCostUsd": 75,
+      "cateringUsdPerPassenger": 0,
+      "cargoHandlingUsdPerKg": 0,
+      "pilotAccrualRate": 0.04,
+      "pilotAccrualMinimumUsd": 15,
+      "costFactor": 0.85,
+      "ticketBaseFareUsd": 55,
+      "ticketYieldPerNmUsd": 0.34,
+      "cargoBaseFeeUsd": 0,
+      "cargoRatePerKgNmUsd": 0,
+      "baggageIncludedKgPerPassenger": 20,
+      "averageBaggageKgPerPassenger": 22,
+      "excessBaggageProbability": 0.24,
+      "excessBaggageFeePerKgUsd": 2.1,
+      "onboardSalesPerPassengerUsd": 4.2,
+      "serviceRevenuePerPassengerUsd": 2.7,
+      "specialCargoFeeUsd": 0
+    },
+    "regional": {
+      "passengerRevenuePerPassengerNm": 1.4,
+      "cargoRevenuePerKgNm": 0.0018,
+      "loadFactor": 0.82,
+      "cargoLoadFactor": 0.45,
+      "airportFeeUsd": 170,
+      "crewCostUsd": 140,
+      "cateringUsdPerPassenger": 2.2,
+      "cargoHandlingUsdPerKg": 0.12,
+      "pilotAccrualRate": 0.06,
+      "pilotAccrualMinimumUsd": 30,
+      "costFactor": 0.78,
+      "ticketBaseFareUsd": 55,
+      "ticketYieldPerNmUsd": 0.34,
+      "cargoBaseFeeUsd": 0,
+      "cargoRatePerKgNmUsd": 0.0018,
+      "baggageIncludedKgPerPassenger": 20,
+      "averageBaggageKgPerPassenger": 22,
+      "excessBaggageProbability": 0.24,
+      "excessBaggageFeePerKgUsd": 2.1,
+      "onboardSalesPerPassengerUsd": 4.2,
+      "serviceRevenuePerPassengerUsd": 2.7,
+      "specialCargoFeeUsd": 0
+    },
+    "interregional": {
+      "passengerRevenuePerPassengerNm": 0.68,
+      "cargoRevenuePerKgNm": 0.00155,
+      "loadFactor": 0.8,
+      "cargoLoadFactor": 0.55,
+      "airportFeeUsd": 420,
+      "crewCostUsd": 320,
+      "cateringUsdPerPassenger": 4,
+      "cargoHandlingUsdPerKg": 0.14,
+      "pilotAccrualRate": 0.065,
+      "pilotAccrualMinimumUsd": 70,
+      "costFactor": 0.86,
+      "ticketBaseFareUsd": 55,
+      "ticketYieldPerNmUsd": 0.34,
+      "cargoBaseFeeUsd": 0,
+      "cargoRatePerKgNmUsd": 0.00155,
+      "baggageIncludedKgPerPassenger": 20,
+      "averageBaggageKgPerPassenger": 22,
+      "excessBaggageProbability": 0.24,
+      "excessBaggageFeePerKgUsd": 2.1,
+      "onboardSalesPerPassengerUsd": 4.2,
+      "serviceRevenuePerPassengerUsd": 2.7,
+      "specialCargoFeeUsd": 0
+    },
+    "patagonia": {
+      "passengerRevenuePerPassengerNm": 0.74,
+      "cargoRevenuePerKgNm": 0.0018,
+      "loadFactor": 0.78,
+      "cargoLoadFactor": 0.6,
+      "airportFeeUsd": 360,
+      "crewCostUsd": 310,
+      "cateringUsdPerPassenger": 3.8,
+      "cargoHandlingUsdPerKg": 0.16,
+      "pilotAccrualRate": 0.066,
+      "pilotAccrualMinimumUsd": 75,
+      "costFactor": 0.86,
+      "ticketBaseFareUsd": 55,
+      "ticketYieldPerNmUsd": 0.34,
+      "cargoBaseFeeUsd": 0,
+      "cargoRatePerKgNmUsd": 0.0018,
+      "baggageIncludedKgPerPassenger": 20,
+      "averageBaggageKgPerPassenger": 22,
+      "excessBaggageProbability": 0.24,
+      "excessBaggageFeePerKgUsd": 2.1,
+      "onboardSalesPerPassengerUsd": 4.2,
+      "serviceRevenuePerPassengerUsd": 2.7,
+      "specialCargoFeeUsd": 0
+    },
+    "nacional": {
+      "passengerRevenuePerPassengerNm": 0.52,
+      "cargoRevenuePerKgNm": 0.00135,
+      "loadFactor": 0.84,
+      "cargoLoadFactor": 0.62,
+      "airportFeeUsd": 780,
+      "crewCostUsd": 650,
+      "cateringUsdPerPassenger": 5.5,
+      "cargoHandlingUsdPerKg": 0.18,
+      "pilotAccrualRate": 0.068,
+      "pilotAccrualMinimumUsd": 120,
+      "costFactor": 0.9,
+      "ticketBaseFareUsd": 95,
+      "ticketYieldPerNmUsd": 0.46,
+      "cargoBaseFeeUsd": 0,
+      "cargoRatePerKgNmUsd": 0.00135,
+      "baggageIncludedKgPerPassenger": 20,
+      "averageBaggageKgPerPassenger": 22,
+      "excessBaggageProbability": 0.24,
+      "excessBaggageFeePerKgUsd": 2.1,
+      "onboardSalesPerPassengerUsd": 4.2,
+      "serviceRevenuePerPassengerUsd": 2.7,
+      "specialCargoFeeUsd": 0
+    },
+    "internacional_regional": {
+      "passengerRevenuePerPassengerNm": 0.48,
+      "cargoRevenuePerKgNm": 0.0012,
+      "loadFactor": 0.86,
+      "cargoLoadFactor": 0.66,
+      "airportFeeUsd": 1250,
+      "crewCostUsd": 950,
+      "cateringUsdPerPassenger": 8,
+      "cargoHandlingUsdPerKg": 0.22,
+      "pilotAccrualRate": 0.07,
+      "pilotAccrualMinimumUsd": 190,
+      "costFactor": 0.92,
+      "ticketBaseFareUsd": 130,
+      "ticketYieldPerNmUsd": 0.58,
+      "cargoBaseFeeUsd": 0,
+      "cargoRatePerKgNmUsd": 0.0012,
+      "baggageIncludedKgPerPassenger": 20,
+      "averageBaggageKgPerPassenger": 22,
+      "excessBaggageProbability": 0.24,
+      "excessBaggageFeePerKgUsd": 2.1,
+      "onboardSalesPerPassengerUsd": 4.2,
+      "serviceRevenuePerPassengerUsd": 2.7,
+      "specialCargoFeeUsd": 0
+    },
+    "largo_radio": {
+      "passengerRevenuePerPassengerNm": 0.38,
+      "cargoRevenuePerKgNm": 0.00092,
+      "loadFactor": 0.88,
+      "cargoLoadFactor": 0.7,
+      "airportFeeUsd": 3000,
+      "crewCostUsd": 2600,
+      "cateringUsdPerPassenger": 14,
+      "cargoHandlingUsdPerKg": 0.28,
+      "pilotAccrualRate": 0.072,
+      "pilotAccrualMinimumUsd": 450,
+      "costFactor": 0.95,
+      "ticketBaseFareUsd": 210,
+      "ticketYieldPerNmUsd": 0.72,
+      "cargoBaseFeeUsd": 0,
+      "cargoRatePerKgNmUsd": 0.00092,
+      "baggageIncludedKgPerPassenger": 20,
+      "averageBaggageKgPerPassenger": 22,
+      "excessBaggageProbability": 0.24,
+      "excessBaggageFeePerKgUsd": 2.1,
+      "onboardSalesPerPassengerUsd": 4.2,
+      "serviceRevenuePerPassengerUsd": 2.7,
+      "specialCargoFeeUsd": 0
+    },
+    "carga_regional": {
+      "passengerRevenuePerPassengerNm": 0,
+      "cargoRevenuePerKgNm": 0.018,
+      "loadFactor": 0,
+      "cargoLoadFactor": 0.68,
+      "airportFeeUsd": 260,
+      "crewCostUsd": 190,
+      "cateringUsdPerPassenger": 0,
+      "cargoHandlingUsdPerKg": 0.11,
+      "pilotAccrualRate": 0.06,
+      "pilotAccrualMinimumUsd": 35,
+      "costFactor": 0.84,
+      "ticketBaseFareUsd": 0,
+      "ticketYieldPerNmUsd": 0,
+      "cargoBaseFeeUsd": 180,
+      "cargoRatePerKgNmUsd": 0.019,
+      "baggageIncludedKgPerPassenger": 0,
+      "averageBaggageKgPerPassenger": 0,
+      "excessBaggageProbability": 0,
+      "excessBaggageFeePerKgUsd": 0,
+      "onboardSalesPerPassengerUsd": 0,
+      "serviceRevenuePerPassengerUsd": 0,
+      "specialCargoFeeUsd": 120
+    },
+    "carga_interregional": {
+      "passengerRevenuePerPassengerNm": 0,
+      "cargoRevenuePerKgNm": 0.011,
+      "loadFactor": 0,
+      "cargoLoadFactor": 0.72,
+      "airportFeeUsd": 520,
+      "crewCostUsd": 420,
+      "cateringUsdPerPassenger": 0,
+      "cargoHandlingUsdPerKg": 0.13,
+      "pilotAccrualRate": 0.065,
+      "pilotAccrualMinimumUsd": 85,
+      "costFactor": 0.88,
+      "ticketBaseFareUsd": 0,
+      "ticketYieldPerNmUsd": 0,
+      "cargoBaseFeeUsd": 180,
+      "cargoRatePerKgNmUsd": 0.013,
+      "baggageIncludedKgPerPassenger": 0,
+      "averageBaggageKgPerPassenger": 0,
+      "excessBaggageProbability": 0,
+      "excessBaggageFeePerKgUsd": 0,
+      "onboardSalesPerPassengerUsd": 0,
+      "serviceRevenuePerPassengerUsd": 0,
+      "specialCargoFeeUsd": 120
+    },
+    "carga_nacional": {
+      "passengerRevenuePerPassengerNm": 0,
+      "cargoRevenuePerKgNm": 0.018,
+      "loadFactor": 0,
+      "cargoLoadFactor": 0.75,
+      "airportFeeUsd": 900,
+      "crewCostUsd": 760,
+      "cateringUsdPerPassenger": 0,
+      "cargoHandlingUsdPerKg": 0.16,
+      "pilotAccrualRate": 0.068,
+      "pilotAccrualMinimumUsd": 150,
+      "costFactor": 0.92,
+      "ticketBaseFareUsd": 0,
+      "ticketYieldPerNmUsd": 0,
+      "cargoBaseFeeUsd": 1200,
+      "cargoRatePerKgNmUsd": 0.018,
+      "baggageIncludedKgPerPassenger": 0,
+      "averageBaggageKgPerPassenger": 0,
+      "excessBaggageProbability": 0,
+      "excessBaggageFeePerKgUsd": 0,
+      "onboardSalesPerPassengerUsd": 0,
+      "serviceRevenuePerPassengerUsd": 0,
+      "specialCargoFeeUsd": 120
+    },
+    "carga_internacional": {
+      "passengerRevenuePerPassengerNm": 0,
+      "cargoRevenuePerKgNm": 0.0036,
+      "loadFactor": 0,
+      "cargoLoadFactor": 0.78,
+      "airportFeeUsd": 2800,
+      "crewCostUsd": 2400,
+      "cateringUsdPerPassenger": 0,
+      "cargoHandlingUsdPerKg": 0.22,
+      "pilotAccrualRate": 0.07,
+      "pilotAccrualMinimumUsd": 420,
+      "costFactor": 0.95,
+      "ticketBaseFareUsd": 0,
+      "ticketYieldPerNmUsd": 0,
+      "cargoBaseFeeUsd": 520,
+      "cargoRatePerKgNmUsd": 0.0052,
+      "baggageIncludedKgPerPassenger": 0,
+      "averageBaggageKgPerPassenger": 0,
+      "excessBaggageProbability": 0,
+      "excessBaggageFeePerKgUsd": 0,
+      "onboardSalesPerPassengerUsd": 0,
+      "serviceRevenuePerPassengerUsd": 0,
+      "specialCargoFeeUsd": 420
+    }
+  },
+  "aircraftCategoryProfiles": {
+    "single_engine": {
+      "fuelCostPerNm": 1.5,
+      "maintenanceCostPerNm": 0.5,
+      "maintenanceReservePerNm": 0.2,
+      "fixedTurnCostUsd": 45,
+      "crewCostMultiplier": 0.5
+    },
+    "piston_twin": {
+      "fuelCostPerNm": 2.4,
+      "maintenanceCostPerNm": 0.9,
+      "maintenanceReservePerNm": 0.3,
+      "fixedTurnCostUsd": 75,
+      "crewCostMultiplier": 0.65
+    },
+    "turboprop_single": {
+      "fuelCostPerNm": 3.2,
+      "maintenanceCostPerNm": 1.1,
+      "maintenanceReservePerNm": 0.4,
+      "fixedTurnCostUsd": 120,
+      "crewCostMultiplier": 0.7
+    },
+    "turboprop_twin": {
+      "fuelCostPerNm": 4.8,
+      "maintenanceCostPerNm": 1.4,
+      "maintenanceReservePerNm": 0.55,
+      "fixedTurnCostUsd": 180,
+      "crewCostMultiplier": 0.85
+    },
+    "regional_turboprop": {
+      "fuelCostPerNm": 6.8,
+      "maintenanceCostPerNm": 2,
+      "maintenanceReservePerNm": 0.8,
+      "fixedTurnCostUsd": 320,
+      "crewCostMultiplier": 0.9
+    },
+    "light_jet": {
+      "fuelCostPerNm": 8.6,
+      "maintenanceCostPerNm": 3,
+      "maintenanceReservePerNm": 1.1,
+      "fixedTurnCostUsd": 420,
+      "crewCostMultiplier": 1
+    },
+    "regional_jet": {
+      "fuelCostPerNm": 11,
+      "maintenanceCostPerNm": 3.8,
+      "maintenanceReservePerNm": 1.4,
+      "fixedTurnCostUsd": 650,
+      "crewCostMultiplier": 1.1
+    },
+    "narrow_body": {
+      "fuelCostPerNm": 15,
+      "maintenanceCostPerNm": 5.2,
+      "maintenanceReservePerNm": 2,
+      "fixedTurnCostUsd": 900,
+      "crewCostMultiplier": 1.25
+    },
+    "long_range_narrow_body": {
+      "fuelCostPerNm": 15.5,
+      "maintenanceCostPerNm": 5.5,
+      "maintenanceReservePerNm": 2.2,
+      "fixedTurnCostUsd": 980,
+      "crewCostMultiplier": 1.3
+    },
+    "wide_body": {
+      "fuelCostPerNm": 34,
+      "maintenanceCostPerNm": 12,
+      "maintenanceReservePerNm": 4.8,
+      "fixedTurnCostUsd": 3000,
+      "crewCostMultiplier": 2.1
+    },
+    "freighter": {
+      "fuelCostPerNm": 38,
+      "maintenanceCostPerNm": 13.5,
+      "maintenanceReservePerNm": 5.4,
+      "fixedTurnCostUsd": 3400,
+      "crewCostMultiplier": 1.9
+    },
+    "cargo_turboprop": {
+      "fuelCostPerNm": 3.4,
+      "maintenanceCostPerNm": 0.8,
+      "maintenanceReservePerNm": 0.35,
+      "fixedTurnCostUsd": 110,
+      "crewCostMultiplier": 0.7
+    }
+  },
+  "airportCategoryFeesUsd": {
+    "local": 90,
+    "regional": 220,
+    "interregional": 360,
+    "national": 620,
+    "international": 1400,
+    "remote": 180,
+    "cargo": 520,
+    "mixed": 680,
+    "patagonia_hub": 420
+  },
+  "initialPilotWalletGrantUsd": 25000,
+  "progressionExpenses": [
+    {
+      "code": "THEORY_BASIC",
+      "type": "training_fee",
+      "label": "Teoria basica",
+      "amountUsd": 1200,
+      "appliesTo": "rank_progression",
+      "metadata": {
+        "appliesToRank": "CADET",
+        "requiredForProgression": true,
+        "repeatable": false,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "THEORY_ADVANCED",
+      "type": "training_fee",
+      "label": "Teoria avanzada",
+      "amountUsd": 2500,
+      "appliesTo": "rank_progression",
+      "metadata": {
+        "appliesToRank": "FIRST_OFFICER",
+        "requiredForProgression": true,
+        "repeatable": false,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "THEORY_RANK_EXAM",
+      "type": "training_fee",
+      "label": "Examen teorico por rango",
+      "amountUsd": 3500,
+      "appliesTo": "rank_progression",
+      "metadata": {
+        "appliesToRank": "CAPTAIN",
+        "requiredForProgression": true,
+        "repeatable": true,
+        "cooldownDays": 14
+      }
+    },
+    {
+      "code": "FAILED_RETRY",
+      "type": "checkride_fee",
+      "label": "Reintento examen o checkride",
+      "amountUsd": 850,
+      "appliesTo": "retry",
+      "metadata": {
+        "requiredForProgression": false,
+        "repeatable": true,
+        "cooldownDays": 3
+      }
+    },
+    {
+      "code": "CHECKRIDE_INITIAL",
+      "type": "checkride_fee",
+      "label": "Checkride inicial",
+      "amountUsd": 4500,
+      "appliesTo": "checkride",
+      "metadata": {
+        "appliesToAircraftCategory": "single_engine",
+        "requiredForProgression": true,
+        "repeatable": true,
+        "cooldownDays": 7
+      }
+    },
+    {
+      "code": "CHECKRIDE_LIGHT",
+      "type": "checkride_fee",
+      "label": "Checkride aeronave ligera",
+      "amountUsd": 5500,
+      "appliesTo": "checkride",
+      "metadata": {
+        "appliesToAircraftCategory": "piston_twin",
+        "requiredForProgression": true,
+        "repeatable": true,
+        "cooldownDays": 7
+      }
+    },
+    {
+      "code": "CHECKRIDE_TURBOPROP",
+      "type": "checkride_fee",
+      "label": "Checkride turbohelice",
+      "amountUsd": 8500,
+      "appliesTo": "checkride",
+      "metadata": {
+        "appliesToAircraftCategory": "regional_turboprop",
+        "requiredForProgression": true,
+        "repeatable": true,
+        "cooldownDays": 10
+      }
+    },
+    {
+      "code": "CHECKRIDE_REGIONAL_JET",
+      "type": "checkride_fee",
+      "label": "Checkride jet regional",
+      "amountUsd": 14000,
+      "appliesTo": "checkride",
+      "metadata": {
+        "appliesToAircraftCategory": "regional_jet",
+        "requiredForProgression": true,
+        "repeatable": true,
+        "cooldownDays": 12
+      }
+    },
+    {
+      "code": "CHECKRIDE_NARROW_BODY",
+      "type": "checkride_fee",
+      "label": "Checkride narrow body",
+      "amountUsd": 22000,
+      "appliesTo": "checkride",
+      "metadata": {
+        "appliesToAircraftCategory": "narrow_body",
+        "requiredForProgression": true,
+        "repeatable": true,
+        "cooldownDays": 14
+      }
+    },
+    {
+      "code": "CHECKRIDE_WIDE_BODY",
+      "type": "checkride_fee",
+      "label": "Checkride wide body",
+      "amountUsd": 35000,
+      "appliesTo": "checkride",
+      "metadata": {
+        "appliesToAircraftCategory": "wide_body",
+        "requiredForProgression": true,
+        "repeatable": true,
+        "cooldownDays": 21
+      }
+    },
+    {
+      "code": "TYPE_RATING",
+      "type": "rank_progression_fee",
+      "label": "Habilitacion tipo",
+      "amountUsd": 18000,
+      "appliesTo": "type_rating",
+      "metadata": {
+        "appliesToAircraftCode": "GENERIC",
+        "requiredForProgression": true,
+        "repeatable": false,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "RECURRENT_RENEWAL",
+      "type": "certification_fee",
+      "label": "Recurrente renovacion",
+      "amountUsd": 6500,
+      "appliesTo": "recurrent",
+      "metadata": {
+        "requiredForProgression": true,
+        "repeatable": true,
+        "cooldownDays": 180
+      }
+    },
+    {
+      "code": "SPECIAL_CARGO_CERT",
+      "type": "certification_fee",
+      "label": "Certificacion especial carga",
+      "amountUsd": 9500,
+      "appliesTo": "cargo",
+      "metadata": {
+        "appliesToAircraftCategory": "cargo_turboprop",
+        "requiredForProgression": true,
+        "repeatable": false,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "INTERNATIONAL_CERT",
+      "type": "certification_fee",
+      "label": "Certificacion internacional",
+      "amountUsd": 15000,
+      "appliesTo": "international",
+      "metadata": {
+        "requiredForProgression": true,
+        "repeatable": false,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "PILOT_TRANSFER_HUB_TO_HUB",
+      "type": "pilot_transfer_fee",
+      "label": "Traslado hub a hub",
+      "amountUsd": 1200,
+      "appliesTo": "pilot_transfer",
+      "metadata": {
+        "transferType": "hub_to_hub",
+        "requiredForProgression": false,
+        "repeatable": true,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "PILOT_TRANSFER_REGIONAL",
+      "type": "pilot_transfer_fee",
+      "label": "Traslado regional",
+      "amountUsd": 2500,
+      "appliesTo": "pilot_transfer",
+      "metadata": {
+        "transferType": "regional",
+        "requiredForProgression": false,
+        "repeatable": true,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "PILOT_TRANSFER_NATIONAL",
+      "type": "pilot_transfer_fee",
+      "label": "Traslado nacional",
+      "amountUsd": 5000,
+      "appliesTo": "pilot_transfer",
+      "metadata": {
+        "transferType": "national",
+        "requiredForProgression": false,
+        "repeatable": true,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "PILOT_TRANSFER_NON_HUB_RECOVERY",
+      "type": "pilot_transfer_fee",
+      "label": "Recuperacion desde aeropuerto no hub",
+      "amountUsd": 7500,
+      "appliesTo": "pilot_transfer",
+      "metadata": {
+        "transferType": "non_hub_recovery",
+        "requiredForProgression": false,
+        "repeatable": true,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "PILOT_TRANSFER_INTERNATIONAL",
+      "type": "pilot_transfer_fee",
+      "label": "Traslado internacional",
+      "amountUsd": 12000,
+      "appliesTo": "pilot_transfer",
+      "metadata": {
+        "transferType": "international",
+        "requiredForProgression": false,
+        "repeatable": true,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "AIRCRAFT_ABANDONED_NON_HUB",
+      "type": "operational_penalty",
+      "label": "Aeronave abandonada fuera de hub",
+      "amountUsd": 10000,
+      "appliesTo": "penalty",
+      "metadata": {
+        "penaltyType": "aircraft_abandoned",
+        "requiredForProgression": false,
+        "repeatable": true,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "ADMIN_CANCELLATION_FEE",
+      "type": "operational_penalty",
+      "label": "Cancelacion indebida",
+      "amountUsd": 2000,
+      "appliesTo": "penalty",
+      "metadata": {
+        "penaltyType": "cancellation",
+        "requiredForProgression": false,
+        "repeatable": true,
+        "cooldownDays": 0
+      }
+    },
+    {
+      "code": "PRIORITY_REPOSITION_REQUEST",
+      "type": "operational_penalty",
+      "label": "Reposicionamiento prioritario",
+      "amountUsd": 8000,
+      "appliesTo": "penalty",
+      "metadata": {
+        "penaltyType": "priority_reposition",
+        "requiredForProgression": false,
+        "repeatable": true,
+        "cooldownDays": 0
+      }
+    }
+  ]
+}

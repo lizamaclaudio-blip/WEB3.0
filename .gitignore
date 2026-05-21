@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+@"
+.env
+.env.*
+!.env.example
+.next/
+.cache/
+node_modules/
+*.zip
+src/app_globals.tmp
+scripts/pw3/*.bak
+"@ | Set-Content -Encoding utf8 ".gitignore"
