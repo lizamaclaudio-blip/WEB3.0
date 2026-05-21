@@ -4,6 +4,7 @@ import { getAuthenticatedPilot } from "@/lib/auth/service";
 import { dbOne } from "@/lib/db/client";
 import { normalizeSimbriefOfp } from "@/lib/simbrief/ofp";
 import { isSamePwgFlight, normalizePwgFlightNumber } from "@/lib/dispatch/flight-number";
+import { isSameDispatchAircraft, normalizeAircraftCode } from "@/lib/simbrief/aircraft-map";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -68,10 +69,25 @@ export async function POST(request: Request) {
 
   const ofp = normalizeSimbriefOfp(payload);
   
-  // Logging seguro para diagnóstico
-  console.info(`[simbrief-ofp] pilot=${user.callsign} userId=${simbriefUserId ? "***" : "none"} username=${simbriefUsername ? "***" : "none"}`);
+  // Logging seguro para diagnóstico - Aircraft raw data
+  const rawAircraft = (payload as any)?.aircraft;
+  const rawGeneral = (payload as any)?.general;
+  const rawParams = (payload as any)?.params;
+  console.info(`[simbrief-ofp] pilot=${user.callsign}`);
+  console.info(`[simbrief-ofp] aircraftRaw=${JSON.stringify({
+    aircraft_icaocode: rawAircraft?.icaocode || rawAircraft?.icao_code,
+    aircraft_name: rawAircraft?.name,
+    aircraft_type: rawAircraft?.type,
+    aircraft_basetype: rawAircraft?.basetype,
+    general_icaoairline: rawGeneral?.icao_airline,
+    general_aircrafticao: rawGeneral?.aircraft_icao,
+    general_icaotype: rawGeneral?.icao_type,
+    general_aircraft: rawGeneral?.aircraft,
+    params_aircraft: rawParams?.aircraft,
+    normalized: ofp.aircraftIcao,
+    expected: expectedAircraftCode,
+  })}`);
   console.info(`[simbrief-ofp] ofpOrigin=${ofp.origin} ofpDest=${ofp.destination} ofpFlightNum=${ofp.flightNumber} ofpAircraft=${ofp.aircraftIcao}`);
-  console.info(`[simbrief-ofp] expectedOrigin=${expectedOrigin} expectedDest=${expectedDestination} expectedFlightNum=${expectedFlightNumber}`);
   
   if (!ofp.origin || !ofp.destination) {
     console.warn("[simbrief-ofp] OFP missing origin/destination");
@@ -101,9 +117,20 @@ export async function POST(request: Request) {
     }
   }
   
-  if (expectedAircraftCode && ofp.aircraftIcao && !ofp.aircraftIcao.includes(expectedAircraftCode)) {
-    console.warn(`[simbrief-ofp] Aircraft mismatch: got ${ofp.aircraftIcao}, expected ${expectedAircraftCode}`);
-    return error("SIMBRIEF_AIRCRAFT_MISMATCH");
+  // Validación flexible de aeronave (acepta C208 vs Cessna 208B)
+  if (expectedAircraftCode && ofp.aircraftIcao) {
+    const aircraftMatches = isSameDispatchAircraft(expectedAircraftCode, ofp.aircraftIcao);
+    const normExpected = normalizeAircraftCode(expectedAircraftCode);
+    const normOfp = normalizeAircraftCode(ofp.aircraftIcao);
+    console.info(`[simbrief-ofp] aircraftCompare: ofpRaw=${ofp.aircraftIcao}(norm=${normOfp}) expected=${expectedAircraftCode}(norm=${normExpected}) matches=${aircraftMatches}`);
+    
+    if (!aircraftMatches) {
+      console.warn(`[simbrief-ofp] Aircraft mismatch: got ${ofp.aircraftIcao} (norm=${normOfp}), expected ${expectedAircraftCode} (norm=${normExpected})`);
+      return error("SIMBRIEF_AIRCRAFT_MISMATCH");
+    }
+  } else if (expectedAircraftCode && !ofp.aircraftIcao) {
+    console.warn(`[simbrief-ofp] Aircraft not identified in OFP. Raw fields logged above.`);
+    return error("SIMBRIEF_AIRCRAFT_NOT_IDENTIFIED");
   }
 
   console.info(`[simbrief-ofp] OFP loaded successfully for ${user.callsign}`);

@@ -63,10 +63,30 @@ export function normalizeSimbriefOfp(raw: AnyObj): NormalizedSimbriefOfp {
   const params = (raw.params as AnyObj) ?? {};
   const times = (raw.times as AnyObj) ?? {};
   const files = (raw.files as AnyObj) ?? {};
+  const aircraft = (raw.aircraft as AnyObj) ?? {};
+  const apiParams = (raw.api_params as AnyObj) ?? {};
 
   const routeText = first(general.route, params.route, files.navlog, raw.route);
   const cruise = first(general.initial_altitude, params.initial_altitude, general.cruise_profile);
   const fl = upper(cruise).startsWith("FL") ? upper(cruise) : (cruise ? `FL${cruise}` : "");
+  
+  // Buscar aeronave en múltiples campos posibles
+  const aircraftIcao = upper(first(
+    aircraft.icaocode,
+    aircraft.icao_code,
+    aircraft.icao,
+    aircraft.name,
+    aircraft.type,
+    aircraft.basename,
+    general.icao_airline,
+    general.aircraft_icao,
+    general.icao_type,
+    general.aircraft,
+    params.aircraft,
+    apiParams.aircraft,
+    raw.aircraft_icao,
+    raw.aircraft,
+  ));
 
   return {
     simbriefId: first(general.ofp_id, general.id, raw.ofp_id),
@@ -75,7 +95,7 @@ export function normalizeSimbriefOfp(raw: AnyObj): NormalizedSimbriefOfp {
     destination: upper(first(destination.icao_code, general.dest_icao, raw.dest)),
     alternate: upper(first(general.alternate_icao, raw.alternate)),
     flightNumber: upper(first(general.flight_number, general.flightnum, raw.flight_number)),
-    aircraftIcao: upper(first(general.icao_airline, general.aircraft_icao, general.icao_type, raw.aircraft_icao)),
+    aircraftIcao,
     route: routeText,
     routeText,
     cruiseAltitude: cruise,

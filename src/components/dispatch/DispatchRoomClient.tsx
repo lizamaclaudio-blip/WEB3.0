@@ -1379,11 +1379,16 @@ export default function DispatchRoomClient({
       if (!response.ok || !payload?.ok || !payload.ofp) {
         const code = payload?.code || "SIMBRIEF_FETCH_FAILED";
         setSimbriefStatus(code.includes("MISMATCH") ? "mismatch" : "error");
+        // Extraer código normalizado de aeronave para mensajes claros
+        const ofpAircraftRaw = payload?.ofp?.aircraftIcao || "?";
+        const expectedAircraft = mapper.simbriefCode || selectedAircraft?.model_code || "?";
+        
         const errorMessages = {
           SIMBRIEF_ORIGIN_MISMATCH: `El OFP no coincide: origen ${payload?.ofp?.origin || "?"} vs ${originIdent}.`,
           SIMBRIEF_DESTINATION_MISMATCH: `El OFP no coincide: destino ${payload?.ofp?.destination || "?"} vs ${destinationIdent}.`,
           SIMBRIEF_FLIGHT_MISMATCH: `El OFP no coincide: vuelo ${payload?.ofp?.flightNumber || "?"} vs PWG${extractPwgFlightNumber(expectedFlightNumber) || expectedFlightNumber}.`,
-          SIMBRIEF_AIRCRAFT_MISMATCH: `El OFP no coincide: aeronave ${payload?.ofp?.aircraftIcao || "?"} vs ${mapper.simbriefCode}.`,
+          SIMBRIEF_AIRCRAFT_MISMATCH: `El OFP corresponde a ${ofpAircraftRaw}, pero el despacho espera ${expectedAircraft}. Genera el OFP con la aeronave correcta.`,
+          SIMBRIEF_AIRCRAFT_NOT_IDENTIFIED: "No se pudo identificar la aeronave del OFP SimBrief. Revisa que el plan haya sido generado con la aeronave correcta (Cessna 208B para C208).",
           SIMBRIEF_OFP_NOT_FOUND: "No se encontró OFP en SimBrief. Genera primero el plan de vuelo.",
           SIMBRIEF_USER_NOT_CONFIGURED: "Configura tu usuario SimBrief en tu perfil.",
         };
