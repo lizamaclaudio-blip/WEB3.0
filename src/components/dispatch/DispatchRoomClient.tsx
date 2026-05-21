@@ -85,8 +85,10 @@ type OperationTypesResponse = { operation_types?: OperationTypeItem[] };
 type DispatchReservation = {
   id: string;
   pilot_callsign?: string | null;
+  aircraft_id?: string | null;
   aircraft_registration?: string | null;
   aircraft_model_code?: string | null;
+  route_id?: string | null;
   origin_ident: string;
   destination_ident: string;
   operation_type: string;
@@ -96,6 +98,21 @@ type DispatchReservation = {
   dispatch_token_hint?: string | null;
   expires_at: string;
   ttl_minutes?: number;
+  reusedExistingReservation?: boolean;
+  aircraft?: {
+    id?: string | null;
+    registration?: string | null;
+    model_code?: string | null;
+    display_name?: string | null;
+  };
+  route?: {
+    id?: string | null;
+    route_code?: string | null;
+    origin_ident?: string | null;
+    destination_ident?: string | null;
+    category?: string | null;
+    distance_nm?: number | string | null;
+  };
   rules?: {
     operation_type: string;
     score_mode: string;
@@ -849,10 +866,11 @@ function FinalStage({
   const flightNumber = buildFlightNumber(mode, originIdent, destinationIdent);
   const endTime = "Por calcular";
   const reservation = reservationState.reservation ?? null;
-  const isReady = ["ready", "sending", "acars_ready"].includes(reservationState.status) && reservation !== null;
+  const hasReservationCredentials = Boolean(reservation?.id && reservation.dispatch_token);
+  const isReady = ["ready", "sending", "acars_ready"].includes(reservationState.status) && hasReservationCredentials;
   const isCreating = reservationState.status === "creating";
   const isSending = reservationState.status === "sending";
-  const isAcarsReady = reservationState.status === "acars_ready" && reservation !== null;
+  const isAcarsReady = reservationState.status === "acars_ready" && hasReservationCredentials;
 
   const ruleText = mode === "training_free"
     ? "Entrenamiento libre: no mueve piloto, no mueve aeronave, no genera economia y queda como evaluacion referencial."
@@ -875,11 +893,12 @@ function FinalStage({
       <section className={isReady ? styles.reservationReadyBox : styles.reservationBox}>
         <div>
           <span>Reserva temporal</span>
-          <strong>{isReady ? `Activa · ${reservationCountdown}` : "Disponible por 15 minutos"}</strong>
+          <strong>{isReady ? `Activa - ${reservationCountdown}` : "Disponible por 15 minutos"}</strong>
           <p>{ruleText}</p>
+          {reservationState.status === "ready" && reservationState.message ? <p className={styles.reservationHint}>{reservationState.message}</p> : null}
           {reservationState.status === "error" ? <p className={styles.reservationError}>{reservationState.message}</p> : null}
           {isReady ? (
-            <p className={styles.reservationHint}>ID {reservation?.id ?? "pendiente"} · Token seguro creado · vence {reservation?.expires_at ? new Date(reservation.expires_at).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" }) : "por confirmar"}</p>
+            <p className={styles.reservationHint}>ID {reservation?.id ?? "pendiente"} - Token seguro creado - vence {reservation?.expires_at ? new Date(reservation.expires_at).toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" }) : "por confirmar"}</p>
           ) : null}
           {isAcarsReady ? <p className={styles.acarsReadyText}>Despacho listo para ACARS. El cliente desktop se conectara al final del desarrollo web.</p> : null}
         </div>
@@ -889,7 +908,7 @@ function FinalStage({
       </section>
       <div className={styles.finalButtons}>
         <button type="button" disabled>Imprimir Despacho</button>
-        <button type="button" disabled={!isReady || isSending || isAcarsReady} onClick={onSendToAcars}>{isSending ? "Preparando..." : isAcarsReady ? "Listo para ACARS" : "Enviar a ACARS"}</button>
+        <button type="button" disabled={!hasReservationCredentials || isSending || isAcarsReady} onClick={onSendToAcars}>{isSending ? "Preparando..." : isAcarsReady ? "Listo para ACARS" : "Enviar a ACARS"}</button>
         <a href="/dashboard">HUB Center</a>
       </div>
       <section className={styles.sopPanel}>
@@ -1091,9 +1110,14 @@ export default function DispatchRoomClient({
   const canContinuePlan = Boolean(effectiveRouteText.trim() && flightLevel && alternateIdent.trim());
   const isCargo = isCargoMode(mode);
   const effectivePassengerCount = isCargo ? 0 : passengerCount;
+  const requiresSelectedRoute = mode === "official_route" || mode === "cargo_official";
   const canContinueWeight = Boolean(selectedAircraft && fuelKg > 0 && (!isCargo || cargoKg > 0));
   const reservationCountdown = formatCountdown(reservationState.reservation?.expires_at, nowMs);
-  const canCreateReservation = Boolean(originIdent && destinationIdent && selectedAircraft && fuelKg > 0 && operationAllowed && (!isCargo || cargoKg > 0));
+  const canCreateReservation = Boolean(originIdent && destinationIdent && selectedAircraft && fuelKg > 0 && operationAllowed && (!requiresSelectedRoute || selectedRoute?.id) && (!isCargo || cargoKg > 0));
+  const hasValidReservation = Boolean(reservationState.reservation?.id && reservationState.reservation?.dispatch_token);
+  const reservedAircraftLabel = reservationState.reservation
+    ? `${normalizeText(reservationState.reservation.aircraft_model_code, selectedAircraft?.model_code || "Modelo")} - ${normalizeText(reservationState.reservation.aircraft_registration, selectedAircraft?.registration || "Sin matricula")}`
+    : "";
 
   useEffect(() => {
     const defaultDeparture = getOriginLocalDepartureDefault(originAirport?.timezone || null);
@@ -1157,7 +1181,10 @@ export default function DispatchRoomClient({
         body: JSON.stringify({
           operationType: operationCode,
           aircraftId: selectedAircraft.id || selectedAircraft.registration,
+          aircraftCode: selectedAircraft.model_code,
+          aircraftRegistration: selectedAircraft.registration,
           routeId: selectedRoute?.id || null,
+          routeCode: selectedRoute?.route_code || null,
           originIdent,
           destinationIdent,
           alternateIdent,
@@ -1171,9 +1198,33 @@ export default function DispatchRoomClient({
           isCargo,
         }),
       });
-      const payload = (await response.json().catch(() => null)) as { ok?: boolean; reservation?: DispatchReservation; message?: string; error?: string } | null;
+      const payload = (await response.json().catch(() => null)) as {
+        ok?: boolean;
+        reservation?: DispatchReservation;
+        reservationId?: string;
+        dispatchToken?: string;
+        expiresAt?: string;
+        reusedExistingReservation?: boolean;
+        message?: string;
+        error?: string;
+        code?: string;
+      } | null;
       if (!response.ok || !payload?.ok || !payload.reservation) throw new Error(payload?.message || payload?.error || "No se pudo crear la reserva temporal.");
-      setReservationState({ status: "ready", message: "Reserva temporal creada.", reservation: payload.reservation, acarsPayload: null });
+      const reservation = {
+        ...payload.reservation,
+        id: payload.reservationId || payload.reservation.id,
+        dispatch_token: payload.dispatchToken || payload.reservation.dispatch_token,
+        expires_at: payload.expiresAt || payload.reservation.expires_at,
+        reusedExistingReservation: payload.reusedExistingReservation ?? payload.reservation.reusedExistingReservation,
+      };
+      setReservationState({
+        status: "ready",
+        message: reservation.reusedExistingReservation
+          ? "Ya tenias una reserva activa. Puedes enviarla a ACARS."
+          : "Reserva temporal creada. Disponible por 15 minutos.",
+        reservation,
+        acarsPayload: null,
+      });
     } catch (error) {
       setReservationState({ status: "error", message: error instanceof Error ? error.message : "No se pudo crear la reserva temporal.", reservation: null, acarsPayload: null });
     }
@@ -1193,9 +1244,32 @@ export default function DispatchRoomClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reservationId: reservation.id, dispatchToken: reservation.dispatch_token }),
       });
-      const payload = (await response.json().catch(() => null)) as { ok?: boolean; acarsPayload?: DispatchAcarsPayload; message?: string; error?: string } | null;
+      const payload = (await response.json().catch(() => null)) as {
+        ok?: boolean;
+        reservationId?: string;
+        dispatchToken?: string;
+        expiresAt?: string;
+        acarsPayload?: DispatchAcarsPayload;
+        message?: string;
+        error?: string;
+        code?: string;
+      } | null;
       if (!response.ok || !payload?.ok || !payload.acarsPayload) throw new Error(payload?.message || payload?.error || "No se pudo preparar el despacho para ACARS.");
-      setReservationState((current) => ({ ...current, status: "acars_ready", message: "Despacho listo para ACARS.", reservation: current.reservation ? { ...current.reservation, status: "ACARS_READY" } : reservation, acarsPayload: payload.acarsPayload }));
+      setReservationState((current) => ({
+        ...current,
+        status: "acars_ready",
+        message: "Despacho listo para ACARS.",
+        reservation: current.reservation
+          ? {
+              ...current.reservation,
+              id: payload.reservationId || current.reservation.id,
+              dispatch_token: payload.dispatchToken || current.reservation.dispatch_token,
+              expires_at: payload.expiresAt || current.reservation.expires_at,
+              status: "ACARS_READY",
+            }
+          : reservation,
+        acarsPayload: payload.acarsPayload,
+      }));
     } catch (error) {
       setReservationState((current) => ({ ...current, status: "error", message: error instanceof Error ? error.message : "No se pudo preparar el despacho para ACARS." }));
     }
@@ -1316,8 +1390,8 @@ export default function DispatchRoomClient({
               <div className={styles.badgeLineCentered}><IcaoFlagBadge icao={airportCode(currentAirport) || "----"} countryCode={currentAirport?.iso_country || currentAirport?.country} size="sm" /></div>
               <p><strong>{airportLabel(currentAirport)}</strong></p>
               <div className={styles.sideDivider} />
-              <p><strong>Avion reservado:</strong></p>
-              <strong>{selectedAircraft ? aircraftLabel(selectedAircraft) : "-"}</strong>
+              <p><strong>{hasValidReservation ? "Avion reservado:" : "Aeronave seleccionada:"}</strong></p>
+              <strong>{hasValidReservation ? reservedAircraftLabel : selectedAircraft ? aircraftLabel(selectedAircraft) : "-"}</strong>
               <div className={styles.sideDivider} />
               <p className={styles.smallNote}>{selectedOperationHelp}</p>
               {loading ? <p className={styles.smallNote}>Cargando datos de Neon...</p> : null}

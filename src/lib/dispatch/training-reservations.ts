@@ -14,11 +14,49 @@ import { getRouteEconomyEstimate, mapDbEstimateToEconomyEstimate } from "@/lib/e
 import { calculateFlightEconomyEstimate } from "@/lib/economy/calculator";
 
 const FALLBACK_DISPATCH_TTL_MINUTES = 15;
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const TEMPORARY_RESERVATION_STATUSES = new Set(["TEMP_RESERVED", "ACARS_READY"]);
+const BLOCKING_FLIGHT_STATUSES = new Set([
+  "ACARS_CLAIMED",
+  "RESERVED",
+  "DISPATCHED",
+  "IN_FLIGHT",
+  "LANDED",
+  "PENDING_EVALUATION",
+  "EVALUATED",
+]);
+const CLOSED_RESERVATION_STATUSES = new Set(["CANCELLED", "EXPIRED", "FINALIZED"]);
+
+class TrainingReservationError extends Error {
+  details?: Record<string, unknown>;
+
+  constructor(code: string, details?: Record<string, unknown>) {
+    super(code);
+    this.name = "TrainingReservationError";
+    this.details = details;
+  }
+}
+
+export function getTrainingReservationErrorCode(error: unknown) {
+  return error instanceof Error ? error.message : "TRAINING_RESERVATION_FAILED";
+}
+
+export function getTrainingReservationErrorDetails(error: unknown) {
+  return error instanceof TrainingReservationError ? error.details : undefined;
+}
+
+function reservationError(code: string, details?: Record<string, unknown>): never {
+  throw new TrainingReservationError(code, details);
+}
 
 type CreateTrainingReservationInput = {
   operationType?: string | null;
   routeId?: string | null;
+  routeCode?: string | null;
   aircraftId?: string | null;
+  aircraftCode?: string | null;
+  aircraftRegistration?: string | null;
   originIdent: string;
   destinationIdent: string;
   alternateIdent?: string | null;
@@ -41,17 +79,38 @@ type AirportLookup = {
 
 type TrainingReservationRow = {
   id: string;
+  pilot_user_id?: string | null;
   pilot_callsign: string | null;
+  aircraft_id: string | null;
   aircraft_registration: string | null;
   aircraft_model_code: string | null;
+  route_id: string | null;
   origin_ident: string;
   destination_ident: string;
   operation_type: string;
   score_mode: string;
   status: string;
+  dispatch_token_hash?: string | null;
   dispatch_token_hint: string | null;
   expires_at: string;
   created_at: string;
+  updated_at?: string | null;
+  is_expired?: boolean;
+};
+
+type RouteLookup = {
+  id: string;
+  route_code: string | null;
+  origin_ident: string | null;
+  destination_ident: string | null;
+  category: string | null;
+  distance_nm: number | string | null;
+  allows_passenger: boolean | null;
+  allows_cargo: boolean | null;
+};
+
+type ActiveReservationLookup = TrainingReservationRow & {
+  is_expired: boolean;
 };
 
 function normalizeIdent(value: unknown) {
@@ -63,6 +122,14 @@ function normalizeIdent(value: unknown) {
 function normalizeText(value: unknown, fallback = "") {
   const text = String(value ?? "").trim();
   return text || fallback;
+}
+
+function normalizeStatus(value: unknown) {
+  return normalizeText(value).toUpperCase();
+}
+
+function isUuid(value: string) {
+  return UUID_PATTERN.test(value);
 }
 
 function toInteger(value: unknown, fallback = 0) {
@@ -272,7 +339,7 @@ export async function expireTrainingReservations() {
   await dbQuery(`
     update public.training_dispatch_reservations
        set status = 'EXPIRED', updated_at = now()
-     where status = 'TEMP_RESERVED'
+     where status in ('TEMP_RESERVED', 'ACARS_READY')
        and expires_at <= now()
   `);
 }
@@ -288,6 +355,325 @@ async function findAirport(ident: string) {
   );
 }
 
+async function findRouteById(routeId: string, originIdent: string, destinationIdent: string) {
+  return await dbOne<RouteLookup>(
+    `select
+       nr.id::text,
+       nr.route_code,
+       oa.ident as origin_ident,
+       da.ident as destination_ident,
+       nr.route_category as category,
+       nr.distance_nm,
+       nr.allows_passenger,
+       nr.allows_cargo
+     from public.network_routes nr
+     join public.airports oa on oa.id = nr.origin_airport_id
+     join public.airports da on da.id = nr.destination_airport_id
+     where nr.id = $1::uuid
+       and upper(coalesce(oa.ident, oa.icao, '')) = upper($2)
+       and upper(coalesce(da.ident, da.icao, '')) = upper($3)
+       and coalesce(nr.is_active, true) = true
+     limit 1`,
+    [routeId, originIdent, destinationIdent],
+  );
+}
+
+async function findRoutesByCode(routeCode: string, originIdent: string, destinationIdent: string) {
+  const result = await dbQuery<RouteLookup>(
+    `select
+       nr.id::text,
+       nr.route_code,
+       oa.ident as origin_ident,
+       da.ident as destination_ident,
+       nr.route_category as category,
+       nr.distance_nm,
+       nr.allows_passenger,
+       nr.allows_cargo
+     from public.network_routes nr
+     join public.airports oa on oa.id = nr.origin_airport_id
+     join public.airports da on da.id = nr.destination_airport_id
+     where upper(coalesce(nr.route_code, '')) = upper($1)
+       and upper(coalesce(oa.ident, oa.icao, '')) = upper($2)
+       and upper(coalesce(da.ident, da.icao, '')) = upper($3)
+       and coalesce(nr.is_active, true) = true
+     order by nr.route_code nulls last
+     limit 5`,
+    [routeCode, originIdent, destinationIdent],
+  );
+  return result.rows;
+}
+
+async function findRoutesByEndpoints(originIdent: string, destinationIdent: string) {
+  const result = await dbQuery<RouteLookup>(
+    `select
+       nr.id::text,
+       nr.route_code,
+       oa.ident as origin_ident,
+       da.ident as destination_ident,
+       nr.route_category as category,
+       nr.distance_nm,
+       nr.allows_passenger,
+       nr.allows_cargo
+     from public.network_routes nr
+     join public.airports oa on oa.id = nr.origin_airport_id
+     join public.airports da on da.id = nr.destination_airport_id
+     where upper(coalesce(oa.ident, oa.icao, '')) = upper($1)
+       and upper(coalesce(da.ident, da.icao, '')) = upper($2)
+       and coalesce(nr.is_active, true) = true
+     order by nr.route_code nulls last
+     limit 5`,
+    [originIdent, destinationIdent],
+  );
+  return result.rows;
+}
+
+async function resolveRouteForReservation(input: {
+  routeId: string;
+  routeCode: string;
+  originIdent: string;
+  destinationIdent: string;
+}) {
+  if (input.routeId && isUuid(input.routeId)) {
+    const route = await findRouteById(
+      input.routeId,
+      input.originIdent,
+      input.destinationIdent,
+    );
+    if (!route) reservationError("ROUTE_ID_REQUIRED");
+    return route;
+  }
+
+  const routeCode = input.routeCode || input.routeId;
+  if (routeCode) {
+    const routes = await findRoutesByCode(
+      routeCode,
+      input.originIdent,
+      input.destinationIdent,
+    );
+    if (routes.length === 1) return routes[0];
+    if (routes.length > 1) {
+      reservationError("ROUTE_ID_REQUIRED", {
+        candidates: routes.map((route) => route.id),
+      });
+    }
+  }
+
+  const endpointRoutes = await findRoutesByEndpoints(
+    input.originIdent,
+    input.destinationIdent,
+  );
+  if (endpointRoutes.length === 1) return endpointRoutes[0];
+  if (endpointRoutes.length > 1) {
+    reservationError("ROUTE_ID_REQUIRED", {
+      candidates: endpointRoutes.map((route) => route.id),
+    });
+  }
+
+  reservationError("ROUTE_ID_REQUIRED");
+}
+
+function selectAircraftForReservation(
+  availableAircraft: Awaited<ReturnType<typeof listAvailableAircraft>>,
+  input: CreateTrainingReservationInput,
+) {
+  const aircraftId = normalizeText(input.aircraftId);
+  const aircraftRegistration = normalizeIdent(input.aircraftRegistration);
+  const aircraftCode = normalizeIdent(input.aircraftCode);
+
+  if (!aircraftId && !aircraftRegistration && !aircraftCode)
+    reservationError("AIRCRAFT_ID_REQUIRED");
+
+  const directMatch = availableAircraft.find((aircraft) => {
+    const value = `${aircraft.model_code}-${aircraft.registration}`;
+    return (
+      aircraft.id === aircraftId ||
+      aircraft.registration === aircraftId ||
+      value === aircraftId ||
+      (aircraftRegistration && aircraft.registration === aircraftRegistration)
+    );
+  });
+
+  if (directMatch) return directMatch;
+
+  if (aircraftCode) {
+    const modelMatches = availableAircraft.filter(
+      (aircraft) => aircraft.model_code === aircraftCode,
+    );
+    if (modelMatches.length === 1) return modelMatches[0];
+  }
+
+  reservationError("AIRCRAFT_NOT_ALLOWED_FOR_PILOT");
+}
+
+function reservationMatchesSelection(
+  row: ActiveReservationLookup,
+  route: RouteLookup,
+  aircraft: Awaited<ReturnType<typeof listAvailableAircraft>>[number],
+) {
+  const rowRouteId = normalizeText(row.route_id);
+  const rowAircraftId = normalizeText(row.aircraft_id);
+  const rowRegistration = normalizeIdent(row.aircraft_registration);
+
+  return (
+    rowRouteId === route.id &&
+    (rowAircraftId === aircraft.id || rowRegistration === aircraft.registration)
+  );
+}
+
+async function closeReservation(id: string, status: "CANCELLED" | "EXPIRED") {
+  await dbQuery(
+    `update public.training_dispatch_reservations
+        set status = $2,
+            acars_status = $2,
+            updated_at = now()
+      where id = $1::uuid`,
+    [id, status],
+  );
+}
+
+async function findActiveReservationsForPilot(userId: string) {
+  const result = await dbQuery<ActiveReservationLookup>(
+    `select
+       id::text,
+       pilot_user_id::text,
+       pilot_callsign,
+       aircraft_id::text,
+       aircraft_registration,
+       aircraft_model_code,
+       route_id::text,
+       origin_ident,
+       destination_ident,
+       operation_type,
+       score_mode,
+       status,
+       dispatch_token_hash,
+       dispatch_token_hint,
+       expires_at::text,
+       created_at::text,
+       updated_at::text,
+       (expires_at <= now()) as is_expired
+     from public.training_dispatch_reservations
+     where pilot_user_id = $1::uuid
+       and upper(status) <> all($2::text[])
+     order by updated_at desc nulls last, created_at desc nulls last`,
+    [userId, Array.from(CLOSED_RESERVATION_STATUSES)],
+  );
+
+  return result.rows;
+}
+
+async function findActiveAircraftReservationByOtherPilot(
+  userId: string,
+  aircraft: Awaited<ReturnType<typeof listAvailableAircraft>>[number],
+) {
+  return await dbOne<ActiveReservationLookup>(
+    `select
+       id::text,
+       pilot_user_id::text,
+       pilot_callsign,
+       aircraft_id::text,
+       aircraft_registration,
+       aircraft_model_code,
+       route_id::text,
+       origin_ident,
+       destination_ident,
+       operation_type,
+       score_mode,
+       status,
+       dispatch_token_hash,
+       dispatch_token_hint,
+       expires_at::text,
+       created_at::text,
+       updated_at::text,
+       (expires_at <= now()) as is_expired
+     from public.training_dispatch_reservations
+     where pilot_user_id <> $1::uuid
+       and (aircraft_id = $2::uuid or upper(coalesce(aircraft_registration, '')) = upper($3))
+       and (
+         status in ('ACARS_CLAIMED','RESERVED','DISPATCHED','IN_FLIGHT','LANDED','PENDING_EVALUATION','EVALUATED')
+         or (status in ('TEMP_RESERVED','ACARS_READY') and expires_at > now())
+       )
+     order by updated_at desc nulls last, created_at desc nulls last
+     limit 1`,
+    [userId, aircraft.id, aircraft.registration],
+  );
+}
+
+async function rotateReservationToken(reservationId: string) {
+  const dispatchToken = createDispatchToken();
+  const dispatchTokenHash = hashDispatchToken(dispatchToken);
+  const tokenHint = dispatchToken.slice(0, 8);
+
+  const row = await dbOne<TrainingReservationRow>(
+    `update public.training_dispatch_reservations
+        set dispatch_token_hash = $2,
+            dispatch_token_hint = $3,
+            updated_at = now()
+      where id = $1::uuid
+      returning
+        id::text,
+        pilot_user_id::text,
+        pilot_callsign,
+        aircraft_id::text,
+        aircraft_registration,
+        aircraft_model_code,
+        route_id::text,
+        origin_ident,
+        destination_ident,
+        operation_type,
+        score_mode,
+        status,
+        dispatch_token_hash,
+        dispatch_token_hint,
+        expires_at::text,
+        created_at::text,
+        updated_at::text`,
+    [reservationId, dispatchTokenHash, tokenHint],
+  );
+
+  if (!row) reservationError("RESERVATION_NOT_FOUND");
+  return { row, dispatchToken };
+}
+
+function buildReservationResult(input: {
+  row: TrainingReservationRow;
+  dispatchToken: string;
+  ttlMinutes: number;
+  operationRule: Awaited<ReturnType<typeof getFlightOperationType>>;
+  aircraft: Awaited<ReturnType<typeof listAvailableAircraft>>[number];
+  route: RouteLookup;
+  reusedExistingReservation: boolean;
+}) {
+  return {
+    ...input.row,
+    dispatch_token: input.dispatchToken,
+    ttl_minutes: input.ttlMinutes,
+    reusedExistingReservation: input.reusedExistingReservation,
+    aircraft: {
+      id: input.aircraft.id,
+      registration: input.aircraft.registration,
+      model_code: input.aircraft.model_code,
+      display_name: input.aircraft.display_name,
+    },
+    route: {
+      id: input.route.id,
+      route_code: input.route.route_code,
+      origin_ident: normalizeIdent(input.route.origin_ident),
+      destination_ident: normalizeIdent(input.route.destination_ident),
+      category: input.route.category,
+      distance_nm: input.route.distance_nm,
+    },
+    rules: {
+      operation_type: input.operationRule.code,
+      score_mode: input.operationRule.score_mode,
+      affects_pilot_position: input.operationRule.affects_pilot_position,
+      affects_aircraft_position: input.operationRule.affects_aircraft_position,
+      affects_economy: input.operationRule.affects_economy,
+      affects_ranking: input.operationRule.affects_ranking,
+    },
+  };
+}
+
 export async function createTrainingFreeReservation(
   user: AuthenticatedPilot,
   input: CreateTrainingReservationInput,
@@ -299,14 +685,19 @@ export async function createTrainingFreeReservation(
   const isCargo = isCargoOperation(operationType);
   const originIdent = normalizeIdent(input.originIdent);
   const destinationIdent = normalizeIdent(input.destinationIdent);
-  const aircraftId = normalizeText(input.aircraftId);
-  const routeId = normalizeText(input.routeId);
+  const requestedRouteId = normalizeText(input.routeId);
+  const requestedRouteCode = normalizeText(input.routeCode);
+  const requestedAircraft =
+    normalizeText(input.aircraftId) ||
+    normalizeIdent(input.aircraftRegistration) ||
+    normalizeIdent(input.aircraftCode);
 
-  console.info(`[dispatch] createTrainingFreeReservation callsign=${user.callsign} origin=${originIdent} dest=${destinationIdent} aircraft=${aircraftId} route=${routeId}`);
+  console.info(
+    `[dispatch] createTrainingFreeReservation callsign=${user.callsign} origin=${originIdent} dest=${destinationIdent} aircraft=${requestedAircraft} route=${requestedRouteId || requestedRouteCode}`,
+  );
 
   if (!originIdent) throw new Error("ORIGIN_REQUIRED");
   if (!destinationIdent) throw new Error("DESTINATION_REQUIRED");
-  if (!aircraftId) throw new Error("AIRCRAFT_REQUIRED");
 
   const [originAirport, destinationAirport, availableAircraft, operationRule] =
     await Promise.all([
@@ -324,47 +715,90 @@ export async function createTrainingFreeReservation(
   if (!originAirport) throw new Error("ORIGIN_NOT_FOUND");
   if (!destinationAirport) throw new Error("DESTINATION_NOT_FOUND");
 
-  const selectedAircraft = availableAircraft.find((aircraft) => {
-    return (
-      aircraft.id === aircraftId ||
-      aircraft.registration === aircraftId ||
-      `${aircraft.model_code}-${aircraft.registration}` === aircraftId
-    );
+  const selectedAircraft = selectAircraftForReservation(availableAircraft, input);
+  const selectedRoute = await resolveRouteForReservation({
+    routeId: requestedRouteId,
+    routeCode: requestedRouteCode,
+    originIdent,
+    destinationIdent,
   });
 
-  console.info(`[dispatch] selectedAircraft=${selectedAircraft?.id || 'NOT_FOUND'} registration=${selectedAircraft?.registration || 'N/A'}`);
-
-  if (!selectedAircraft) throw new Error("AIRCRAFT_NOT_ALLOWED_FOR_PILOT");
-
-  const activeReservation = await dbOne<{ id: string; status: string }>(
-    `select id::text, status
-       from public.training_dispatch_reservations
-      where pilot_user_id = $1::uuid
-        and (
-          status in ('ACARS_CLAIMED','RESERVED','DISPATCHED','IN_FLIGHT','LANDED','PENDING_EVALUATION','EVALUATED')
-          or (status in ('TEMP_RESERVED','ACARS_READY') and expires_at > now())
-        )
-      order by updated_at desc nulls last, created_at desc nulls last
-      limit 1`,
-    [user.userId],
+  console.info(
+    `[dispatch] selectedAircraft=${selectedAircraft.id} registration=${selectedAircraft.registration} route=${selectedRoute.id}`,
   );
 
-  // Si hay reserva en estado final (ya en vuelo), bloquear
-  if (activeReservation && 
-      ['ACARS_CLAIMED','RESERVED','DISPATCHED','IN_FLIGHT','LANDED','PENDING_EVALUATION','EVALUATED'].includes(activeReservation.status)) {
-    console.warn(`[dispatch] FLIGHT_ACTIVE_BLOCKS_RESERVATION pilot=${user.callsign} reservation=${activeReservation.id} status=${activeReservation.status}`);
-    throw new Error("ACTIVE_FLIGHT_IN_PROGRESS");
+  const activeReservations = await findActiveReservationsForPilot(user.userId);
+  for (const activeReservation of activeReservations) {
+    const status = normalizeStatus(activeReservation.status);
+
+    if (BLOCKING_FLIGHT_STATUSES.has(status)) {
+      console.warn(
+        `[dispatch] FLIGHT_ACTIVE_BLOCKS_RESERVATION pilot=${user.callsign} reservation=${activeReservation.id} status=${status}`,
+      );
+      reservationError("ACTIVE_FLIGHT_IN_PROGRESS", {
+        activeReservationId: activeReservation.id,
+        status,
+      });
+    }
+
+    if (!TEMPORARY_RESERVATION_STATUSES.has(status)) continue;
+
+    if (activeReservation.is_expired) {
+      console.info(
+        `[dispatch] expiring stale reservation pilot=${user.callsign} reservation=${activeReservation.id}`,
+      );
+      await closeReservation(activeReservation.id, "EXPIRED");
+      continue;
+    }
+
+    if (
+      !activeReservation.dispatch_token_hash ||
+      !activeReservation.route_id ||
+      !activeReservation.aircraft_id
+    ) {
+      console.warn(
+        `[dispatch] cancelling corrupt reservation pilot=${user.callsign} reservation=${activeReservation.id}`,
+      );
+      await closeReservation(activeReservation.id, "CANCELLED");
+      continue;
+    }
+
+    if (reservationMatchesSelection(activeReservation, selectedRoute, selectedAircraft)) {
+      const refreshed = await rotateReservationToken(activeReservation.id);
+      console.info(
+        `[dispatch] reused temp reservation callsign=${user.callsign ?? "N/A"} id=${refreshed.row.id} expires=${refreshed.row.expires_at}`,
+      );
+
+      return buildReservationResult({
+        row: refreshed.row,
+        dispatchToken: refreshed.dispatchToken,
+        ttlMinutes,
+        operationRule,
+        aircraft: selectedAircraft,
+        route: selectedRoute,
+        reusedExistingReservation: true,
+      });
+    }
+
+    reservationError("ACTIVE_RESERVATION_EXISTS", {
+      activeReservationId: activeReservation.id,
+      status,
+      routeId: activeReservation.route_id,
+      aircraftId: activeReservation.aircraft_id,
+      message: "Ya tienes una reserva activa para otra ruta. Cancelala o enviala a ACARS.",
+    });
   }
 
-  // Si hay reserva temporal activa, la cancelamos para crear una nueva
-  if (activeReservation && ['TEMP_RESERVED','ACARS_READY'].includes(activeReservation.status)) {
-    console.info(`[dispatch] CANCELLING_OLD_TEMP_RESERVATION pilot=${user.callsign} oldReservation=${activeReservation.id}`);
-    await dbQuery(
-      `update public.training_dispatch_reservations 
-       set status = 'CANCELLED', updated_at = now() 
-       where id = $1::uuid`,
-      [activeReservation.id]
-    );
+  const aircraftBlocked = await findActiveAircraftReservationByOtherPilot(
+    user.userId,
+    selectedAircraft,
+  );
+  if (aircraftBlocked) {
+    reservationError("AIRCRAFT_RESERVED_BY_OTHER", {
+      activeReservationId: aircraftBlocked.id,
+      pilotCallsign: aircraftBlocked.pilot_callsign,
+      status: aircraftBlocked.status,
+    });
   }
 
   const reservationId = randomUUID();
@@ -375,17 +809,6 @@ export async function createTrainingFreeReservation(
   let row: TrainingReservationRow;
   try {
     row = await dbTransaction(async (client) => {
-      await client.query(
-        `
-        update public.training_dispatch_reservations
-           set status = 'CANCELLED', updated_at = now()
-         where pilot_user_id = $1::uuid
-           and status = 'TEMP_RESERVED'
-           and expires_at > now()
-      `,
-        [user.userId],
-      );
-
       const result = await client.query<TrainingReservationRow>(
       `
       insert into public.training_dispatch_reservations (
@@ -427,7 +850,7 @@ export async function createTrainingFreeReservation(
         $6,
         $7::uuid,
         $8::uuid,
-        nullif($9, '')::uuid,
+        $9::uuid,
         $10,
         $11,
         $12,
@@ -450,17 +873,22 @@ export async function createTrainingFreeReservation(
         now() + ($28::text || ' minutes')::interval
       ) returning
         id::text,
+        pilot_user_id::text,
         pilot_callsign,
+        aircraft_id::text,
         aircraft_registration,
         aircraft_model_code,
+        route_id::text,
         origin_ident,
         destination_ident,
         operation_type,
         score_mode,
         status,
+        dispatch_token_hash,
         dispatch_token_hint,
         expires_at::text,
-        created_at::text
+        created_at::text,
+        updated_at::text
         `,
       [
         reservationId,
@@ -471,7 +899,7 @@ export async function createTrainingFreeReservation(
         selectedAircraft.model_code,
         originAirport.id,
         destinationAirport.id,
-        routeId,
+        selectedRoute.id,
         originAirport.ident || originAirport.icao || originIdent,
         destinationAirport.ident || destinationAirport.icao || destinationIdent,
         normalizeIdent(input.alternateIdent),
@@ -508,24 +936,20 @@ export async function createTrainingFreeReservation(
     `[dispatch] temp reservation ok callsign=${user.callsign ?? "N/A"} id=${row.id} expires=${row.expires_at}`,
   );
 
-  return {
-    ...row,
-    dispatch_token: dispatchToken,
-    ttl_minutes: ttlMinutes,
-    rules: {
-      operation_type: operationRule.code,
-      score_mode: operationRule.score_mode,
-      affects_pilot_position: operationRule.affects_pilot_position,
-      affects_aircraft_position: operationRule.affects_aircraft_position,
-      affects_economy: operationRule.affects_economy,
-      affects_ranking: operationRule.affects_ranking,
-    },
-  };
+  return buildReservationResult({
+    row,
+    dispatchToken,
+    ttlMinutes,
+    operationRule,
+    aircraft: selectedAircraft,
+    route: selectedRoute,
+    reusedExistingReservation: false,
+  });
 }
 
 type PrepareTrainingAcarsInput = {
   reservationId: string;
-  dispatchToken: string;
+  dispatchToken?: string | null;
 };
 
 type TrainingDispatchRow = {
@@ -551,7 +975,7 @@ type TrainingDispatchRow = {
   operation_type: string;
   score_mode: string;
   status: string;
-  dispatch_token_hash: string;
+  dispatch_token_hash: string | null;
   dispatch_token_hint: string | null;
   affects_pilot_position: boolean;
   affects_aircraft_position: boolean;
@@ -563,11 +987,7 @@ type TrainingDispatchRow = {
 };
 
 function assertUuid(value: string) {
-  if (
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-      value,
-    )
-  ) {
+  if (!UUID_PATTERN.test(value)) {
     throw new Error("RESERVATION_NOT_FOUND");
   }
 }
@@ -677,14 +1097,11 @@ export async function prepareTrainingReservationForAcars(
   await expireTrainingReservations();
 
   const reservationId = normalizeText(input.reservationId);
-  const dispatchToken = normalizeText(input.dispatchToken);
+  const inputDispatchToken = normalizeText(input.dispatchToken);
   if (!reservationId) throw new Error("RESERVATION_REQUIRED");
-  if (!dispatchToken) throw new Error("DISPATCH_TOKEN_REQUIRED");
   assertUuid(reservationId);
 
-  const dispatchTokenHash = hashDispatchToken(dispatchToken);
-
-  const payload = await dbTransaction(async (client) => {
+  const prepared = await dbTransaction(async (client) => {
     const result = await client.query<TrainingDispatchRow>(
       `
       select
@@ -731,20 +1148,41 @@ export async function prepareTrainingReservationForAcars(
 
     const row = result.rows[0];
     if (!row) throw new Error("RESERVATION_NOT_FOUND");
-    if (row.dispatch_token_hash !== dispatchTokenHash)
-      throw new Error("DISPATCH_TOKEN_INVALID");
-    if (["CANCELLED", "EXPIRED"].includes(row.status))
+
+    const status = normalizeStatus(row.status);
+    if (["CANCELLED", "EXPIRED", "FINALIZED"].includes(status))
       throw new Error("RESERVATION_EXPIRED");
     if (row.is_expired) {
       await client.query(
         `
         update public.training_dispatch_reservations
-           set status = 'EXPIRED', updated_at = now()
-         where id = $1::uuid
+           set status = 'EXPIRED',
+               acars_status = 'EXPIRED',
+               updated_at = now()
+          where id = $1::uuid
       `,
         [reservationId],
       );
       throw new Error("RESERVATION_EXPIRED");
+    }
+
+    let effectiveDispatchToken = inputDispatchToken;
+    if (effectiveDispatchToken) {
+      const dispatchTokenHash = hashDispatchToken(effectiveDispatchToken);
+      if (row.dispatch_token_hash !== dispatchTokenHash)
+        throw new Error("DISPATCH_TOKEN_INVALID");
+    } else {
+      effectiveDispatchToken = createDispatchToken();
+      row.dispatch_token_hash = hashDispatchToken(effectiveDispatchToken);
+      row.dispatch_token_hint = effectiveDispatchToken.slice(0, 8);
+      await client.query(
+        `update public.training_dispatch_reservations
+            set dispatch_token_hash = $2,
+                dispatch_token_hint = $3,
+                updated_at = now()
+          where id = $1::uuid`,
+        [reservationId, row.dispatch_token_hash, row.dispatch_token_hint],
+      );
     }
 
     const routeIdForEconomy = normalizeText(row.route_id ?? "");
@@ -755,13 +1193,19 @@ export async function prepareTrainingReservationForAcars(
       row.operation_type,
       row.affects_economy,
     );
-    const acarsPayload = buildTrainingAcarsPayload(user, row, dispatchToken, economySnapshot);
+    const acarsPayload = buildTrainingAcarsPayload(
+      user,
+      row,
+      effectiveDispatchToken,
+      economySnapshot,
+    );
 
-    if (row.status === "TEMP_RESERVED") {
+    if (status === "TEMP_RESERVED") {
       await client.query(
         `
         update public.training_dispatch_reservations
            set status = 'ACARS_READY',
+               acars_status = 'READY',
                sent_to_acars_at = now(),
                acars_ready_at = now(),
                prepared_acars_payload = $2::jsonb,
@@ -771,13 +1215,17 @@ export async function prepareTrainingReservationForAcars(
       `,
         [reservationId, JSON.stringify(acarsPayload)],
       );
-    } else if (row.status === "ACARS_READY") {
+    } else if (status === "ACARS_READY") {
       await client.query(
         `
         update public.training_dispatch_reservations
-           set prepared_acars_payload = coalesce(prepared_acars_payload, $2::jsonb),
+           set sent_to_acars_at = coalesce(sent_to_acars_at, now()),
+               acars_ready_at = coalesce(acars_ready_at, now()),
+               acars_status = 'READY',
+               prepared_acars_payload = $2::jsonb,
+               acars_payload_version = 'pw3-dispatch-v1',
                updated_at = now()
-         where id = $1::uuid
+          where id = $1::uuid
       `,
         [reservationId, JSON.stringify(acarsPayload)],
       );
@@ -785,14 +1233,20 @@ export async function prepareTrainingReservationForAcars(
       throw new Error("RESERVATION_NOT_READY");
     }
 
-    return acarsPayload;
+    return {
+      reservationId: row.id,
+      dispatchToken: effectiveDispatchToken,
+      payloadVersion: acarsPayload.payload_version,
+      expiresAt: row.expires_at,
+      acarsPayload,
+    };
   });
 
   console.info(
     `[dispatch] acars payload ready callsign=${user.callsign ?? "N/A"} reservation=${reservationId}`,
   );
 
-  return payload;
+  return prepared;
 }
 
 type ClaimTrainingAcarsInput = {

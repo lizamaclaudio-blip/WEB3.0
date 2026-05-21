@@ -88,7 +88,7 @@ export async function listFlightOperationTypes(): Promise<
     `select
        code,
        label,
-       description,
+       null::text as description,
        score_mode,
        affects_pilot_position,
        affects_aircraft_position,
@@ -121,7 +121,7 @@ export async function getFlightOperationType(
     `select
        code,
        label,
-       description,
+       null::text as description,
        score_mode,
        affects_pilot_position,
        affects_aircraft_position,
