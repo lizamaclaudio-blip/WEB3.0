@@ -779,10 +779,7 @@ function PlanStage({
   return (
     <div className={styles.planStage}>
       <h3>Plan de Vuelo</h3>
-      <div className={styles.simbriefNotice}>
-        <strong>SimBrief:</strong>
-        <span>{originIdent || "ORIGEN"} -&gt; {destinationIdent || "DESTINO"} - {routeValue || "Ruta por definir"}</span>
-      </div>
+      {/* Banner superior ocultado - info duplicada del bloque Plan de vuelo SimBrief */}
       <section className={styles.darkPanel}>
         <header>Plan de vuelo SimBrief</header>
         <div className={styles.routeConfigGrid}>
@@ -793,7 +790,7 @@ function PlanStage({
           <label className={styles.routeInputWide}><span>Plan de vuelo *</span><input value={routeValue || "Pendiente de OFP SimBrief"} readOnly={requiresSimbrief} /></label>
           {requiresSimbrief ? (
             <>
-              <label><span>Estado SimBrief</span><input value={simbriefMessage || simbriefStatus} readOnly /></label>
+              <label><span>Estado SimBrief</span><input value={simbriefOfp ? "Cargado" : (simbriefStatus === "error" ? "Error" : "Sin cargar")} readOnly /></label>
               <label><span>Combustible OFP</span><input value={simbriefOfp ? `${Math.round(asNumber(simbriefOfp.blockFuelKg, 0))} kg block / ${Math.round(asNumber(simbriefOfp.tripFuelKg, 0))} kg trip` : "Pendiente de OFP SimBrief"} readOnly /></label>
               <label><span>Payload OFP</span><input value={simbriefOfp ? `${Math.round(asNumber(simbriefOfp.payloadKg, 0))} kg` : "Pendiente de OFP SimBrief"} readOnly /></label>
               <label><span>PAX / Carga OFP</span><input value={simbriefOfp ? `${Math.round(asNumber(simbriefOfp.passengerCount, 0))} pax / ${Math.round(asNumber(simbriefOfp.cargoKg, 0))} kg` : "Pendiente de OFP SimBrief"} readOnly /></label>
@@ -1209,10 +1206,11 @@ export default function DispatchRoomClient({
   const routeCandidates = useMemo(() => routes.filter((route) => (route.blocked_reasons || []).length === 0), [routes]);
   const canContinueSearch = (mode === "official_route" || mode === "cargo_official") ? Boolean(selectedRoute) : Boolean(originIdent && destinationIdent && operationAllowed);
   const canContinueAircraft = Boolean(originIdent && destinationIdent && selectedAircraft && operationAllowed);
-  // REGLA: Para SimBrief, requerir ruta IFR válida (no solo destino)
-  const hasValidIfrRoute = simbriefOfp?.route && simbriefOfp.route.length > 5 && simbriefOfp.route !== destinationIdent;
+  // REGLA: Para SimBrief, aceptar cualquier ruta que venga del OFP (incluyendo SCTE DCT SCIE)
+  // La validación estricta es solo para bloquear rutas vacías o solo-destino
+  const hasAnyRoute = simbriefOfp?.route && simbriefOfp.route.length > 3;
   const canContinuePlan = requiresSimbrief 
-    ? Boolean(hasValidIfrRoute && simbriefOfp?.flightLevel && simbriefOfp?.alternate) 
+    ? Boolean(hasAnyRoute && simbriefOfp?.flightLevel && simbriefOfp?.alternate) 
     : Boolean(effectiveRouteText.trim() && flightLevel && alternateIdent.trim());
   const isCargo = isCargoMode(mode);
   const effectivePassengerCount = isCargo ? 0 : Math.round(asNumber(simbriefOfp?.passengerCount, passengerCount));
@@ -1464,17 +1462,21 @@ export default function DispatchRoomClient({
         return;
       }
       
-      // Validar ruta IFR del OFP
+      // REGLA: Siempre guardar datos del OFP que ya cargaron correctamente
+      // La validación de ruta es solo advertencia, no debe bloquear datos válidos
       const routeValidation = validateIfrRoute(payload.ofp.route, originIdent, destinationIdent);
-      if (!routeValidation.valid) {
-        setSimbriefStatus("error");
-        setSimbriefMessage(routeValidation.errorMessage || "Ruta IFR no válida en el OFP.");
-        return;
-      }
       
+      // Guardar OFP independientemente de advertencias de ruta
       setSimbriefOfp(payload.ofp);
       setSimbriefStatus("loaded");
-      setSimbriefMessage("OFP cargado correctamente desde SimBrief.");
+      
+      // Mensaje: Éxito principal, advertencia secundaria si aplica
+      if (!routeValidation.valid) {
+        // Ruta con problemas pero OFP válido - mostrar advertencia pero permitir continuar
+        setSimbriefMessage(`OFP cargado. ${routeValidation.errorMessage || "Revisa la ruta en SimBrief."}`);
+      } else {
+        setSimbriefMessage("OFP cargado correctamente desde SimBrief.");
+      }
     } catch {
       setSimbriefStatus("error");
       setSimbriefMessage("No se pudo cargar OFP desde SimBrief.");

@@ -262,73 +262,76 @@ export function validateIfrRoute(
 ): IfrRouteValidationResult {
   const routeClean = text(route);
   
+  // REGLA: Bloquear solo si ruta es null, vacía, o exactamente igual al destino
   if (!routeClean) {
     return {
       valid: false,
       errorCode: "SIMBRIEF_IFR_ROUTE_MISSING",
-      errorMessage: "El OFP no contiene una ruta IFR. Selecciona una ruta sugerida en SimBrief, genera nuevamente el OFP y vuelve a cargarlo.",
+      errorMessage: "El OFP no contiene una ruta. Genera el plan en SimBrief y vuelve a cargar.",
       route: routeClean,
       origin,
       destination,
     };
   }
   
-  // Si la ruta es solo el destino, es inválida
+  // REGLA: Rechazar SOLO si la ruta es exactamente el destino (ej: "SCIE")
+  // Esto indica que SimBrief no generó una ruta válida
   if (destination && routeClean === destination) {
     return {
       valid: false,
       errorCode: "SIMBRIEF_IFR_ROUTE_INVALID",
-      errorMessage: `La ruta del OFP es solo el destino (${destination}). Debe ser una ruta IFR completa con waypoints y aerovías.`,
+      errorMessage: `El OFP no tiene ruta definida (solo muestra destino ${destination}). Selecciona una ruta sugerida en SimBrief.`,
       route: routeClean,
       origin,
       destination,
     };
   }
   
-  // Si la ruta es solo origen-destino sin puntos intermedios
-  const originDestPattern = origin && destination 
-    ? new RegExp(`^${origin}\\s+DCT\\s+${destination}$`, "i")
-    : null;
-  if (originDestPattern && originDestPattern.test(routeClean)) {
+  // REGLA: Aceptar rutas que contienen origen + destino
+  // Ejemplos válidos:
+  // - SCTE DCT SCIE (directo, aceptado si viene de SimBrief)
+  // - SCTE/35 N0180F080 SCIE/02 (ruta con procedimientos)
+  // - VOVK4A VOVKI V551 NIA V103 ANGOL ANG05A (ruta con airways)
+  
+  const hasOrigin = origin ? routeClean.toUpperCase().includes(origin) : false;
+  const hasDest = destination ? routeClean.toUpperCase().includes(destination) : false;
+  
+  // Si tiene origen y destino, considerarla válida
+  // SimBrief genera diferentes formatos según la ruta seleccionada
+  if (hasOrigin && hasDest) {
     return {
-      valid: false,
-      errorCode: "SIMBRIEF_IFR_ROUTE_INVALID",
-      errorMessage: "La ruta del OFP es un directo origen-destino sin puntos intermedios. Debe ser una ruta IFR con waypoints o aerovías.",
+      valid: true,
       route: routeClean,
       origin,
       destination,
     };
   }
   
-  // Contar segmentos útiles (waypoints, airways, SID, STAR)
-  // Excluir origen, destino, y palabras como DCT
-  const segments = routeClean
-    .split(/\s+/)
-    .filter(s => s && s.length >= 2 && s !== "DCT" && s !== "DIRECT");
+  // Si no tiene origen/destino claros pero tiene contenido válido (waypoints, airways)
+  // también aceptar - puede ser una ruta parcial o diferente
+  const segments = routeClean.split(/\s+/).filter(s => s.length >= 2);
+  const hasWaypoints = segments.some(s => 
+    /^[A-Z]{5}$/.test(s) || // Fixes (VOVKI, ANGOL)
+    /^[A-Z]{3}\d[A-Z]?$/.test(s) || // SIDs/STARs (VOVK4A, ANG05A)
+    /^V\d{2,4}$/.test(s) || // Airways (V551, V103)
+    /^[A-Z]\d{2,4}$/.test(s) || // Airways variantes
+    s.includes("/") // Procedimientos con pista (SCTE/35)
+  );
   
-  // Una ruta IFR válida debe tener:
-  // - Al menos un waypoint intermedio, airway, SID o STAR
-  // - O al menos 3 segmentos (origen + algo intermedio + destino)
-  const usefulSegments = segments.filter(s => {
-    const isOrigin = origin && s === origin;
-    const isDest = destination && s === destination;
-    const isDirect = s === "DCT" || s === "DIRECT";
-    return !isOrigin && !isDest && !isDirect;
-  });
-  
-  if (usefulSegments.length < 1) {
+  if (hasWaypoints) {
     return {
-      valid: false,
-      errorCode: "SIMBRIEF_IFR_ROUTE_INVALID",
-      errorMessage: "La ruta del OFP no contiene waypoints, aerovías, SID o STAR válidos.",
+      valid: true,
       route: routeClean,
       origin,
       destination,
     };
   }
   
+  // Si no cumple ninguna regla, rechazar
   return {
-    valid: true,
+    valid: false,
+    errorCode: "SIMBRIEF_IFR_ROUTE_INVALID",
+    errorMessage: "La ruta del OFP no es reconocida como válida.",
     route: routeClean,
     origin,
     destination,
