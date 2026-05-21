@@ -20,6 +20,12 @@ function fail(msg) {
 function checkContains(rel, needles) {
   const content = read(rel);
   for (const needle of needles) {
+    if (Array.isArray(needle)) {
+      if (!needle.some((option) => content.includes(option))) {
+        fail(`${rel} no contiene ninguna opción requerida: ${needle.join(" | ")}`);
+      }
+      continue;
+    }
     if (!content.includes(needle)) fail(`${rel} no contiene: ${needle}`);
   }
   ok(`${rel} contiene trazas requeridas`);
@@ -40,7 +46,7 @@ checkContains("src/lib/simbrief/aircraft-map.ts", [
 checkContains("src/components/dispatch/DispatchRoomClient.tsx", [
   "Generar plan de vuelo en SimBrief",
   "Cargar OFP",
-  "requiresSimbrief ? Boolean(simbriefOfp?.route",
+  "const canContinuePlan = requiresSimbrief",
   "readOnly={requiresSimbrief}",
 ]);
 

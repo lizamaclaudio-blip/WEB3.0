@@ -23,8 +23,11 @@ function errorResponse(error: unknown) {
     ORIGIN_NOT_FOUND: "El aeropuerto de origen no existe o no esta activo.",
     DESTINATION_NOT_FOUND: "El aeropuerto de destino no existe o no esta activo.",
     AIRCRAFT_NOT_ALLOWED_FOR_PILOT: "La aeronave no esta disponible para tu rango, ubicacion operacional o tipo de despacho.",
-    ACTIVE_RESERVATION_EXISTS: "Ya tienes una reserva activa para otra ruta. Cancelala o enviala a ACARS.",
-    AIRCRAFT_RESERVED_BY_OTHER: "Esta aeronave ya esta reservada por otro piloto.",
+    ACTIVE_RESERVATION_EXISTS: "Ya tienes una reserva activa. Cancelala o enviala a ACARS antes de crear una nueva.",
+    PILOT_HAS_ACTIVE_RESERVATION: "Ya tienes una reserva activa. Enviala a ACARS o cancelala antes de crear otra.",
+    PILOT_ALREADY_HAS_ACTIVE_RESERVATION:
+      "Ya tienes una reserva activa. Enviala a ACARS, cancelala o espera que expire antes de crear otra.",
+    AIRCRAFT_RESERVED_BY_OTHER: "La aeronave seleccionada ya esta reservada temporalmente por otro piloto.",
     ACTIVE_FLIGHT_IN_PROGRESS: "Tienes un vuelo activo en progreso. Finaliza o evalua el vuelo actual antes de crear uno nuevo.",
     TRAINING_RESERVATION_FAILED: "Error al crear la reserva temporal. Intenta nuevamente.",
     DB_TRANSACTION_FAILED: "Error de base de datos al crear la reserva. Contacte soporte.",

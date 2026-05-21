@@ -96,6 +96,9 @@ type DispatchReservation = {
   aircraft_registration?: string | null;
   aircraft_model_code?: string | null;
   route_id?: string | null;
+  assigned_flight_number?: string | null;
+  assigned_callsign?: string | null;
+  airline_icao?: string | null;
   origin_ident: string;
   destination_ident: string;
   operation_type: string;
@@ -1015,7 +1018,7 @@ function FinalStage({
           <span className={styles.sopBadge}>{isAcarsReady ? "ACARS READY" : isReady ? "TEMP ACTIVO" : "PRE-ACTIVO"}</span>
           <strong>Procedimiento de Operaciones</strong>
           <p>{operationLabel}: verificar origen, destino, aeronave, nivel de vuelo {flightLevel}, combustible y condiciones meteorologicas antes de enviar a ACARS.</p>
-          <p>La reserva temporal dura 15 minutos. Si no se envia a ACARS, queda expirada/anulada y vuelve al estado anterior.</p>
+          <p>Esta reserva bloquea la aeronave por 15 minutos. La ruta sigue disponible para otros pilotos.</p>
         </div>
       </section>
     </div>
@@ -1349,8 +1352,9 @@ export default function DispatchRoomClient({
     }
 
     const mapper = mapAircraftCodeToSimbrief(selectedAircraft?.model_code || "");
-    // Usar helper para obtener número de vuelo PWG correcto (nunca SCTE-SCIE)
     const pwgFlight = getSimbriefFlightNumber(selectedRoute?.route_code, originIdent, destinationIdent);
+    const assignedFlightNumber = normalizeText(reservationState.reservation?.assigned_flight_number, pwgFlight.flightNumber);
+    const assignedCallsign = normalizeText(reservationState.reservation?.assigned_callsign, `PWG${assignedFlightNumber}`);
     const prefill = new URL("https://dispatch.simbrief.com/options/custom");
     if (simbriefUserId.trim()) prefill.searchParams.set("userid", simbriefUserId.trim());
     if (simbriefUsername.trim()) prefill.searchParams.set("username", simbriefUsername.trim());
@@ -1359,9 +1363,8 @@ export default function DispatchRoomClient({
     prefill.searchParams.set("type", mapper.simbriefCode || (selectedAircraft?.model_code || ""));
     prefill.searchParams.set("reg", selectedAircraft?.registration || "");
     // fltnum debe ser SOLO el número (ej: "695"), no "PWG695" ni "SCTE-SCIE"
-    prefill.searchParams.set("fltnum", pwgFlight.flightNumber);
-    // callsign debe ser PWG + número (ej: "PWG695")
-    prefill.searchParams.set("callsign", pwgFlight.callsign);
+    prefill.searchParams.set("fltnum", assignedFlightNumber);
+    prefill.searchParams.set("callsign", assignedCallsign);
     // airline siempre PWG
     prefill.searchParams.set("airline", "PWG");
     prefill.searchParams.set("route", effectiveRouteText || "");
@@ -1604,7 +1607,7 @@ export default function DispatchRoomClient({
       setReservationState({
         status: "ready",
         message: reservation.reusedExistingReservation
-          ? "Ya tenias una reserva activa. Puedes enviarla a ACARS."
+          ? "Ya tienes una reserva activa. Envíala a ACARS o cancélala antes de crear otra."
           : "Reserva temporal creada. Disponible por 15 minutos.",
         reservation,
         acarsPayload: null,
