@@ -19,6 +19,11 @@ export type AircraftTechnicalProfile = {
   baggagePerPassengerKg: number;
   maxBaggageKg: number;
 
+  // Payload limits for SimBrief safety
+  standardPassengerWeightKg: number; // 84kg includes carry-on
+  operationalMtowBufferKg: number; // Safety margin below MTOW
+  maxPassengerFlightCargoKg: number; // Max commercial cargo in passenger flight (usually 0)
+
   // Fuel & Performance
   fuelCapacityKg: number;
   reserveFuelKg: number;
@@ -71,6 +76,9 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxPayloadKg: 360,
     baggagePerPassengerKg: 20,
     maxBaggageKg: 60,
+    standardPassengerWeightKg: 84,
+    operationalMtowBufferKg: 50,
+    maxPassengerFlightCargoKg: 0,
     fuelCapacityKg: 144, // 56 gal * 6lb/gal / 2.2
     reserveFuelKg: 45,
     avgFuelBurnKgHour: 28,
@@ -111,6 +119,9 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxPayloadKg: 680,
     baggagePerPassengerKg: 20,
     maxBaggageKg: 100,
+    standardPassengerWeightKg: 84,
+    operationalMtowBufferKg: 100,
+    maxPassengerFlightCargoKg: 0,
     fuelCapacityKg: 320, // ~140 gal
     reserveFuelKg: 90,
     avgFuelBurnKgHour: 75,
@@ -151,6 +162,9 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxPayloadKg: 1860,
     baggagePerPassengerKg: 20,
     maxBaggageKg: 220,
+    standardPassengerWeightKg: 84,
+    operationalMtowBufferKg: 150,
+    maxPassengerFlightCargoKg: 0,
     fuelCapacityKg: 1134, // 335 gal
     reserveFuelKg: 200,
     avgFuelBurnKgHour: 170,
@@ -174,7 +188,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
       aircraftType: "C208",
       units: "KGS",
       defaultPassengers: 6,
-      defaultCargoKg: 400,
+      defaultCargoKg: 300, // Conservative for cargo flights; passenger flights use baggage calculation
     },
     source: "manufacturer",
   },
@@ -191,6 +205,9 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxPayloadKg: 620,
     baggagePerPassengerKg: 20,
     maxBaggageKg: 100,
+    standardPassengerWeightKg: 84,
+    operationalMtowBufferKg: 150,
+    maxPassengerFlightCargoKg: 0,
     fuelCapacityKg: 408, // 292 gal
     reserveFuelKg: 100,
     avgFuelBurnKgHour: 115,
@@ -231,6 +248,9 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxPayloadKg: 1100,
     baggagePerPassengerKg: 20,
     maxBaggageKg: 200,
+    standardPassengerWeightKg: 84,
+    operationalMtowBufferKg: 200,
+    maxPassengerFlightCargoKg: 0,
     fuelCapacityKg: 1670, // 490 gal
     reserveFuelKg: 250,
     avgFuelBurnKgHour: 200,
@@ -271,6 +291,9 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxPayloadKg: 2100,
     baggagePerPassengerKg: 20,
     maxBaggageKg: 380,
+    standardPassengerWeightKg: 84,
+    operationalMtowBufferKg: 250,
+    maxPassengerFlightCargoKg: 0,
     fuelCapacityKg: 1040, // 305 gal
     reserveFuelKg: 180,
     avgFuelBurnKgHour: 185,
@@ -311,6 +334,9 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxPayloadKg: 7500,
     baggagePerPassengerKg: 20,
     maxBaggageKg: 1400,
+    standardPassengerWeightKg: 84,
+    operationalMtowBufferKg: 500,
+    maxPassengerFlightCargoKg: 0,
     fuelCapacityKg: 5000, // ~1650 gal
     reserveFuelKg: 600,
     avgFuelBurnKgHour: 550,
@@ -351,6 +377,9 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxPayloadKg: 9800,
     baggagePerPassengerKg: 20,
     maxBaggageKg: 1480,
+    standardPassengerWeightKg: 84,
+    operationalMtowBufferKg: 600,
+    maxPassengerFlightCargoKg: 0,
     fuelCapacityKg: 7200, // ~2200 gal
     reserveFuelKg: 800,
     avgFuelBurnKgHour: 750,
@@ -391,6 +420,9 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxPayloadKg: 10600,
     baggagePerPassengerKg: 20,
     maxBaggageKg: 1600,
+    standardPassengerWeightKg: 84,
+    operationalMtowBufferKg: 700,
+    maxPassengerFlightCargoKg: 0,
     fuelCapacityKg: 7800,
     reserveFuelKg: 850,
     avgFuelBurnKgHour: 820,
@@ -431,6 +463,9 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxPayloadKg: 23000,
     baggagePerPassengerKg: 20,
     maxBaggageKg: 3240,
+    standardPassengerWeightKg: 84,
+    operationalMtowBufferKg: 1000,
+    maxPassengerFlightCargoKg: 0,
     fuelCapacityKg: 21000, // ~6800 gal
     reserveFuelKg: 2000,
     avgFuelBurnKgHour: 2400,
@@ -471,6 +506,9 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxPayloadKg: 77500,
     baggagePerPassengerKg: 0,
     maxBaggageKg: 0,
+    standardPassengerWeightKg: 0,
+    operationalMtowBufferKg: 2000,
+    maxPassengerFlightCargoKg: 0,
     fuelCapacityKg: 73000,
     reserveFuelKg: 8000,
     avgFuelBurnKgHour: 9000,

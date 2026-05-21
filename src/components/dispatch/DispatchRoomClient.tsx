@@ -1354,21 +1354,28 @@ export default function DispatchRoomClient({
     // Si no hay OFP cargado, usar defaults del perfil técnico
     if (!simbriefOfp && techProfile) {
       if (isCargo) {
-        // Vuelo cargo: pax siempre 0, cargo desde default del perfil
+        // Vuelo cargo: pax siempre 0, cargo desde default del perfil (conservador)
         prefillPax = 0;
-        prefillCargo = techProfile.simbrief.defaultCargoKg ?? Math.round(techProfile.maxCargoKg * 0.4);
+        prefillCargo = techProfile.simbrief.defaultCargoKg ?? Math.round(techProfile.maxCargoKg * 0.3);
       } else {
         // Vuelo pax: usar default del perfil o 50% de capacidad
         prefillPax = techProfile.simbrief.defaultPassengers ?? Math.round(techProfile.passengerCapacity * 0.5);
-        prefillCargo = techProfile.simbrief.defaultCargoKg ?? Math.round(prefillPax * techProfile.baggagePerPassengerKg);
+        // Para vuelos pax: calcular equipaje, NUNCA usar defaultCargoKg (que es para carga comercial)
+        const baggageKg = Math.round(prefillPax * techProfile.baggagePerPassengerKg);
+        // En vuelos pax, carga comercial = 0 (maxPassengerFlightCargoKg)
+        prefillCargo = Math.min(baggageKg, techProfile.maxPassengerFlightCargoKg);
       }
     }
     
-    // Validar límites de aeronave
+    // Validar límites de aeronave con margen de seguridad MTOW
     if (techProfile) {
       prefillPax = Math.min(prefillPax, techProfile.passengerCapacity);
-      const maxBaggage = prefillPax * techProfile.baggagePerPassengerKg;
-      prefillCargo = Math.min(prefillCargo, techProfile.maxCargoKg - maxBaggage);
+      // Para vuelos pax: solo equipaje permitido (sin carga comercial)
+      const maxBaggageKg = prefillPax * techProfile.baggagePerPassengerKg;
+      const maxAllowedCargo = isCargo 
+        ? techProfile.maxCargoKg 
+        : Math.min(techProfile.maxPassengerFlightCargoKg, maxBaggageKg);
+      prefillCargo = Math.min(prefillCargo, maxAllowedCargo);
     }
     
     prefill.searchParams.set("pax", String(prefillPax));
