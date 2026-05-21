@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <item>
-  <version>7.1.0</version>
-  <url>https://qoradagitvccyabfkgkw.supabase.co/storage/v1/object/public/acars-releases/PatagoniaWingsACARSSetup.exe</url>
-  <changelog>ACARS 7.1.0 - Migracion oficial a Web 3.0: claim v1, finalize canonico, idempotencia y evidencia ACARS como caja negra.</changelog>
-  <mandatory>true</mandatory>
+  <version>7.1.1</version>
+  <url>https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe</url>
+  <changelog>ACARS 7.1.1 - Hotfix: corregido bucle de autoupdate. No hay actualizacion si version es igual.</changelog>
+  <mandatory>false</mandatory>
 </item>
