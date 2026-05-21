@@ -87,7 +87,7 @@ export default function RegisterPage() {
         throw new Error(data?.error ?? "No se pudo crear la cuenta.");
       }
 
-      setMessage("Cuenta creada. Tu callsign PWG fue asignado automaticamente y quedaste en estado pendiente de aprobacion.");
+      setMessage("Cuenta creada. Tu callsign PWG fue asignado automaticamente y tu perfil quedo activo.");
       setTimeout(() => router.push(data.redirectTo ?? "/dashboard"), 700);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo crear la cuenta.");
@@ -100,12 +100,12 @@ export default function RegisterPage() {
     <AuthShell
       eyebrow="Nuevo piloto"
       title="Crear cuenta"
-      description="Solicita tu ingreso a Patagonia Wings. El sistema asignara tu callsign PWG automaticamente, iniciando como CADET en el hub escuela que selecciones."
+      description="Crea tu cuenta en Patagonia Wings. El sistema asigna tu callsign PWG automaticamente y activa tu perfil como CADET."
       sideTitle="Proceso de ingreso"
       sideItems={[
         "Completa tus datos basicos de postulacion.",
         "El sistema asigna automaticamente el siguiente callsign PWG disponible.",
-        "Tu cuenta queda como CADET y PENDING_APPROVAL hasta revision operacional.",
+        "Tu cuenta queda activa automaticamente como CADET.",
       ]}
     >
       <form className="space-y-5" aria-label="Formulario de creacion de cuenta" onSubmit={onSubmit}>
@@ -165,7 +165,7 @@ export default function RegisterPage() {
 
         <label className="flex items-start gap-3 text-sm leading-6 text-slate-600">
           <input type="checkbox" required className="mt-1 h-4 w-4 rounded border-slate-300 accent-[#0B4F8A]" />
-          <span>Declaro que usare la plataforma como piloto virtual y acepto que la activacion puede requerir revision del equipo Patagonia Wings.</span>
+          <span>Declaro que usare la plataforma como piloto virtual y acepto las normas operacionales de Patagonia Wings.</span>
         </label>
 
         {error && <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</div>}

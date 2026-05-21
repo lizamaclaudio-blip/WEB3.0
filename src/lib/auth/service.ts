@@ -18,6 +18,8 @@ export type LoginPilotInput = {
   password: string;
 };
 
+const INITIAL_PILOT_WALLET_GRANT_USD = 25000;
+
 export type AuthenticatedPilot = {
   userId: string;
   email: string;
@@ -161,6 +163,92 @@ async function deleteExpiredSessions() {
   await dbQuery("delete from public.app_sessions where expires_at <= now()");
 }
 
+async function getNextAvailablePilotCallsign(client: PoolClient) {
+  await client.query("lock table public.pilot_profiles in share row exclusive mode");
+  const rows = await client.query<{ callsign: string }>(
+    `select callsign
+       from public.pilot_profiles
+      where callsign ~ '^PWG[0-9]{3,}$'
+        and upper(coalesce(pilot_status, '')) not in ('ARCHIVED', 'DELETED', 'INACTIVE_ARCHIVED')`,
+  );
+
+  const used = new Set<number>();
+  for (const row of rows.rows) {
+    const match = /^PWG(\d{3,})$/i.exec(row.callsign ?? "");
+    if (!match) continue;
+    used.add(Number(match[1]));
+  }
+
+  let next = 1;
+  while (used.has(next)) next += 1;
+  return `PWG${String(next).padStart(3, "0")}`;
+}
+
+async function ensureInitialPilotWalletGrant(input: {
+  client: PoolClient;
+  pilotId: string;
+  callsign: string;
+  reason: string;
+}) {
+  const idempotencyKey = `pilot_initial_grant:${input.pilotId}`;
+  const exists = await input.client.query<{ id: string }>(
+    `select id::text
+       from public.pw3_economy_ledger
+      where idempotency_key = $1
+      limit 1`,
+    [idempotencyKey],
+  );
+  if (exists.rows[0]?.id) return { applied: false, idempotencyKey };
+
+  await input.client.query(
+    `insert into public.pw3_pilot_wallets (pilot_id, callsign)
+     values ($1::uuid, $2)
+     on conflict do nothing`,
+    [input.pilotId, input.callsign],
+  );
+
+  const wallet = await input.client.query<{ id: string; wallet_balance_usd: number }>(
+    `select id::text, wallet_balance_usd
+       from public.pw3_pilot_wallets
+      where pilot_id = $1::uuid
+         or lower(callsign) = lower($2)
+      order by case when pilot_id = $1::uuid then 0 else 1 end
+      limit 1
+      for update`,
+    [input.pilotId, input.callsign],
+  );
+
+  const walletId = wallet.rows[0]?.id;
+  if (!walletId) throw new AuthError("REGISTER_FAILED", "No se pudo inicializar wallet del piloto.", 500);
+
+  await input.client.query(
+    `update public.pw3_pilot_wallets
+        set callsign = $2,
+            wallet_balance_usd = coalesce(wallet_balance_usd, 0) + $3,
+            total_earned_usd = coalesce(total_earned_usd, 0) + $3,
+            updated_at = now()
+      where id = $1::uuid`,
+    [walletId, input.callsign, INITIAL_PILOT_WALLET_GRANT_USD],
+  );
+
+  await input.client.query(
+    `insert into public.pw3_economy_ledger
+      (pilot_id, callsign, source, type, category, direction, amount_usd, description, status, metadata, idempotency_key, created_by)
+     values
+      ($1::uuid, $2, 'system', 'adjustment', 'pilot_initial_grant', 'credit', $3, $4, 'posted', $5::jsonb, $6, 'auth-register')`,
+    [
+      input.pilotId,
+      input.callsign,
+      INITIAL_PILOT_WALLET_GRANT_USD,
+      "Capital inicial carrera Patagonia Wings 3.0",
+      JSON.stringify({ reason: input.reason, flow: "register" }),
+      idempotencyKey,
+    ],
+  );
+
+  return { applied: true, idempotencyKey };
+}
+
 export async function registerPilot(input: RegisterPilotInput) {
   await ensureAuthSchema();
   const valid = assertValidRegisterInput(input);
@@ -169,10 +257,24 @@ export async function registerPilot(input: RegisterPilotInput) {
 
   try {
     return await dbTransaction(async (client) => {
+      const existing = await client.query<{ id: string; email: string }>(
+        `select id::text, email
+           from public.app_users
+          where lower(email) = lower($1)
+          limit 1`,
+        [valid.email],
+      );
+      if (existing.rows[0]?.id) {
+        throw new AuthError(
+          "EMAIL_EXISTS",
+          "Este correo ya esta registrado. Inicia sesion o recupera tu contrasena.",
+          409,
+        );
+      }
+
       const userResult = await client.query<{ id: string }>(
         `insert into public.app_users (email, display_name, first_name, last_name, metadata)
          values ($1, $2, $3, $4, $5::jsonb)
-         on conflict (email) do nothing
          returning id`,
         [
           valid.email,
@@ -184,7 +286,13 @@ export async function registerPilot(input: RegisterPilotInput) {
       );
 
       const userId = userResult.rows[0]?.id;
-      if (!userId) throw new AuthError("EMAIL_EXISTS", "Ya existe una cuenta con ese correo.", 409);
+      if (!userId) {
+        throw new AuthError(
+          "EMAIL_EXISTS",
+          "Este correo ya esta registrado. Inicia sesion o recupera tu contrasena.",
+          409,
+        );
+      }
 
       await client.query(
         `insert into public.app_user_credentials (user_id, password_hash, password_salt, password_algorithm)
@@ -196,6 +304,26 @@ export async function registerPilot(input: RegisterPilotInput) {
         "select public.pw_create_pilot_profile_for_user($1::uuid, $2::text, $3::text)::text as pilot_id",
         [userId, valid.email, displayName],
       );
+
+      const callsign = await getNextAvailablePilotCallsign(client);
+      const callsignNumber = Number(callsign.slice(3));
+      await client.query(
+        `update public.pilot_profiles
+            set callsign = $2,
+                callsign_number = $3,
+                rank_code = 'CADET',
+                pilot_status = 'ACTIVE',
+                updated_at = now()
+          where id = $1::uuid`,
+        [userId, callsign, callsignNumber],
+      );
+
+      await ensureInitialPilotWalletGrant({
+        client,
+        pilotId: userId,
+        callsign,
+        reason: "registration",
+      });
 
       await client.query("select public.pw_select_initial_training_hub($1::uuid, $2::text)", [userId, valid.hubIdent]);
 
