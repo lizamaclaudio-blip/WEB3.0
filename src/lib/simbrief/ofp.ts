@@ -132,25 +132,54 @@ export function normalizeSimbriefOfp(raw: AnyObj): NormalizedSimbriefOfp {
   const atc = (raw.atc as AnyObj) ?? {};
   const navlog = (raw.navlog as AnyObj) ?? {};
 
-  // Buscar ruta en múltiples campos
+  // EXTRAER RUTA IFR: Buscar en múltiples campos con prioridad
+  // SimBrief puede entregar la ruta en diferentes campos según el tipo de OFP
+  const textPlan = (raw.text as AnyObj) ?? {};
+  const fms = (raw.fms as AnyObj) ?? {};
+  const selectedRoute = (raw.selected_route as AnyObj) ?? {};
+  
   const routeCandidates = [
+    // Prioridad 1: Campos oficiales de ruta
     general.route,
     general.route_ifps,
     atc.route,
     params.route,
     apiParams.route,
+    selectedRoute.route,
+    // Prioridad 2: Plan de vuelo textual
+    textPlan.plan,
+    textPlan.route,
+    // Prioridad 3: Navlog/FMS
     navlog.route,
+    fms.route,
     files.navlog,
     raw.route,
   ];
   
-  // Si no hay ruta explícita, construir simple
+  // Debug: Log para encontrar campo exacto de ruta (seguro, no imprime tokens)
+  if (typeof process !== "undefined" && process.env.NODE_ENV === "development") {
+    // eslint-disable-next-line no-console
+    console.log("[simbrief-ofp] route candidates", {
+      generalRoute: general.route,
+      atcRoute: atc.route,
+      navlogRoute: navlog.route,
+      textRoute: textPlan.plan || textPlan.route,
+      paramsRoute: params.route,
+      apiParamsRoute: apiParams.route,
+      fmsRoute: fms.route,
+      selectedRoute: selectedRoute.route,
+      rawRoute: raw.route,
+      origin: origin.icao_code,
+      destination: destination.icao_code,
+    });
+  }
+  
   let routeText = first(...routeCandidates);
   const originIdent = upper(first(origin.icao_code, general.orig_icao, raw.orig));
   const destIdent = upper(first(destination.icao_code, general.dest_icao, raw.dest));
-  if (!routeText && originIdent && destIdent) {
-    routeText = `${originIdent} DCT ${destIdent}`;
-  }
+  
+  // NO construir fallback automático - eso oculta problemas de ruta
+  // La web NO debe inventar rutas, debe usar la ruta real del OFP SimBrief
 
   // Normalizar altitud y flight level
   const cruiseAlt = first(general.initial_altitude, params.initial_altitude, general.cruise_profile, params.cruise_profile);
@@ -204,5 +233,104 @@ export function normalizeSimbriefOfp(raw: AnyObj): NormalizedSimbriefOfp {
     estBlockTimeMinutes: Math.round(num(first(times.est_time_block, raw.est_block_minutes))),
     estFlightTimeMinutes: Math.round(num(first(times.est_time_enroute, raw.est_flight_minutes))),
     raw,
+  };
+}
+
+// Tipo para resultado de validación de ruta IFR
+export type IfrRouteValidationResult = {
+  valid: boolean;
+  errorCode?: "SIMBRIEF_IFR_ROUTE_MISSING" | "SIMBRIEF_IFR_ROUTE_INVALID";
+  errorMessage?: string;
+  route?: string;
+  origin?: string;
+  destination?: string;
+};
+
+/**
+ * Valida que una ruta sea una ruta IFR válida (no solo destino u origen-destino sin puntos)
+ * 
+ * Reglas de validación:
+ * - Debe contener waypoints, airways, SID o STAR (mínimo 2 segmentos útiles)
+ * - NO es válida si es solo el destino (ej: "SCIE")
+ * - NO es válida si es solo origen-destino sin puntos intermedios (ej: "SCTE DCT SCIE")
+ * - NO es válida si está vacía o null
+ */
+export function validateIfrRoute(
+  route: string | null | undefined,
+  origin?: string,
+  destination?: string
+): IfrRouteValidationResult {
+  const routeClean = text(route);
+  
+  if (!routeClean) {
+    return {
+      valid: false,
+      errorCode: "SIMBRIEF_IFR_ROUTE_MISSING",
+      errorMessage: "El OFP no contiene una ruta IFR. Selecciona una ruta sugerida en SimBrief, genera nuevamente el OFP y vuelve a cargarlo.",
+      route: routeClean,
+      origin,
+      destination,
+    };
+  }
+  
+  // Si la ruta es solo el destino, es inválida
+  if (destination && routeClean === destination) {
+    return {
+      valid: false,
+      errorCode: "SIMBRIEF_IFR_ROUTE_INVALID",
+      errorMessage: `La ruta del OFP es solo el destino (${destination}). Debe ser una ruta IFR completa con waypoints y aerovías.`,
+      route: routeClean,
+      origin,
+      destination,
+    };
+  }
+  
+  // Si la ruta es solo origen-destino sin puntos intermedios
+  const originDestPattern = origin && destination 
+    ? new RegExp(`^${origin}\\s+DCT\\s+${destination}$`, "i")
+    : null;
+  if (originDestPattern && originDestPattern.test(routeClean)) {
+    return {
+      valid: false,
+      errorCode: "SIMBRIEF_IFR_ROUTE_INVALID",
+      errorMessage: "La ruta del OFP es un directo origen-destino sin puntos intermedios. Debe ser una ruta IFR con waypoints o aerovías.",
+      route: routeClean,
+      origin,
+      destination,
+    };
+  }
+  
+  // Contar segmentos útiles (waypoints, airways, SID, STAR)
+  // Excluir origen, destino, y palabras como DCT
+  const segments = routeClean
+    .split(/\s+/)
+    .filter(s => s && s.length >= 2 && s !== "DCT" && s !== "DIRECT");
+  
+  // Una ruta IFR válida debe tener:
+  // - Al menos un waypoint intermedio, airway, SID o STAR
+  // - O al menos 3 segmentos (origen + algo intermedio + destino)
+  const usefulSegments = segments.filter(s => {
+    const isOrigin = origin && s === origin;
+    const isDest = destination && s === destination;
+    const isDirect = s === "DCT" || s === "DIRECT";
+    return !isOrigin && !isDest && !isDirect;
+  });
+  
+  if (usefulSegments.length < 1) {
+    return {
+      valid: false,
+      errorCode: "SIMBRIEF_IFR_ROUTE_INVALID",
+      errorMessage: "La ruta del OFP no contiene waypoints, aerovías, SID o STAR válidos.",
+      route: routeClean,
+      origin,
+      destination,
+    };
+  }
+  
+  return {
+    valid: true,
+    route: routeClean,
+    origin,
+    destination,
   };
 }

@@ -4,6 +4,7 @@ import IcaoFlagBadge from "@/components/ui/IcaoFlagBadge";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./DispatchRoom.module.css";
 import { mapAircraftCodeToSimbrief } from "@/lib/simbrief/aircraft-map";
+import { validateIfrRoute } from "@/lib/simbrief/ofp";
 import { getSimbriefFlightNumber, extractPwgFlightNumber, buildPwgCallsign, generatePwgFlightNumber } from "@/lib/dispatch/flight-number";
 import { getAircraftTechnicalProfile } from "@/lib/aircraft/technical-profiles";
 
@@ -1202,12 +1203,17 @@ export default function DispatchRoomClient({
   const requiresSimbrief = selectedOperation?.requires_simbrief ?? isOfficialDispatchMode(mode);
   const originAirport = getAirportFromList(originIdent, originResults, currentAirport);
   const destinationAirport = getAirportFromList(destinationIdent, destinationResults, null);
-  const effectiveRouteText = routeText || (originIdent && destinationIdent ? buildPlanRoute(originIdent, destinationIdent) : "");
+  // REGLA: Para vuelos IFR/oficiales, NO usar fallback de ruta - debe venir del OFP SimBrief
+  const effectiveRouteText = simbriefOfp?.route || routeText || "";
   const operationAllowed = selectedOperation?.allowed_for_rank ?? true;
   const routeCandidates = useMemo(() => routes.filter((route) => (route.blocked_reasons || []).length === 0), [routes]);
   const canContinueSearch = (mode === "official_route" || mode === "cargo_official") ? Boolean(selectedRoute) : Boolean(originIdent && destinationIdent && operationAllowed);
   const canContinueAircraft = Boolean(originIdent && destinationIdent && selectedAircraft && operationAllowed);
-  const canContinuePlan = requiresSimbrief ? Boolean(simbriefOfp?.route && simbriefOfp?.flightLevel && simbriefOfp?.alternate) : Boolean(effectiveRouteText.trim() && flightLevel && alternateIdent.trim());
+  // REGLA: Para SimBrief, requerir ruta IFR válida (no solo destino)
+  const hasValidIfrRoute = simbriefOfp?.route && simbriefOfp.route.length > 5 && simbriefOfp.route !== destinationIdent;
+  const canContinuePlan = requiresSimbrief 
+    ? Boolean(hasValidIfrRoute && simbriefOfp?.flightLevel && simbriefOfp?.alternate) 
+    : Boolean(effectiveRouteText.trim() && flightLevel && alternateIdent.trim());
   const isCargo = isCargoMode(mode);
   const effectivePassengerCount = isCargo ? 0 : Math.round(asNumber(simbriefOfp?.passengerCount, passengerCount));
   const requiresSelectedRoute = mode === "official_route" || mode === "cargo_official";
@@ -1351,31 +1357,52 @@ export default function DispatchRoomClient({
     let prefillPax = effectivePassengerCount;
     let prefillCargo = effectiveCargoKg;
     
+    // REGLA DE PAYLOAD: Separar equipaje (baggage) de carga comercial (cargo)
+    // Passenger flight: pax > 0, baggageKg > 0, commercialCargoKg = 0
+    // Cargo flight: pax = 0, baggageKg = 0, commercialCargoKg > 0
+    
+    let passengerWeightKg = 0;
+    let baggageKg = 0;
+    let commercialCargoKg = 0;
+    
     // Si no hay OFP cargado, usar defaults del perfil técnico
     if (!simbriefOfp && techProfile) {
       if (isCargo) {
-        // Vuelo cargo: pax siempre 0, cargo desde default del perfil (conservador)
+        // Vuelo CARGO: pax = 0, baggage = 0, carga comercial desde escenario/default
         prefillPax = 0;
-        prefillCargo = techProfile.simbrief.defaultCargoKg ?? Math.round(techProfile.maxCargoKg * 0.3);
+        passengerWeightKg = 0;
+        baggageKg = 0;
+        // Carga comercial desde default del perfil (conservador) o escenario
+        commercialCargoKg = techProfile.simbrief.defaultCargoKg ?? Math.round(techProfile.maxCargoKg * 0.3);
+        prefillCargo = commercialCargoKg;
       } else {
-        // Vuelo pax: usar default del perfil o 50% de capacidad
+        // Vuelo PASSENGER: pax > 0, equipaje calculado, carga comercial = 0
         prefillPax = techProfile.simbrief.defaultPassengers ?? Math.round(techProfile.passengerCapacity * 0.5);
-        // Para vuelos pax: calcular equipaje, NUNCA usar defaultCargoKg (que es para carga comercial)
-        const baggageKg = Math.round(prefillPax * techProfile.baggagePerPassengerKg);
-        // En vuelos pax, carga comercial = 0 (maxPassengerFlightCargoKg)
-        prefillCargo = Math.min(baggageKg, techProfile.maxPassengerFlightCargoKg);
+        passengerWeightKg = prefillPax * (techProfile.standardPassengerWeightKg ?? 84);
+        baggageKg = prefillPax * techProfile.baggagePerPassengerKg;
+        commercialCargoKg = 0; // Vuelos pax NO llevan carga comercial
+        // SimBrief solo tiene un campo "cargo" → enviamos equipaje allí (conceptualmente es baggage)
+        prefillCargo = baggageKg;
       }
     }
     
     // Validar límites de aeronave con margen de seguridad MTOW
     if (techProfile) {
       prefillPax = Math.min(prefillPax, techProfile.passengerCapacity);
-      // Para vuelos pax: solo equipaje permitido (sin carga comercial)
-      const maxBaggageKg = prefillPax * techProfile.baggagePerPassengerKg;
-      const maxAllowedCargo = isCargo 
-        ? techProfile.maxCargoKg 
-        : Math.min(techProfile.maxPassengerFlightCargoKg, maxBaggageKg);
-      prefillCargo = Math.min(prefillCargo, maxAllowedCargo);
+      
+      if (isCargo) {
+        // Cargo flight: limitar carga comercial por capacidad
+        const maxAllowedCargo = techProfile.maxCargoKg;
+        commercialCargoKg = Math.min(prefillCargo, maxAllowedCargo);
+        prefillCargo = commercialCargoKg;
+      } else {
+        // Passenger flight: limitar equipaje por capacidad de bodega
+        const maxBaggageKg = prefillPax * techProfile.baggagePerPassengerKg;
+        baggageKg = Math.min(prefillCargo, maxBaggageKg, techProfile.maxBaggageKg);
+        commercialCargoKg = 0;
+        // SimBrief cargo field = equipaje (no hay carga comercial en vuelos pax)
+        prefillCargo = baggageKg;
+      }
     }
     
     prefill.searchParams.set("pax", String(prefillPax));
@@ -1430,10 +1457,21 @@ export default function DispatchRoomClient({
           SIMBRIEF_AIRCRAFT_NOT_IDENTIFIED: "No se pudo identificar la aeronave del OFP SimBrief. Revisa que el plan haya sido generado con la aeronave correcta (Cessna 208B para C208).",
           SIMBRIEF_OFP_NOT_FOUND: "No se encontró OFP en SimBrief. Genera primero el plan de vuelo.",
           SIMBRIEF_USER_NOT_CONFIGURED: "Configura tu usuario SimBrief en tu perfil.",
+          SIMBRIEF_IFR_ROUTE_MISSING: "El OFP no contiene una ruta IFR válida. Selecciona una ruta sugerida en SimBrief, genera nuevamente el OFP y vuelve a cargarlo.",
+          SIMBRIEF_IFR_ROUTE_INVALID: "La ruta del OFP no es una ruta IFR válida (waypoints, aerovías, SID/STAR). Selecciona una ruta sugerida en SimBrief.",
         };
         setSimbriefMessage(errorMessages[code as keyof typeof errorMessages] || `Error al cargar OFP (${code}).`);
         return;
       }
+      
+      // Validar ruta IFR del OFP
+      const routeValidation = validateIfrRoute(payload.ofp.route, originIdent, destinationIdent);
+      if (!routeValidation.valid) {
+        setSimbriefStatus("error");
+        setSimbriefMessage(routeValidation.errorMessage || "Ruta IFR no válida en el OFP.");
+        return;
+      }
+      
       setSimbriefOfp(payload.ofp);
       setSimbriefStatus("loaded");
       setSimbriefMessage("OFP cargado correctamente desde SimBrief.");

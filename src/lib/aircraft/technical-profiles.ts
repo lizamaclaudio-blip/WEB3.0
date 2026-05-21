@@ -78,7 +78,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxBaggageKg: 60,
     standardPassengerWeightKg: 84,
     operationalMtowBufferKg: 50,
-    maxPassengerFlightCargoKg: 0,
+    maxPassengerFlightCargoKg: 0, // Carga comercial permitida en vuelos de pasajeros (0 = ninguna)
     fuelCapacityKg: 144, // 56 gal * 6lb/gal / 2.2
     reserveFuelKg: 45,
     avgFuelBurnKgHour: 28,
@@ -121,7 +121,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxBaggageKg: 100,
     standardPassengerWeightKg: 84,
     operationalMtowBufferKg: 100,
-    maxPassengerFlightCargoKg: 0,
+    maxPassengerFlightCargoKg: 0, // Carga comercial permitida en vuelos de pasajeros (0 = ninguna)
     fuelCapacityKg: 320, // ~140 gal
     reserveFuelKg: 90,
     avgFuelBurnKgHour: 75,
@@ -164,7 +164,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxBaggageKg: 220,
     standardPassengerWeightKg: 84,
     operationalMtowBufferKg: 150,
-    maxPassengerFlightCargoKg: 0,
+    maxPassengerFlightCargoKg: 0, // Carga comercial permitida en vuelos de pasajeros (0 = ninguna)
     fuelCapacityKg: 1134, // 335 gal
     reserveFuelKg: 200,
     avgFuelBurnKgHour: 170,
@@ -207,7 +207,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxBaggageKg: 100,
     standardPassengerWeightKg: 84,
     operationalMtowBufferKg: 150,
-    maxPassengerFlightCargoKg: 0,
+    maxPassengerFlightCargoKg: 0, // Carga comercial permitida en vuelos de pasajeros (0 = ninguna)
     fuelCapacityKg: 408, // 292 gal
     reserveFuelKg: 100,
     avgFuelBurnKgHour: 115,
@@ -250,7 +250,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxBaggageKg: 200,
     standardPassengerWeightKg: 84,
     operationalMtowBufferKg: 200,
-    maxPassengerFlightCargoKg: 0,
+    maxPassengerFlightCargoKg: 0, // Carga comercial permitida en vuelos de pasajeros (0 = ninguna)
     fuelCapacityKg: 1670, // 490 gal
     reserveFuelKg: 250,
     avgFuelBurnKgHour: 200,
@@ -293,7 +293,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxBaggageKg: 380,
     standardPassengerWeightKg: 84,
     operationalMtowBufferKg: 250,
-    maxPassengerFlightCargoKg: 0,
+    maxPassengerFlightCargoKg: 0, // Carga comercial permitida en vuelos de pasajeros (0 = ninguna)
     fuelCapacityKg: 1040, // 305 gal
     reserveFuelKg: 180,
     avgFuelBurnKgHour: 185,
@@ -336,7 +336,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxBaggageKg: 1400,
     standardPassengerWeightKg: 84,
     operationalMtowBufferKg: 500,
-    maxPassengerFlightCargoKg: 0,
+    maxPassengerFlightCargoKg: 0, // Carga comercial permitida en vuelos de pasajeros (0 = ninguna)
     fuelCapacityKg: 5000, // ~1650 gal
     reserveFuelKg: 600,
     avgFuelBurnKgHour: 550,
@@ -379,7 +379,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxBaggageKg: 1480,
     standardPassengerWeightKg: 84,
     operationalMtowBufferKg: 600,
-    maxPassengerFlightCargoKg: 0,
+    maxPassengerFlightCargoKg: 0, // Carga comercial permitida en vuelos de pasajeros (0 = ninguna)
     fuelCapacityKg: 7200, // ~2200 gal
     reserveFuelKg: 800,
     avgFuelBurnKgHour: 750,
@@ -422,7 +422,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxBaggageKg: 1600,
     standardPassengerWeightKg: 84,
     operationalMtowBufferKg: 700,
-    maxPassengerFlightCargoKg: 0,
+    maxPassengerFlightCargoKg: 0, // Carga comercial permitida en vuelos de pasajeros (0 = ninguna)
     fuelCapacityKg: 7800,
     reserveFuelKg: 850,
     avgFuelBurnKgHour: 820,
@@ -465,7 +465,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxBaggageKg: 3240,
     standardPassengerWeightKg: 84,
     operationalMtowBufferKg: 1000,
-    maxPassengerFlightCargoKg: 0,
+    maxPassengerFlightCargoKg: 0, // Carga comercial permitida en vuelos de pasajeros (0 = ninguna)
     fuelCapacityKg: 21000, // ~6800 gal
     reserveFuelKg: 2000,
     avgFuelBurnKgHour: 2400,
@@ -508,7 +508,7 @@ const TECHNICAL_PROFILES: Record<string, AircraftTechnicalProfile> = {
     maxBaggageKg: 0,
     standardPassengerWeightKg: 0,
     operationalMtowBufferKg: 2000,
-    maxPassengerFlightCargoKg: 0,
+    maxPassengerFlightCargoKg: 0, // Carga comercial permitida en vuelos de pasajeros (0 = ninguna)
     fuelCapacityKg: 73000,
     reserveFuelKg: 8000,
     avgFuelBurnKgHour: 9000,
