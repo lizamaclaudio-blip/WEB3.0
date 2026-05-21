@@ -445,43 +445,74 @@ async function resolveRouteForReservation(input: {
   originIdent: string;
   destinationIdent: string;
 }) {
+  console.log("[resolveRoute] input", {
+    routeId: input.routeId,
+    routeCode: input.routeCode,
+    originIdent: input.originIdent,
+    destinationIdent: input.destinationIdent,
+    isUuid: input.routeId ? isUuid(input.routeId) : false,
+  });
+
+  // PRIORIDAD 1: Buscar por UUID si el routeId es un UUID válido
   if (input.routeId && isUuid(input.routeId)) {
+    console.log("[resolveRoute] Looking up by UUID", input.routeId);
     const route = await findRouteById(
       input.routeId,
       input.originIdent,
       input.destinationIdent,
     );
-    if (!route) reservationError("ROUTE_ID_REQUIRED");
-    return route;
+    if (route) {
+      console.log("[resolveRoute] Found by UUID", route.id);
+      return route;
+    }
+    console.log("[resolveRoute] UUID lookup failed, trying other methods");
   }
 
-  const routeCode = input.routeCode || input.routeId;
+  // PRIORIDAD 2: Buscar por routeCode (o usar routeId como code si no es UUID)
+  const routeCode = input.routeCode || (input.routeId && !isUuid(input.routeId) ? input.routeId : "");
   if (routeCode) {
+    console.log("[resolveRoute] Looking up by routeCode", routeCode);
     const routes = await findRoutesByCode(
       routeCode,
       input.originIdent,
       input.destinationIdent,
     );
-    if (routes.length === 1) return routes[0];
+    if (routes.length === 1) {
+      console.log("[resolveRoute] Found by routeCode", routes[0].id);
+      return routes[0];
+    }
     if (routes.length > 1) {
+      console.log("[resolveRoute] Multiple routes found by code", routes.length);
       reservationError("ROUTE_ID_REQUIRED", {
         candidates: routes.map((route) => route.id),
+        message: `Hay ${routes.length} rutas con código ${routeCode}. Selecciona una específica.`,
       });
     }
+    console.log("[resolveRoute] Route code lookup failed, trying endpoints");
   }
 
+  // PRIORIDAD 3: Buscar por endpoints (origen/destino)
+  console.log("[resolveRoute] Looking up by endpoints", input.originIdent, "->", input.destinationIdent);
   const endpointRoutes = await findRoutesByEndpoints(
     input.originIdent,
     input.destinationIdent,
   );
-  if (endpointRoutes.length === 1) return endpointRoutes[0];
+  if (endpointRoutes.length === 1) {
+    console.log("[resolveRoute] Found by endpoints", endpointRoutes[0].id);
+    return endpointRoutes[0];
+  }
   if (endpointRoutes.length > 1) {
+    console.log("[resolveRoute] Multiple routes found by endpoints", endpointRoutes.length);
     reservationError("ROUTE_ID_REQUIRED", {
       candidates: endpointRoutes.map((route) => route.id),
+      message: `Hay ${endpointRoutes.length} rutas de ${input.originIdent} a ${input.destinationIdent}. Selecciona una específica.`,
     });
   }
 
-  reservationError("ROUTE_ID_REQUIRED");
+  console.log("[resolveRoute] No route found by any method");
+  reservationError("ROUTE_ID_REQUIRED", {
+    message: `No se encontró ruta para ${input.originIdent} → ${input.destinationIdent}. Verifica que la ruta esté activa.`,
+  });
 }
 
 function selectAircraftForReservation(

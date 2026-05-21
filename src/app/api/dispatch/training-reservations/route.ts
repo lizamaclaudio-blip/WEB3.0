@@ -30,7 +30,9 @@ function errorResponse(error: unknown) {
     DB_TRANSACTION_FAILED: "Error de base de datos al crear la reserva. Contacte soporte.",
   };
 
-  const message = messageByCode[code] || messageByCode["TRAINING_RESERVATION_FAILED"];
+  // Usar mensaje específico de details si está disponible, sino el genérico
+  const specificMessage = details?.message || details?.error;
+  const message = specificMessage || messageByCode[code] || messageByCode["TRAINING_RESERVATION_FAILED"];
   const statusByCode: Record<string, number> = {
     ACTIVE_RESERVATION_EXISTS: 409,
     ACTIVE_FLIGHT_IN_PROGRESS: 409,

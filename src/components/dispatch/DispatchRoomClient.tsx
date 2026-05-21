@@ -1527,7 +1527,10 @@ export default function DispatchRoomClient({
       };
       console.log("[dispatch] createReservation payload", {
         selectedRoute,
+        selectedRouteId,
+        selectedRouteInternalId,
         routeId: reservationPayload.routeId,
+        routeCode: reservationPayload.routeCode,
         originIdent,
         destinationIdent,
         selectedAircraft,
@@ -1535,6 +1538,7 @@ export default function DispatchRoomClient({
         aircraftCode: reservationPayload.aircraftCode,
         registration: reservationPayload.aircraftRegistration,
         operationType: reservationPayload.operationType,
+        requiresSelectedRoute,
       });
       const response = await fetch("/api/dispatch/training-reservations", {
         method: "POST",
