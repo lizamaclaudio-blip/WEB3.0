@@ -316,7 +316,7 @@ export function DispatchPageShell({ variant = "dashboard" }: DispatchPageShellPr
           safeJsonFetch<FleetResponse>("/api/fleet/available", { aircraft: [] }, markSoftFailure),
           safeJsonFetch<RoutesResponse>("/api/routes/available", { routes: [] }, markSoftFailure),
           safeJsonFetch<OperationTypesResponse>("/api/dispatch/operation-types", { operation_types: [] }, markSoftFailure),
-          safeJsonFetch<ActiveReservationResponse>("/api/dispatch/active-reservation", { hasActiveReservation: false, reservation: null }, markSoftFailure),
+          safeJsonFetch<ActiveReservationResponse>("/api/dispatch/active-reservation", { hasActiveReservation: false, reservation: null }),
         ]);
 
         if (!mounted) return;
@@ -329,8 +329,8 @@ export function DispatchPageShell({ variant = "dashboard" }: DispatchPageShellPr
         const ident = authJson?.current_airport?.ident || authJson?.current_airport?.icao;
         if (ident) {
           const [metarJson, advisoryJson] = await Promise.all([
-            safeJsonFetch<MetarInfo | null>(`/api/airport-metar?ident=${encodeURIComponent(ident)}`, null, markSoftFailure),
-            safeJsonFetch<WeatherAdvisoryInfo | null>(`/api/dispatch/weather-advisory?ident=${encodeURIComponent(ident)}`, null, markSoftFailure),
+            safeJsonFetch<MetarInfo | null>(`/api/airport-metar?ident=${encodeURIComponent(ident)}`, null),
+            safeJsonFetch<WeatherAdvisoryInfo | null>(`/api/dispatch/weather-advisory?ident=${encodeURIComponent(ident)}`, null),
           ]);
 
           if (mounted) {
