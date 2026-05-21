@@ -50,3 +50,4 @@ node_modules/
 src/app_globals.tmp
 scripts/pw3/*.bak
 "@ | Set-Content -Encoding utf8 ".gitignore"
+.vercel

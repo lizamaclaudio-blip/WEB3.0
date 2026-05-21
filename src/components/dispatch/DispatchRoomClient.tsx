@@ -704,6 +704,7 @@ function PlanStage({
   departureTime,
   selectedAircraft,
   mode,
+  destinationPhotoUrl,
 }: {
   originAirport: AirportInfo | AirportSearchItem | null;
   destinationAirport: AirportInfo | AirportSearchItem | null;
@@ -718,6 +719,7 @@ function PlanStage({
   departureTime: string;
   selectedAircraft: AircraftItem | null;
   mode: DispatchMode;
+  destinationPhotoUrl?: string | null;
 }) {
   const flightNumber = buildFlightNumber(mode, originIdent, destinationIdent);
   const aircraftModel = selectedAircraft?.model_code || "N/D";
@@ -744,7 +746,21 @@ function PlanStage({
       <section className={styles.darkPanel}>
         <header>Destino</header>
         <div className={styles.destinationCard}>
-          <div className={styles.destinationImage} aria-hidden="true"><span>PW</span></div>
+          <div
+            className={styles.destinationImage}
+            aria-hidden="true"
+            style={
+              destinationPhotoUrl
+                ? {
+                    backgroundImage: `linear-gradient(135deg, rgba(11,79,138,.68), rgba(20,184,166,.25)), url('${destinationPhotoUrl}')`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }
+                : undefined
+            }
+          >
+            {!destinationPhotoUrl ? <span>PW</span> : null}
+          </div>
           <div className={styles.destinationInfo}>
             <div className={styles.badgeLine}>
               <IcaoFlagBadge icao={destinationIdent} countryCode={destinationAirport?.iso_country || destinationAirport?.country} size="sm" />
@@ -962,6 +978,7 @@ export default function DispatchRoomClient({
   const [reservationState, setReservationState] = useState<ReservationState>({ status: "idle", reservation: null, acarsPayload: null });
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [selectedAircraftPhotoUrl, setSelectedAircraftPhotoUrl] = useState<string | null>(null);
+  const [destinationPhotoUrl, setDestinationPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const interval = window.setInterval(() => setNowMs(Date.now()), 1000);
@@ -1149,6 +1166,28 @@ export default function DispatchRoomClient({
       cancelled = true;
     };
   }, [selectedAircraft?.display_name, selectedAircraft?.model_code]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadDestinationPhoto() {
+      const ident = destinationIdent.trim().toUpperCase();
+      if (!ident) {
+        setDestinationPhotoUrl(null);
+        return;
+      }
+      try {
+        const response = await fetch(`/api/city-hero?ident=${encodeURIComponent(ident)}`, { cache: "force-cache" });
+        const payload = (await response.json().catch(() => null)) as { imageUrl?: string | null } | null;
+        if (!cancelled) setDestinationPhotoUrl(payload?.imageUrl ?? null);
+      } catch {
+        if (!cancelled) setDestinationPhotoUrl(null);
+      }
+    }
+    void loadDestinationPhoto();
+    return () => {
+      cancelled = true;
+    };
+  }, [destinationIdent]);
 
   function selectRoute(routeId: string) {
     const route = routes.find((item) => routeKey(item) === routeId);
@@ -1366,7 +1405,7 @@ export default function DispatchRoomClient({
               ) : null}
               {step === 3 ? (
                 <>
-                  <PlanStage originAirport={originAirport} destinationAirport={destinationAirport} originIdent={originIdent} destinationIdent={destinationIdent} flightLevel={flightLevel} setFlightLevel={setFlightLevel} routeText={effectiveRouteText} setRouteText={setRouteText} alternateIdent={alternateIdent} setAlternateIdent={setAlternateIdent} departureTime={departureTime} selectedAircraft={selectedAircraft} mode={mode} />
+                  <PlanStage originAirport={originAirport} destinationAirport={destinationAirport} originIdent={originIdent} destinationIdent={destinationIdent} flightLevel={flightLevel} setFlightLevel={setFlightLevel} routeText={effectiveRouteText} setRouteText={setRouteText} alternateIdent={alternateIdent} setAlternateIdent={setAlternateIdent} departureTime={departureTime} selectedAircraft={selectedAircraft} mode={mode} destinationPhotoUrl={destinationPhotoUrl} />
                   <div className={styles.navButtons}><button type="button" className={styles.backButton} onClick={() => setStep(2)}>Volver</button><button type="button" className={styles.continueButton} disabled={!canContinuePlan} onClick={() => setStep(4)}>Continuar</button></div>
                 </>
               ) : null}
