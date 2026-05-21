@@ -24,7 +24,7 @@ export default function DownloadsPage() {
                 Patagonia Wings ACARS
               </h2>
               <p className="mb-1 text-slate-300">
-                Version actual: <span className="font-mono text-cyan-400">7.1.1</span>
+                Version actual: <span className="font-mono text-cyan-400">7.1.2</span>
               </p>
               <p className="mb-4 text-sm text-slate-400">
                 Sistema de registro de vuelos para Microsoft Flight Simulator
@@ -41,6 +41,16 @@ export default function DownloadsPage() {
                 Descargar instalador
               </a>
             </div>
+          </div>
+
+          <div className="mt-6 rounded-lg border border-cyan-500/30 bg-cyan-500/10 p-4">
+            <p className="text-sm text-cyan-200">
+              <strong>Versión 7.1.2 — Hotfix Login Web 3.0</strong><br />
+              • Corrige autenticación ACARS contra Web 3.0.<br />
+              • El cliente ahora envía email normalizado al endpoint /api/auth/login.<br />
+              • Mensaje de credenciales incorrectas mejorado.<br />
+              • Claim/finalize no fueron modificados.
+            </p>
           </div>
 
           <div className="mt-6 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">

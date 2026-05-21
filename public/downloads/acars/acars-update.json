@@ -1,9 +1,9 @@
 ﻿{
-  "version": "7.1.1",
-  "latestVersion": "7.1.1",
-  "currentVersion": "7.1.1",
-  "revision": "2026.5.21.3",
-  "latestRevision": "2026.5.21.3",
+  "version": "7.1.2",
+  "latestVersion": "7.1.2",
+  "currentVersion": "7.1.2",
+  "revision": "2026.5.21.4",
+  "latestRevision": "2026.5.21.4",
   "webVersion": "3.0",
   "downloadUrl": "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
   "url": "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
@@ -11,7 +11,7 @@
   "mandatory": false,
   "required": false,
   "forceUpdate": false,
-  "notes": "ACARS 7.1.1 - Autoupdate via Patagonia Wings Web 3.0. Sin Supabase.",
+  "notes": "ACARS 7.1.2 - Hotfix Login Web 3.0: corregido login email payload. Sin Supabase.",
   "releaseDate": "2026-05-21",
   "minVersion": "1.0.0",
   "storageProvider": "web"

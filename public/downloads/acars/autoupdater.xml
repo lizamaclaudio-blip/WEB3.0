@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <item>
-  <version>7.1.1</version>
+  <version>7.1.2</version>
   <url>https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe</url>
-  <changelog>ACARS 7.1.1 - Hotfix: corregido bucle de autoupdate. No hay actualizacion si version es igual.</changelog>
+  <changelog>ACARS 7.1.2 - Hotfix Login Web 3.0: corregido login email payload. Sin Supabase.</changelog>
   <mandatory>false</mandatory>
 </item>
