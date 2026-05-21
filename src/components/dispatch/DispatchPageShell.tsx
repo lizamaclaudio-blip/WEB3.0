@@ -424,7 +424,7 @@ export function DispatchPageShell({ variant = "dashboard" }: DispatchPageShellPr
       ) : null}
       <p className={styles.heroLead}>Planifica operaciones oficiales y entrenamiento con datos reales desde Neon.</p>
 
-      {loadWarning ? <div className={styles.noticeAmber}>{loadWarning}</div> : null}
+      {null}
 
       {hasBlockingReservation ? (
         <div className={styles.noticeAmber}>

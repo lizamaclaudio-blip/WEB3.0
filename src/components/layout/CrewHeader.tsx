@@ -78,9 +78,9 @@ export function CrewHeader({ pilot }: CrewHeaderProps) {
             <div className="pw-sur-account-dropdown">
               <div className="pw-sur-account-card">
                 <div className="pw-sur-avatar">{initials(pilotName)}</div>
-                <div>
-                  <strong>{pilotName}</strong>
-                  <small>{rank}</small>
+                <div style={{ color: "#ffffff" }}>
+                  <strong style={{ color: "#ffffff" }}>{pilotName}</strong>
+                  <small style={{ color: "rgba(255,255,255,0.9)" }}>{rank}</small>
                 </div>
               </div>
               <Link href="/mi-perfil">Mi perfil</Link>
