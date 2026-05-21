@@ -1,0 +1,15 @@
+﻿{
+  "version": "7.1.0",
+  "latestVersion": "7.1.0",
+  "currentVersion": "7.1.0",
+  "webVersion": "3.0",
+  "downloadUrl": "https://qoradagitvccyabfkgkw.supabase.co/storage/v1/object/public/acars-releases/PatagoniaWingsACARSSetup.exe",
+  "url": "https://qoradagitvccyabfkgkw.supabase.co/storage/v1/object/public/acars-releases/PatagoniaWingsACARSSetup.exe",
+  "installerUrl": "https://qoradagitvccyabfkgkw.supabase.co/storage/v1/object/public/acars-releases/PatagoniaWingsACARSSetup.exe",
+  "mandatory": true,
+  "required": true,
+  "notes": "ACARS 7.1.0 - Migracion oficial Web 3.0: claim v1, finalize canonico, idempotencia y cierre operativo en servidor.",
+  "releaseDate": "2026-05-21",
+  "minVersion": "1.0.0",
+  "storageProvider": "supabase"
+}

@@ -1,0 +1,23 @@
+﻿{
+  "channel": "stable",
+  "version": "7.1.1",
+  "latestVersion": "7.1.1",
+  "currentVersion": "7.1.1",
+  "revision": "2026.5.21.3",
+  "latestRevision": "2026.5.21.3",
+  "releaseDate": "2026-05-21",
+  "manifestUrl": "https://www.patagoniaw.com/downloads/acars/acars-update.json",
+  "installerUrl": "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
+  "downloadUrl": "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
+  "url": "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
+  "packageUrl": "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
+  "directDownloadUrl": "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
+  "forceUpdate": true,
+  "mandatory": true,
+  "required": true,
+  "minimumVersion": "1.0.0",
+  "minSupportedVersion": "1.0.0",
+  "forceUpdateBelow": "7.1.1",
+  "notes": "ACARS 7.1.1 - Sin Supabase: autoupdate via Web 3.0, claim v1, finalize canonico, idempotencia y cierre operativo en servidor.",
+  "releaseNotes": "ACARS 7.1.1 - Sin Supabase: autoupdate via Web 3.0, claim v1, finalize canonico, idempotencia y cierre operativo en servidor."
+}
