@@ -387,11 +387,29 @@ function isAircraftCapable(aircraft: AircraftItem, route: RouteItem | null) {
 }
 
 function routeKey(route: RouteItem) {
-  return getRouteId(route) || getRouteCode(route) || `${route.origin_ident}-${route.destination_ident}`;
+  // REGLA: Siempre usar el ID real de la ruta (UUID de network_routes)
+  // NUNCA usar origin-destination como llave porque hay múltiples rutas por par ORI/DST
+  const realId = getRouteId(route);
+  if (realId) return realId;
+  
+  // Si no hay ID real, usar routeCode (ej: PWG695) - pero esto es fallback temporal
+  const code = getRouteCode(route);
+  if (code) return code;
+  
+  // Último recurso: esto indica un problema de datos
+  console.warn("[routeKey] Ruta sin ID ni código:", route);
+  return `${route.origin_ident}-${route.destination_ident}-no-id`;
 }
 
 function getRouteId(route?: RouteItem | null) {
   return normalizeText(route?.id || route?.routeId || route?.route_id, "");
+}
+
+// Validador UUID v4 estricto
+function isValidUuid(value: string | null | undefined): boolean {
+  if (!value) return false;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(value);
 }
 
 function getRouteCode(route?: RouteItem | null) {
@@ -1191,7 +1209,9 @@ export default function DispatchRoomClient({
   const currentAirport = auth?.current_airport || null;
   const rankCode = normalizeText(pilot?.rank_code, "CADET").toUpperCase();
   const selectedRoute = useMemo(() => routes.find((route) => routeKey(route) === selectedRouteId) || null, [routes, selectedRouteId]);
-  const selectedRouteInternalId = getRouteId(selectedRoute);
+  // REGLA: Solo usar UUID válido como routeId de reserva
+  const rawRouteId = getRouteId(selectedRoute);
+  const selectedRouteInternalId = isValidUuid(rawRouteId) ? rawRouteId : null;
   const selectedAircraft = useMemo(() => aircraft.find((item) => item.id === aircraftId || item.registration === aircraftId || aircraftValue(item) === aircraftId) || null, [aircraft, aircraftId]);
   const operationCode = operationCodeForMode(mode, rankCode);
   const selectedOperation = useMemo(() => operationTypes.find((operation) => operation.code === operationCode) || null, [operationCode, operationTypes]);
@@ -1495,9 +1515,25 @@ export default function DispatchRoomClient({
       return;
     }
     if (requiresSelectedRoute && !selectedRouteInternalId) {
+      // Diagnosticar por qué falta el routeId
+      const diagnostic = {
+        selectedRouteId,
+        rawRouteId,
+        selectedRoute: selectedRoute ? {
+          id: selectedRoute.id,
+          routeId: selectedRoute.routeId,
+          route_id: selectedRoute.route_id,
+          route_code: selectedRoute.route_code,
+        } : null,
+        routesCount: routes.length,
+      };
+      console.error("[dispatch] Route UUID missing", diagnostic);
+      
       setReservationState({
         status: "error",
-        message: "No se pudo identificar el ID interno de la ruta seleccionada. Recarga el despacho o vuelve a seleccionar la ruta.",
+        message: rawRouteId 
+          ? `La ruta seleccionada no tiene un ID válido (UUID). Valor encontrado: "${rawRouteId}". Recarga el despacho.`
+          : "No se pudo identificar la ruta interna seleccionada. Vuelve al paso 'Ruta' y selecciona nuevamente.",
         reservation: null,
         acarsPayload: null,
       });

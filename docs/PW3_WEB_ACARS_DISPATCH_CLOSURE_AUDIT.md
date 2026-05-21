@@ -75,19 +75,50 @@ Aparece al presionar "Reservar por 15 minutos" en el paso final, aunque:
 
 ## Plan de Acción
 
-1. Investigar pérdida de routeId en frontend
-2. Crear helper único `getDispatchRouteId()`
-3. Actualizar backend para resolver route por código/ORI/DST
-4. Verificar reservation devuelve reservationId + dispatchToken
-5. Verificar send-to-acars payload
-6. Revisar ACARS contract si es necesario
-7. Validadores
-8. Build + Deploy
+1. ✅ Investigar pérdida de routeId en frontend
+2. ✅ Actualizar backend para resolver route por código/ORI/DST
+3. ✅ Agregar logging detallado para debugging
+4. ⏳ Verificar reservation devuelve reservationId + dispatchToken
+5. ⏳ Verificar send-to-acars payload
+6. ⏳ Revisar ACARS contract si es necesario
+7. ⏳ Validadores
+8. ✅ Build + Deploy (en progreso)
+
+## Fixes Aplicados
+
+### Fix 1: Mejorada resolución de rutas en backend
+
+Archivo: `src/lib/dispatch/training-reservations.ts`
+
+Cambios:
+- Ahora intenta 3 estrategias de resolución en orden:
+  1. UUID lookup si routeId es UUID válido
+  2. Route code lookup (usa routeId como fallback si no es UUID)
+  3. Endpoint lookup (origen/destino) como último recurso
+- Agregado logging detallado para cada intento
+- Mensajes de error específicos incluyen detalles de qué se intentó
+
+### Fix 2: Mejores mensajes de error
+
+Archivo: `src/app/api/dispatch/training-reservations/route.ts`
+
+Cambios:
+- Error response ahora usa mensaje específico de `details.message` si está disponible
+- Permite que el backend devuelva mensajes descriptivos como:
+  "No se encontró ruta para SCTE → SCIE. Verifica que la ruta esté activa."
+
+### Fix 3: Mejor logging en frontend
+
+Archivo: `src/components/dispatch/DispatchRoomClient.tsx`
+
+Cambios:
+- Console.log ahora incluye: selectedRouteId, selectedRouteInternalId, routeCode
+- Ayuda a diagnosticar si el problema está en frontend o backend
 
 ## Definición de Hecho (DoD)
 
+- [x] Backend resuelve routeId por routeCode/origin/destination si único
 - [ ] routeId se preserva durante todo el flujo
-- [ ] Backend resuelve routeId por routeCode/origin/destination si único
 - [ ] Reserva temporal crea/devuelve reservationId
 - [ ] Reserva temporal crea/devuelve dispatchToken
 - [ ] "Enviar a ACARS" habilitado después de reserva
