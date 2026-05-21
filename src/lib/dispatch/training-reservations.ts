@@ -302,6 +302,8 @@ export async function createTrainingFreeReservation(
   const aircraftId = normalizeText(input.aircraftId);
   const routeId = normalizeText(input.routeId);
 
+  console.info(`[dispatch] createTrainingFreeReservation callsign=${user.callsign} origin=${originIdent} dest=${destinationIdent} aircraft=${aircraftId} route=${routeId}`);
+
   if (!originIdent) throw new Error("ORIGIN_REQUIRED");
   if (!destinationIdent) throw new Error("DESTINATION_REQUIRED");
   if (!aircraftId) throw new Error("AIRCRAFT_REQUIRED");
@@ -317,6 +319,8 @@ export async function createTrainingFreeReservation(
   const ttlMinutes =
     operationRule.reservation_expires_minutes ?? FALLBACK_DISPATCH_TTL_MINUTES;
 
+  console.info(`[dispatch] airports origin=${originAirport?.id || 'NOT_FOUND'} dest=${destinationAirport?.id || 'NOT_FOUND'} aircraft_available=${availableAircraft.length}`);
+
   if (!originAirport) throw new Error("ORIGIN_NOT_FOUND");
   if (!destinationAirport) throw new Error("DESTINATION_NOT_FOUND");
 
@@ -327,6 +331,8 @@ export async function createTrainingFreeReservation(
       `${aircraft.model_code}-${aircraft.registration}` === aircraftId
     );
   });
+
+  console.info(`[dispatch] selectedAircraft=${selectedAircraft?.id || 'NOT_FOUND'} registration=${selectedAircraft?.registration || 'N/A'}`);
 
   if (!selectedAircraft) throw new Error("AIRCRAFT_NOT_ALLOWED_FOR_PILOT");
 
@@ -343,26 +349,31 @@ export async function createTrainingFreeReservation(
     [user.userId],
   );
 
-  if (activeReservation) throw new Error("ACTIVE_RESERVATION_EXISTS");
+  if (activeReservation) {
+    console.warn(`[dispatch] ACTIVE_RESERVATION_EXISTS pilot=${user.callsign} reservation=${activeReservation.id} status=${activeReservation.status}`);
+    throw new Error("ACTIVE_RESERVATION_EXISTS");
+  }
 
   const reservationId = randomUUID();
   const dispatchToken = createDispatchToken();
   const dispatchTokenHash = hashDispatchToken(dispatchToken);
   const tokenHint = dispatchToken.slice(0, 8);
 
-  const row = await dbTransaction(async (client) => {
-    await client.query(
-      `
-      update public.training_dispatch_reservations
-         set status = 'CANCELLED', updated_at = now()
-       where pilot_user_id = $1::uuid
-         and status = 'TEMP_RESERVED'
-         and expires_at > now()
-    `,
-      [user.userId],
-    );
+  let row: TrainingReservationRow;
+  try {
+    row = await dbTransaction(async (client) => {
+      await client.query(
+        `
+        update public.training_dispatch_reservations
+           set status = 'CANCELLED', updated_at = now()
+         where pilot_user_id = $1::uuid
+           and status = 'TEMP_RESERVED'
+           and expires_at > now()
+      `,
+        [user.userId],
+      );
 
-    const result = await client.query<TrainingReservationRow>(
+      const result = await client.query<TrainingReservationRow>(
       `
       insert into public.training_dispatch_reservations (
         id,
@@ -474,7 +485,11 @@ export async function createTrainingFreeReservation(
     );
 
     return result.rows[0];
-  });
+    });
+  } catch (dbError) {
+    console.error(`[dispatch] DB transaction failed pilot=${user.callsign}:`, dbError);
+    throw new Error("TRAINING_RESERVATION_FAILED");
+  }
 
   console.info(
     `[dispatch] temp reservation ok callsign=${user.callsign ?? "N/A"} id=${row.id} expires=${row.expires_at}`,

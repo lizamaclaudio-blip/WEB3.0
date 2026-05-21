@@ -15,9 +15,14 @@ function errorResponse(error: unknown) {
     ORIGIN_NOT_FOUND: "El aeropuerto de origen no existe o no esta activo.",
     DESTINATION_NOT_FOUND: "El aeropuerto de destino no existe o no esta activo.",
     AIRCRAFT_NOT_ALLOWED_FOR_PILOT: "La aeronave no esta disponible para tu rango, ubicacion operacional o tipo de despacho.",
+    ACTIVE_RESERVATION_EXISTS: "Ya tienes una reserva activa. Finaliza o cancela la actual antes de crear una nueva.",
+    TRAINING_RESERVATION_FAILED: "Error al crear la reserva temporal. Intenta nuevamente.",
+    DB_TRANSACTION_FAILED: "Error de base de datos al crear la reserva. Contacte soporte.",
   };
 
-  return NextResponse.json({ ok: false, error: code, message: messageByCode[code] ?? "No se pudo crear la reserva temporal del despacho." }, { status: 400 });
+  const message = messageByCode[code] || messageByCode["TRAINING_RESERVATION_FAILED"];
+  console.error(`[training-reservations] Error ${code}: ${message}`, error);
+  return NextResponse.json({ ok: false, error: code, message }, { status: 400 });
 }
 
 export async function POST(request: Request) {
