@@ -1,7 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 
-const navGroups = [
+type NavItem = string | { label: string; href: string; external?: boolean };
+
+const navGroups: { label: string; items: NavItem[] }[] = [
   {
     label: "Patagonia Wings",
     items: ["Noticias modo carrera", "Aeronaves certificadas", "Staff", "Nuestros héroes", "Estadísticas", "Contacto"],
@@ -16,7 +18,15 @@ const navGroups = [
   },
   {
     label: "Menú del Piloto",
-    items: ["Ver mis PIREPs", "Vuelos regulares", "Vuelo de la semana", "Despachos", "Patagonia ACARS", "Descargas", "Sala de pilotos"],
+    items: [
+      "Ver mis PIREPs",
+      "Vuelos regulares",
+      "Vuelo de la semana",
+      "Despachos",
+      { label: "Patagonia ACARS", href: "/downloads/acars/PatagoniaWingsACARSSetup.exe", external: true },
+      { label: "Descargas", href: "/downloads", external: false },
+      "Sala de pilotos"
+    ],
   },
 ];
 
@@ -59,9 +69,16 @@ export function CrewHeader({ pilot }: CrewHeaderProps) {
                 {group.label} <span aria-hidden="true">{chevronDownIcon}</span>
               </button>
               <div className="pw-sur-dropdown-menu">
-                {group.items.map((item) => (
-                  <a href="#" key={item}>{item}</a>
-                ))}
+                {group.items.map((item, idx) => {
+                  if (typeof item === "string") {
+                    return <a href="#" key={item}>{item}</a>;
+                  }
+                  const { label, href, external } = item;
+                  if (external) {
+                    return <a href={href} key={label} download>{label}</a>;
+                  }
+                  return <Link href={href} key={label}>{label}</Link>;
+                })}
               </div>
             </div>
           ))}
