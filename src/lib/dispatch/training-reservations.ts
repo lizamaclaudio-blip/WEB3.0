@@ -67,6 +67,7 @@ type CreateTrainingReservationInput = {
   cargoKg?: number | null;
   fuelKg?: number | null;
   fuelPolicy?: string | null;
+  simbriefOfp?: Record<string, unknown> | null;
 };
 
 type AirportLookup = {
@@ -321,6 +322,15 @@ export async function ensureTrainingReservationSchema() {
   );
   await dbQuery(
     "alter table public.training_dispatch_reservations add column if not exists acars_status text",
+  );
+  await dbQuery(
+    "alter table public.training_dispatch_reservations add column if not exists simbrief_ofp_id text",
+  );
+  await dbQuery(
+    "alter table public.training_dispatch_reservations add column if not exists simbrief_generated_at timestamptz",
+  );
+  await dbQuery(
+    "alter table public.training_dispatch_reservations add column if not exists simbrief_ofp_json jsonb",
   );
 
   await dbQuery(
@@ -805,6 +815,9 @@ export async function createTrainingFreeReservation(
   const dispatchToken = createDispatchToken();
   const dispatchTokenHash = hashDispatchToken(dispatchToken);
   const tokenHint = dispatchToken.slice(0, 8);
+  const simbriefOfp = input.simbriefOfp && typeof input.simbriefOfp === "object" ? input.simbriefOfp : null;
+  const simbriefOfpId = normalizeText(simbriefOfp?.simbriefId ?? "");
+  const simbriefGeneratedAt = normalizeText(simbriefOfp?.generatedAt ?? "");
 
   let row: TrainingReservationRow;
   try {
@@ -840,6 +853,9 @@ export async function createTrainingFreeReservation(
         affects_ranking,
         dispatch_token_hash,
         dispatch_token_hint,
+        simbrief_ofp_id,
+        simbrief_generated_at,
+        simbrief_ofp_json,
         expires_at
       ) values (
         $1::uuid,
@@ -870,7 +886,10 @@ export async function createTrainingFreeReservation(
         $25,
         $26,
         $27,
-        now() + ($28::text || ' minutes')::interval
+        $28,
+        case when $29 = '' then null else $29::timestamptz end,
+        $30::jsonb,
+        now() + ($31::text || ' minutes')::interval
       ) returning
         id::text,
         pilot_user_id::text,
@@ -921,6 +940,9 @@ export async function createTrainingFreeReservation(
         operationRule.affects_ranking,
         dispatchTokenHash,
         tokenHint,
+        simbriefOfpId || null,
+        simbriefGeneratedAt,
+        simbriefOfp ? JSON.stringify(simbriefOfp) : null,
         ttlMinutes,
       ],
     );
@@ -977,6 +999,9 @@ type TrainingDispatchRow = {
   status: string;
   dispatch_token_hash: string | null;
   dispatch_token_hint: string | null;
+  simbrief_ofp_id: string | null;
+  simbrief_generated_at: string | null;
+  simbrief_ofp_json: unknown | null;
   affects_pilot_position: boolean;
   affects_aircraft_position: boolean;
   affects_economy: boolean;
@@ -1026,6 +1051,10 @@ function buildTrainingAcarsPayload(
     cargoKg,
     fuelPlannedKg: fuelKg,
   });
+  const simbriefRaw =
+    row.simbrief_ofp_json && typeof row.simbrief_ofp_json === "object"
+      ? (row.simbrief_ofp_json as Record<string, unknown>)
+      : null;
 
   return {
     payload_version: "pw3-dispatch-v1",
@@ -1067,6 +1096,7 @@ function buildTrainingAcarsPayload(
       passenger_count: effectivePax,
       cargo_kg: cargoKg,
       fuel_kg: fuelKg,
+      fuel_planned_kg: Number(simbriefRaw?.blockFuelKg ?? fuelKg),
       fuel_policy: normalizeText(row.fuel_policy, "AUTO PW"),
     },
     manifest: {
@@ -1075,6 +1105,27 @@ function buildTrainingAcarsPayload(
       aircraft_payload: aircraftPayload,
     },
     economy_snapshot: economySnapshot,
+    simbrief: simbriefRaw
+      ? {
+          ofpId: normalizeText(simbriefRaw.simbriefId ?? row.simbrief_ofp_id),
+          generatedAt: normalizeText(simbriefRaw.generatedAt ?? row.simbrief_generated_at),
+          origin: normalizeText(simbriefRaw.origin ?? row.origin_ident),
+          destination: normalizeText(simbriefRaw.destination ?? row.destination_ident),
+          alternate: normalizeText(simbriefRaw.alternate),
+          route: normalizeText(simbriefRaw.route ?? row.route_text),
+          flightLevel: normalizeText(simbriefRaw.flightLevel ?? row.flight_level),
+          cruiseAltitude: normalizeText(simbriefRaw.cruiseAltitude),
+          blockFuelKg: Number(simbriefRaw.blockFuelKg ?? 0),
+          tripFuelKg: Number(simbriefRaw.tripFuelKg ?? 0),
+          payloadKg: Number(simbriefRaw.payloadKg ?? 0),
+          passengerCount: Number(simbriefRaw.passengerCount ?? effectivePax),
+          cargoKg: Number(simbriefRaw.cargoKg ?? cargoKg),
+          rawSummary: {
+            flightNumber: normalizeText(simbriefRaw.flightNumber),
+            aircraftIcao: normalizeText(simbriefRaw.aircraftIcao),
+          },
+        }
+      : null,
     rules: {
       affects_pilot_position: row.affects_pilot_position,
       affects_aircraft_position: row.affects_aircraft_position,
@@ -1129,6 +1180,9 @@ export async function prepareTrainingReservationForAcars(
         r.status,
         r.dispatch_token_hash,
         r.dispatch_token_hint,
+        r.simbrief_ofp_id,
+        r.simbrief_generated_at::text,
+        r.simbrief_ofp_json,
         r.affects_pilot_position,
         r.affects_aircraft_position,
         r.affects_economy,

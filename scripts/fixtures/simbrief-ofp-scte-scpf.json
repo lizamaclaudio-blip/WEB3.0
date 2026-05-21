@@ -1,0 +1,35 @@
+{
+  "general": {
+    "ofp_id": "SB-TEST-001",
+    "generated_time": "2026-05-21T12:00:00Z",
+    "orig_icao": "SCTE",
+    "dest_icao": "SCPF",
+    "flight_number": "PWG703",
+    "aircraft_icao": "C208",
+    "route": "SCTE DCT SCPF",
+    "initial_altitude": "FL130",
+    "alternate_icao": "SCIP",
+    "costindex": "15"
+  },
+  "weights": {
+    "payload": 1100,
+    "pax_count": 8,
+    "cargo": 320,
+    "est_zfw": 4200,
+    "est_tow": 5600,
+    "est_ldw": 5100
+  },
+  "fuel": {
+    "plan_ramp": 1400,
+    "enroute_burn": 780,
+    "taxi": 40,
+    "reserve": 280,
+    "contingency": 80,
+    "alternate_burn": 120,
+    "finres": 140
+  },
+  "times": {
+    "est_time_block": 95,
+    "est_time_enroute": 70
+  }
+}

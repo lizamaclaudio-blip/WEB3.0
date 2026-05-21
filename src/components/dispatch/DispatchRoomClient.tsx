@@ -3,6 +3,7 @@
 import IcaoFlagBadge from "@/components/ui/IcaoFlagBadge";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./DispatchRoom.module.css";
+import { mapAircraftCodeToSimbrief } from "@/lib/simbrief/aircraft-map";
 
 type AirportInfo = {
   ident?: string | null;
@@ -77,6 +78,7 @@ type OperationTypeItem = {
   label: string;
   description?: string | null;
   score_mode?: string | null;
+  requires_simbrief?: boolean;
   reservation_expires_minutes?: number | null;
   allowed_for_rank?: boolean;
   blocked_reason?: string | null;
@@ -150,6 +152,28 @@ type ReservationState = {
 
 type DispatchMode = "training_free" | "charter_official" | "official_route" | "cargo_official";
 type DispatchStep = 1 | 2 | 3 | 4 | 5;
+type SimbriefStageStatus = "pending" | "opened" | "loaded" | "mismatch" | "error";
+
+type SimbriefOfp = {
+  simbriefId?: string;
+  generatedAt?: string;
+  origin?: string;
+  destination?: string;
+  alternate?: string;
+  flightNumber?: string;
+  aircraftIcao?: string;
+  route?: string;
+  routeText?: string;
+  cruiseAltitude?: string;
+  flightLevel?: string;
+  costIndex?: string;
+  blockFuelKg?: number;
+  tripFuelKg?: number;
+  payloadKg?: number;
+  passengerCount?: number;
+  cargoKg?: number;
+  raw?: Record<string, unknown>;
+};
 
 type DispatchRoomClientProps = {
   initialMode?: DispatchMode | string | null;
@@ -228,6 +252,10 @@ function normalizeDispatchMode(raw?: string | null): DispatchMode {
 
 function isCargoMode(mode: DispatchMode) {
   return mode === "cargo_official";
+}
+
+function isOfficialDispatchMode(mode: DispatchMode) {
+  return mode === "official_route" || mode === "charter_official" || mode === "cargo_official";
 }
 
 
@@ -706,53 +734,75 @@ function PlanStage({
   originIdent,
   destinationIdent,
   flightLevel,
-  setFlightLevel,
   routeText,
-  setRouteText,
   alternateIdent,
-  setAlternateIdent,
   departureTime,
   selectedAircraft,
   mode,
   destinationPhotoUrl,
+  requiresSimbrief,
+  simbriefStatus,
+  simbriefMessage,
+  simbriefOfp,
+  onGenerateSimbrief,
+  onLoadSimbriefOfp,
 }: {
   originAirport: AirportInfo | AirportSearchItem | null;
   destinationAirport: AirportInfo | AirportSearchItem | null;
   originIdent: string;
   destinationIdent: string;
   flightLevel: string;
-  setFlightLevel: (value: string) => void;
   routeText: string;
-  setRouteText: (value: string) => void;
   alternateIdent: string;
-  setAlternateIdent: (value: string) => void;
   departureTime: string;
   selectedAircraft: AircraftItem | null;
   mode: DispatchMode;
   destinationPhotoUrl?: string | null;
+  requiresSimbrief: boolean;
+  simbriefStatus: SimbriefStageStatus;
+  simbriefMessage: string;
+  simbriefOfp: SimbriefOfp | null;
+  onGenerateSimbrief: () => void;
+  onLoadSimbriefOfp: () => void;
 }) {
   const flightNumber = buildFlightNumber(mode, originIdent, destinationIdent);
   const aircraftModel = selectedAircraft?.model_code || "N/D";
-
+  const routeValue = simbriefOfp?.route || routeText || "";
+  const alternateValue = simbriefOfp?.alternate || alternateIdent || "";
+  const levelValue = simbriefOfp?.flightLevel || flightLevel || "";
   return (
     <div className={styles.planStage}>
       <h3>Plan de Vuelo</h3>
       <div className={styles.simbriefNotice}>
         <strong>SimBrief:</strong>
-        <span>{originIdent || "ORIGEN"} → {destinationIdent || "DESTINO"} — {routeText || "Ruta por definir"}</span>
+        <span>{originIdent || "ORIGEN"} -&gt; {destinationIdent || "DESTINO"} - {routeValue || "Ruta por definir"}</span>
       </div>
-
       <section className={styles.darkPanel}>
-        <header>Configuracion de ruta</header>
+        <header>Plan de vuelo SimBrief</header>
         <div className={styles.routeConfigGrid}>
           <label><span>Origen</span><input value={originIdent} readOnly /></label>
           <label><span>Destino</span><input value={destinationIdent} readOnly /></label>
-          <label><span>Alternativa *</span><input value={alternateIdent} onChange={(event) => setAlternateIdent(event.target.value.toUpperCase())} placeholder="SAZS" /></label>
-          <label><span>Nivel de vuelo *</span><select value={flightLevel} onChange={(event) => setFlightLevel(event.target.value)}>{FLIGHT_LEVEL_OPTIONS.map((level) => <option key={level} value={level}>{level}</option>)}</select></label>
-          <label className={styles.routeInputWide}><span>Plan de vuelo *</span><input value={routeText} onChange={(event) => setRouteText(event.target.value.toUpperCase())} /></label>
+          <label><span>Alternativa *</span><input value={alternateValue || "Pendiente de OFP SimBrief"} readOnly={requiresSimbrief} /></label>
+          <label><span>Nivel de vuelo *</span><input value={levelValue || "Pendiente de OFP SimBrief"} readOnly={requiresSimbrief} /></label>
+          <label className={styles.routeInputWide}><span>Plan de vuelo *</span><input value={routeValue || "Pendiente de OFP SimBrief"} readOnly={requiresSimbrief} /></label>
+          {requiresSimbrief ? (
+            <>
+              <label><span>Estado SimBrief</span><input value={simbriefMessage || simbriefStatus} readOnly /></label>
+              <label><span>Combustible OFP</span><input value={simbriefOfp ? `${Math.round(asNumber(simbriefOfp.blockFuelKg, 0))} kg block / ${Math.round(asNumber(simbriefOfp.tripFuelKg, 0))} kg trip` : "Pendiente de OFP SimBrief"} readOnly /></label>
+              <label><span>Payload OFP</span><input value={simbriefOfp ? `${Math.round(asNumber(simbriefOfp.payloadKg, 0))} kg` : "Pendiente de OFP SimBrief"} readOnly /></label>
+              <label><span>PAX / Carga OFP</span><input value={simbriefOfp ? `${Math.round(asNumber(simbriefOfp.passengerCount, 0))} pax / ${Math.round(asNumber(simbriefOfp.cargoKg, 0))} kg` : "Pendiente de OFP SimBrief"} readOnly /></label>
+            </>
+          ) : null}
         </div>
+        {requiresSimbrief ? (
+          <div className={styles.navButtons} style={{ marginTop: 12 }}>
+            <button type="button" className={styles.continueButton} onClick={onGenerateSimbrief}>
+              {simbriefStatus === "opened" || simbriefStatus === "loaded" ? "Abrir SimBrief nuevamente" : "Generar plan de vuelo en SimBrief"}
+            </button>
+            <button type="button" className={styles.continueButton} onClick={onLoadSimbriefOfp}>Cargar OFP</button>
+          </div>
+        ) : null}
       </section>
-
       <section className={styles.darkPanel}>
         <header>Destino</header>
         <div className={styles.destinationCard}>
@@ -783,14 +833,13 @@ function PlanStage({
           </div>
         </div>
       </section>
-
       <section className={styles.flightPlanSummary}>
-        <div><span>Vuelo</span><strong>{flightNumber}</strong></div>
+        <div><span>Vuelo</span><strong>{simbriefOfp?.flightNumber || flightNumber}</strong></div>
         <div><span>Equipo</span><strong>{aircraftModel}</strong></div>
         <div><span>Salida</span><strong>{departureTime}</strong></div>
         <div><span>Origen</span><IcaoFlagBadge icao={originIdent} countryCode={originAirport?.iso_country || originAirport?.country} size="sm" /></div>
         <div><span>Destino</span><IcaoFlagBadge icao={destinationIdent} countryCode={destinationAirport?.iso_country || destinationAirport?.country} size="sm" /></div>
-        <div><span>Estado</span><strong className={styles.pendingBadge}>Planificado</strong></div>
+        <div><span>Estado</span><strong className={styles.pendingBadge}>{requiresSimbrief ? (simbriefOfp ? "OFP cargado" : "Pendiente OFP") : "Planificado"}</strong></div>
       </section>
     </div>
   );
@@ -985,6 +1034,11 @@ export default function DispatchRoomClient({
   const [cargoKg, setCargoKg] = useState(0);
   const [fuelKg, setFuelKg] = useState(1200);
   const [fuelPolicy, setFuelPolicy] = useState("AUTO PW");
+  const [simbriefUsername, setSimbriefUsername] = useState("");
+  const [simbriefUserId, setSimbriefUserId] = useState("");
+  const [simbriefStatus, setSimbriefStatus] = useState<SimbriefStageStatus>("pending");
+  const [simbriefMessage, setSimbriefMessage] = useState("Pendiente de OFP SimBrief.");
+  const [simbriefOfp, setSimbriefOfp] = useState<SimbriefOfp | null>(null);
   const [reservationState, setReservationState] = useState<ReservationState>({ status: "idle", reservation: null, acarsPayload: null });
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [selectedAircraftPhotoUrl, setSelectedAircraftPhotoUrl] = useState<string | null>(null);
@@ -1000,16 +1054,18 @@ export default function DispatchRoomClient({
     async function load() {
       setLoading(true);
       try {
-        const [authResult, fleetResult, routesResult, operationTypesResult] = await Promise.all([
+        const [authResult, fleetResult, routesResult, operationTypesResult, simbriefResult] = await Promise.all([
           fetch("/api/auth/me", { credentials: "include", cache: "no-store" }),
           fetch("/api/fleet/available", { credentials: "include", cache: "no-store" }),
           fetch("/api/routes/available", { credentials: "include", cache: "no-store" }),
           fetch("/api/dispatch/operation-types", { credentials: "include", cache: "no-store" }),
+          fetch("/api/pilot/simbrief", { credentials: "include", cache: "no-store" }),
         ]);
         const authJson = (await authResult.json().catch(() => null)) as AuthMeResponse | null;
         const fleetJson = (await fleetResult.json().catch(() => null)) as FleetResponse | null;
         const routesJson = (await routesResult.json().catch(() => null)) as RoutesResponse | null;
         const operationTypesJson = (await operationTypesResult.json().catch(() => null)) as OperationTypesResponse | null;
+        const simbriefJson = (await simbriefResult.json().catch(() => null)) as { simbriefUsername?: string | null; simbriefUserId?: string | null } | null;
         if (!mounted) return;
         setAuth(authJson);
         setAircraft(fleetJson?.aircraft ?? []);
@@ -1021,6 +1077,8 @@ export default function DispatchRoomClient({
         }));
         setRoutes(normalizedRoutes);
         setOperationTypes(operationTypesJson?.operation_types ?? []);
+        setSimbriefUsername(normalizeText(simbriefJson?.simbriefUsername, ""));
+        setSimbriefUserId(normalizeText(simbriefJson?.simbriefUserId, ""));
         const currentIdent = airportCode(authJson?.current_airport);
         if (currentIdent && mode !== "training_free") {
           setOriginIdent(currentIdent);
@@ -1134,6 +1192,7 @@ export default function DispatchRoomClient({
   const selectedOperation = useMemo(() => operationTypes.find((operation) => operation.code === operationCode) || null, [operationCode, operationTypes]);
   const selectedOperationLabel = normalizeText(selectedOperation?.label, modeLabel(mode));
   const selectedOperationHelp = normalizeText(selectedOperation?.description, modeHelp(mode));
+  const requiresSimbrief = selectedOperation?.requires_simbrief ?? isOfficialDispatchMode(mode);
   const originAirport = getAirportFromList(originIdent, originResults, currentAirport);
   const destinationAirport = getAirportFromList(destinationIdent, destinationResults, null);
   const effectiveRouteText = routeText || (originIdent && destinationIdent ? buildPlanRoute(originIdent, destinationIdent) : "");
@@ -1141,11 +1200,13 @@ export default function DispatchRoomClient({
   const routeCandidates = useMemo(() => routes.filter((route) => (route.blocked_reasons || []).length === 0), [routes]);
   const canContinueSearch = (mode === "official_route" || mode === "cargo_official") ? Boolean(selectedRoute) : Boolean(originIdent && destinationIdent && operationAllowed);
   const canContinueAircraft = Boolean(originIdent && destinationIdent && selectedAircraft && operationAllowed);
-  const canContinuePlan = Boolean(effectiveRouteText.trim() && flightLevel && alternateIdent.trim());
+  const canContinuePlan = requiresSimbrief ? Boolean(simbriefOfp?.route && simbriefOfp?.flightLevel && simbriefOfp?.alternate) : Boolean(effectiveRouteText.trim() && flightLevel && alternateIdent.trim());
   const isCargo = isCargoMode(mode);
-  const effectivePassengerCount = isCargo ? 0 : passengerCount;
+  const effectivePassengerCount = isCargo ? 0 : Math.round(asNumber(simbriefOfp?.passengerCount, passengerCount));
   const requiresSelectedRoute = mode === "official_route" || mode === "cargo_official";
-  const canContinueWeight = Boolean(selectedAircraft && fuelKg > 0 && (!isCargo || cargoKg > 0));
+  const effectiveCargoKg = Math.round(asNumber(simbriefOfp?.cargoKg, cargoKg));
+  const effectiveFuelKg = Math.round(asNumber(simbriefOfp?.blockFuelKg, fuelKg));
+  const canContinueWeight = Boolean(selectedAircraft && effectiveFuelKg > 0 && (!isCargo || effectiveCargoKg > 0));
   const reservationCountdown = formatCountdown(reservationState.reservation?.expires_at, nowMs);
   const canCreateReservation = Boolean(originIdent && destinationIdent && selectedAircraft && fuelKg > 0 && operationAllowed && (!requiresSelectedRoute || selectedRouteInternalId) && (!isCargo || cargoKg > 0));
   const hasValidReservation = Boolean(reservationState.reservation?.id && reservationState.reservation?.dispatch_token);
@@ -1159,6 +1220,16 @@ export default function DispatchRoomClient({
       setDepartureTime(defaultDeparture);
     }
   }, [departureTime, originAirport?.timezone]);
+
+  useEffect(() => {
+    if (!simbriefOfp) return;
+    if (simbriefOfp.flightLevel) setFlightLevel(simbriefOfp.flightLevel);
+    if (simbriefOfp.route) setRouteText(simbriefOfp.route);
+    if (simbriefOfp.alternate) setAlternateIdent(simbriefOfp.alternate);
+    if (typeof simbriefOfp.passengerCount === "number") setPassengerCount(Math.max(0, Math.round(simbriefOfp.passengerCount)));
+    if (typeof simbriefOfp.cargoKg === "number") setCargoKg(Math.max(0, Math.round(simbriefOfp.cargoKg)));
+    if (typeof simbriefOfp.blockFuelKg === "number") setFuelKg(Math.max(0, Math.round(simbriefOfp.blockFuelKg)));
+  }, [simbriefOfp]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1226,8 +1297,100 @@ export default function DispatchRoomClient({
     setAircraftId("");
   }
 
+  async function openSimbriefPlanner() {
+    const username = simbriefUsername.trim();
+    const userId = simbriefUserId.trim();
+    if (!username && !userId) {
+      const provided = window.prompt("Configura tu usuario SimBrief (username):", "");
+      const clean = (provided ?? "").trim();
+      if (!clean) {
+        setSimbriefStatus("error");
+        setSimbriefMessage("Debes configurar usuario SimBrief para continuar.");
+        return;
+      }
+      await fetch("/api/pilot/simbrief", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ simbriefUsername: clean }),
+      });
+      setSimbriefUsername(clean);
+    }
+
+    const mapper = mapAircraftCodeToSimbrief(selectedAircraft?.model_code || "");
+    const flightNumber = selectedRoute?.route_code || buildFlightNumber(mode, originIdent, destinationIdent);
+    const callsign = selectedRoute?.route_code || pilot?.callsign || flightNumber;
+    const prefill = new URL("https://dispatch.simbrief.com/options/custom");
+    if (simbriefUserId.trim()) prefill.searchParams.set("userid", simbriefUserId.trim());
+    if (simbriefUsername.trim()) prefill.searchParams.set("username", simbriefUsername.trim());
+    prefill.searchParams.set("orig", originIdent);
+    prefill.searchParams.set("dest", destinationIdent);
+    prefill.searchParams.set("type", mapper.simbriefCode || (selectedAircraft?.model_code || ""));
+    prefill.searchParams.set("reg", selectedAircraft?.registration || "");
+    prefill.searchParams.set("fltnum", flightNumber);
+    prefill.searchParams.set("callsign", callsign);
+    prefill.searchParams.set("route", effectiveRouteText || "");
+    prefill.searchParams.set("pax", String(effectivePassengerCount));
+    prefill.searchParams.set("cargo", String(effectiveCargoKg));
+    prefill.searchParams.set("airline", "PWG");
+
+    const popup = window.open(prefill.toString(), "_blank", "noopener,noreferrer");
+    if (!popup) {
+      setSimbriefStatus("opened");
+      setSimbriefMessage("Si SimBrief no se abrió, permite ventanas emergentes o usa abrir manualmente.");
+      return;
+    }
+    setSimbriefStatus("opened");
+    setSimbriefMessage("SimBrief abierto. Genera el OFP y luego presiona Cargar OFP.");
+  }
+
+  async function loadLatestSimbriefOfp() {
+    setSimbriefMessage("Cargando OFP desde SimBrief...");
+    try {
+      const mapper = mapAircraftCodeToSimbrief(selectedAircraft?.model_code || "");
+      const expectedFlightNumber = (selectedRoute?.route_code || buildFlightNumber(mode, originIdent, destinationIdent)).toUpperCase();
+      const response = await fetch("/api/simbrief/ofp/latest", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          simbriefUsername,
+          simbriefUserId,
+          expectedOrigin: originIdent,
+          expectedDestination: destinationIdent,
+          expectedFlightNumber,
+          expectedAircraftCode: mapper.simbriefCode || selectedAircraft?.model_code || "",
+        }),
+      });
+      const payload = (await response.json().catch(() => null)) as { ok?: boolean; code?: string; ofp?: SimbriefOfp } | null;
+      if (!response.ok || !payload?.ok || !payload.ofp) {
+        const code = payload?.code || "SIMBRIEF_FETCH_FAILED";
+        setSimbriefStatus(code.includes("MISMATCH") ? "mismatch" : "error");
+        setSimbriefMessage(code === "SIMBRIEF_DESTINATION_MISMATCH" || code === "SIMBRIEF_ORIGIN_MISMATCH"
+          ? `El OFP cargado no corresponde a la ruta seleccionada ${originIdent} -> ${destinationIdent}.`
+          : `No se pudo cargar OFP (${code}).`);
+        return;
+      }
+      setSimbriefOfp(payload.ofp);
+      setSimbriefStatus("loaded");
+      setSimbriefMessage("OFP cargado correctamente desde SimBrief.");
+    } catch {
+      setSimbriefStatus("error");
+      setSimbriefMessage("No se pudo cargar OFP desde SimBrief.");
+    }
+  }
+
   async function createTemporaryReservation() {
     if (!canCreateReservation || !selectedAircraft) return;
+    if (requiresSimbrief && !simbriefOfp) {
+      setReservationState({
+        status: "error",
+        message: "Para vuelos oficiales, el plan de vuelo debe generarse y cargarse desde SimBrief.",
+        reservation: null,
+        acarsPayload: null,
+      });
+      return;
+    }
     if (requiresSelectedRoute && !selectedRouteInternalId) {
       setReservationState({
         status: "error",
@@ -1248,15 +1411,16 @@ export default function DispatchRoomClient({
         routeCode: getRouteCode(selectedRoute) || null,
         originIdent,
         destinationIdent,
-        alternateIdent,
+        alternateIdent: simbriefOfp?.alternate || alternateIdent,
         departureTime,
-        flightLevel,
-        routeText: effectiveRouteText,
+        flightLevel: simbriefOfp?.flightLevel || flightLevel,
+        routeText: simbriefOfp?.route || effectiveRouteText,
         passengerCount: effectivePassengerCount,
-        cargoKg,
-        fuelKg,
+        cargoKg: effectiveCargoKg,
+        fuelKg: effectiveFuelKg,
         fuelPolicy,
         isCargo,
+        simbriefOfp,
       };
       console.log("[dispatch] createReservation payload", {
         selectedRoute,
@@ -1443,7 +1607,25 @@ export default function DispatchRoomClient({
               ) : null}
               {step === 3 ? (
                 <>
-                  <PlanStage originAirport={originAirport} destinationAirport={destinationAirport} originIdent={originIdent} destinationIdent={destinationIdent} flightLevel={flightLevel} setFlightLevel={setFlightLevel} routeText={effectiveRouteText} setRouteText={setRouteText} alternateIdent={alternateIdent} setAlternateIdent={setAlternateIdent} departureTime={departureTime} selectedAircraft={selectedAircraft} mode={mode} destinationPhotoUrl={destinationPhotoUrl} />
+                  <PlanStage
+                    originAirport={originAirport}
+                    destinationAirport={destinationAirport}
+                    originIdent={originIdent}
+                    destinationIdent={destinationIdent}
+                    flightLevel={flightLevel}
+                    routeText={effectiveRouteText}
+                    alternateIdent={alternateIdent}
+                    departureTime={departureTime}
+                    selectedAircraft={selectedAircraft}
+                    mode={mode}
+                    destinationPhotoUrl={destinationPhotoUrl}
+                    requiresSimbrief={requiresSimbrief}
+                    simbriefStatus={simbriefStatus}
+                    simbriefMessage={simbriefMessage}
+                    simbriefOfp={simbriefOfp}
+                    onGenerateSimbrief={openSimbriefPlanner}
+                    onLoadSimbriefOfp={loadLatestSimbriefOfp}
+                  />
                   <div className={styles.navButtons}><button type="button" className={styles.backButton} onClick={() => setStep(2)}>Volver</button><button type="button" className={styles.continueButton} disabled={!canContinuePlan} onClick={() => setStep(4)}>Continuar</button></div>
                 </>
               ) : null}

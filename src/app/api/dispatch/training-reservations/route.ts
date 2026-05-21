@@ -69,6 +69,10 @@ export async function POST(request: Request) {
       cargoKg: Number(body.cargoKg ?? 0),
       fuelKg: Number(body.fuelKg ?? 0),
       fuelPolicy: body.fuelPolicy as string | null,
+      simbriefOfp:
+        body.simbriefOfp && typeof body.simbriefOfp === "object"
+          ? (body.simbriefOfp as Record<string, unknown>)
+          : null,
     });
 
     return NextResponse.json({
