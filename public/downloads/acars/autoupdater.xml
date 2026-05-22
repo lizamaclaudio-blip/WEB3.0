@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <item>
-  <version>7.1.4</version>
-  <latestVersion>7.1.4</latestVersion>
+  <version>7.1.5</version>
+  <latestVersion>7.1.5</latestVersion>
   <url>https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe</url>
-  <changelog>ACARS 7.1.4 - Alinea ACARS con Web 3.0 direct dispatch. Claim ACARS_READY desde Web/Neon.</changelog>
-  <mandatory>false</mandatory>
-  <required>false</required>
+  <changelog>ACARS 7.1.5 - Mandatory update by version/revision with anti-loop protection.</changelog>
+  <mandatory>true</mandatory>
+  <required>true</required>
 </item>
