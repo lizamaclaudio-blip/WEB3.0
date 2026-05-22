@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <item>
-  <version>7.1.3</version>
+  <version>7.1.4</version>
+  <latestVersion>7.1.4</latestVersion>
   <url>https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe</url>
-  <changelog>ACARS 7.1.3 - Hotfix autenticación Web 3.0 dedicada. Endpoint /api/acars/auth/login. Sin Supabase.</changelog>
+  <changelog>ACARS 7.1.4 - Alinea ACARS con Web 3.0 direct dispatch. Claim ACARS_READY desde Web/Neon.</changelog>
   <mandatory>false</mandatory>
+  <required>false</required>
 </item>
