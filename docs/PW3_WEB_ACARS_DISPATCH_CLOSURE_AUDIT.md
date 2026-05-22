@@ -125,3 +125,16 @@ Cambios:
 - [ ] send-to-acars devuelve payload pw3-dispatch-v1
 - [ ] ACARS puede hacer claim del dispatch
 - [ ] Prueba productiva PWG001→PWG695→C208→OFP→Reserva→ACARS exitosa
+
+## 2026-05-21 - ACARS Direct Schema Fix
+
+Error productivo detectado:
+
+`ACARS_DISPATCH_INSERT_FAILED` por columna `route_code` faltante en `public.training_dispatch_reservations`.
+
+Fix aplicado:
+
+- Migracion idempotente `20260521_training_dispatch_reservations_acars_direct_columns.sql`.
+- Columnas direct dispatch agregadas: `route_code`, `payload_version`, `dispatch_payload`, `acars_payload`, `acars_state`.
+- `send-to-acars` guarda payload completo `pw3-dispatch-v1` en columnas nuevas y conserva `prepared_acars_payload` para compatibilidad con claim/finalize.
+- Error de schema faltante ahora devuelve `ACARS_SCHEMA_MISSING_COLUMN` con `missingColumn`, tabla y nombre de migracion.

@@ -9,6 +9,8 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ACARS_PAYLOAD_VERSION = "pw3-dispatch-v1";
+const ACARS_DIRECT_SCHEMA_MIGRATION = "20260521_training_dispatch_reservations_acars_direct_columns.sql";
 
 function text(value: unknown) {
   return String(value ?? "").trim();
@@ -33,6 +35,14 @@ function hashDispatchToken(token: string) {
 
 function createDispatchToken() {
   return randomBytes(40).toString("base64url");
+}
+
+function getMissingColumn(error: unknown) {
+  if (!error || typeof error !== "object") return "";
+  const maybe = error as { code?: unknown; column?: unknown; message?: unknown };
+  if (typeof maybe.column === "string" && maybe.column.trim()) return maybe.column.trim();
+  const message = typeof maybe.message === "string" ? maybe.message : "";
+  return message.match(/column "([^"]+)"/)?.[1] || "";
 }
 
 type AirportRow = { id: string };
@@ -125,7 +135,8 @@ export async function POST(request: Request) {
     const tokenHint = dispatchToken.slice(0, 8);
 
     const acarsPayload = {
-      payload_version: "pw3-dispatch-v1",
+      payloadVersion: ACARS_PAYLOAD_VERSION,
+      payload_version: ACARS_PAYLOAD_VERSION,
       generated_at: new Date().toISOString(),
       source: "WEB_DIRECT_ACARS",
       dispatch_id: dispatchId,
@@ -135,12 +146,19 @@ export async function POST(request: Request) {
       score_mode: scoreMode,
       reservation_status: "ACARS_READY",
       flight: {
+        airlineIcao: assignedFlight.airlineIcao,
+        flightNumber: assignedFlight.flightNumber,
+        routeCode: assignedFlight.routeCode,
         airline_icao: assignedFlight.airlineIcao,
         flight_number: assignedFlight.flightNumber,
         callsign: assignedFlight.callsign,
         route_code: assignedFlight.routeCode,
       },
       route: {
+        routeId: normalizedRouteId,
+        routeCode: assignedFlight.routeCode,
+        origin: originIdent,
+        destination: destinationIdent,
         route_id: normalizedRouteId,
         route_code: assignedFlight.routeCode,
         origin_ident: originIdent,
@@ -148,11 +166,15 @@ export async function POST(request: Request) {
         route_text: simbriefRoute || `${originIdent} DCT ${destinationIdent}`,
       },
       aircraft: {
+        aircraftCode,
         model_code: aircraftCode,
         registration: aircraftRegistration,
       },
       simbrief,
-      loading,
+      loading: {
+        ...loading,
+        fuelPlannedKg: numeric(loading.fuelPlannedKg) || numeric(loading.fuelKg) || numeric(simbrief.blockFuelKg),
+      },
       schedule: {
         departureLocalTime,
         estimatedArrivalLocalTime: text(schedule.estimatedArrivalLocalTime) || null,
@@ -160,6 +182,7 @@ export async function POST(request: Request) {
         estimatedFlightMinutes: numeric(schedule.estimatedFlightMinutes) || null,
         source: "simbrief_ofp",
       },
+      economySnapshot,
       economy_snapshot: economySnapshot,
     };
 
@@ -187,6 +210,10 @@ export async function POST(request: Request) {
          assigned_flight_number,
          assigned_callsign,
          airline_icao,
+         payload_version,
+         dispatch_payload,
+         acars_payload,
+         acars_state,
          flight_payload,
          simbrief_ofp_json,
          prepared_acars_payload,
@@ -217,10 +244,14 @@ export async function POST(request: Request) {
          $18,
          $19,
          $20,
+         '${ACARS_PAYLOAD_VERSION}',
          $21::jsonb,
          $22::jsonb,
+         'ACARS_READY',
          $23::jsonb,
-         'pw3-dispatch-v1',
+         $24::jsonb,
+         $25::jsonb,
+         '${ACARS_PAYLOAD_VERSION}',
          now(),
          now(),
          now() + interval '24 hours'
@@ -246,6 +277,8 @@ export async function POST(request: Request) {
         assignedFlight.flightNumber,
         assignedFlight.callsign,
         assignedFlight.airlineIcao,
+        JSON.stringify(acarsPayload),
+        JSON.stringify(acarsPayload),
         JSON.stringify({ flight: assignedFlight }),
         JSON.stringify(simbrief),
         JSON.stringify(acarsPayload),
@@ -257,11 +290,18 @@ export async function POST(request: Request) {
       status: "READY_FOR_ACARS",
       dispatchId,
       dispatchToken,
-      payloadVersion: "pw3-dispatch-v1",
+      payloadVersion: ACARS_PAYLOAD_VERSION,
       acarsPayload,
     });
   } catch (error) {
     console.error("[dispatch] direct send-to-acars failed", error instanceof Error ? error.message : error);
+    if (error && typeof error === "object" && (error as { code?: unknown }).code === "42703") {
+      return fail("ACARS_SCHEMA_MISSING_COLUMN", "ACARS direct dispatch schema missing column", {
+        missingColumn: getMissingColumn(error),
+        table: "public.training_dispatch_reservations",
+        migrationName: ACARS_DIRECT_SCHEMA_MIGRATION,
+      }, 500);
+    }
     return fail("ACARS_DISPATCH_INSERT_FAILED", "Failed to insert ACARS dispatch", {
       reason: error instanceof Error ? error.message : "unknown",
     }, 500);
