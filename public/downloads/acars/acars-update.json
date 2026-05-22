@@ -8,6 +8,8 @@
     "downloadUrl":  "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
     "url":  "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
     "installerUrl":  "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
+    "sha256":  "C73DA4C500CDD5AAB707604CEEE9CAA3AFA4666458CC2B82C974D77C5E96FDC5",
+    "sizeBytes":  30272190,
     "mandatory":  true,
     "required":  true,
     "forceUpdate":  true,

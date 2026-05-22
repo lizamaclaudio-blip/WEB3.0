@@ -44,7 +44,34 @@ function getExpectedHash(version: string): string | null {
   }
 }
 
-function getManifestInfo(): { version: string; revision: string; forceUpdate: boolean } | null {
+type ManifestInfo = {
+  version: string;
+  revision: string;
+  forceUpdate: boolean;
+  sha256?: string | null;
+  sizeBytes?: number | null;
+};
+
+async function loadManifestFromPublicUrl(baseUrl: string): Promise<ManifestInfo | null> {
+  try {
+    const response = await fetch(`${baseUrl.replace(/\/$/, "")}/downloads/acars/acars-update.json`, {
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    const manifest = await response.json();
+    return {
+      version: manifest.version,
+      revision: manifest.revision,
+      forceUpdate: Boolean(manifest.forceUpdate),
+      sha256: manifest.sha256 ?? null,
+      sizeBytes: typeof manifest.sizeBytes === "number" ? manifest.sizeBytes : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function getManifestInfo(requestUrl: string): Promise<ManifestInfo | null> {
   try {
     const manifestPath = join(process.cwd(), "public", "downloads", "acars", "acars-update.json");
     const content = readFileSync(manifestPath, "utf-8");
@@ -53,9 +80,12 @@ function getManifestInfo(): { version: string; revision: string; forceUpdate: bo
       version: manifest.version,
       revision: manifest.revision,
       forceUpdate: manifest.forceUpdate || false,
+      sha256: manifest.sha256 ?? null,
+      sizeBytes: typeof manifest.sizeBytes === "number" ? manifest.sizeBytes : null,
     };
   } catch {
-    return null;
+    const baseUrl = new URL(requestUrl).origin;
+    return loadManifestFromPublicUrl(baseUrl);
   }
 }
 
@@ -65,7 +95,7 @@ export async function GET(request: Request) {
     const requestedVersion = url.searchParams.get("version");
     const providedHash = url.searchParams.get("hash")?.toUpperCase();
 
-    const manifest = getManifestInfo();
+    const manifest = await getManifestInfo(request.url);
     if (!manifest) {
       return NextResponse.json(
         { ok: false, error: "MANIFEST_NOT_FOUND", message: "No se pudo leer manifest de versiones" },
@@ -77,7 +107,10 @@ export async function GET(request: Request) {
     const targetVersion = requestedVersion || manifest.version;
     
     // Obtener hash esperado
-    const expectedHash = getExpectedHash(targetVersion);
+    let expectedHash = getExpectedHash(targetVersion);
+    if (!expectedHash && targetVersion === manifest.version && manifest.sha256) {
+      expectedHash = String(manifest.sha256).toUpperCase();
+    }
     
     // Validar hash si se proporcionó
     let hashMatch: boolean | null = null;
@@ -109,6 +142,7 @@ export async function GET(request: Request) {
       latestVersion: manifest.version,
       revision: manifest.revision,
       expectedHash: expectedHash,
+      expectedSizeBytes: manifest.sizeBytes ?? null,
       providedHash: providedHash || null,
       hashMatch: hashMatch,
       safeToInstall: safeToInstall,
