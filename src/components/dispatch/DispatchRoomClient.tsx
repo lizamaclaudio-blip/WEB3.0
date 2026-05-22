@@ -838,7 +838,7 @@ function PlanStage({
           <label className={styles.routeInputWide}><span>Plan de vuelo *</span><input value={routeValue || "Pendiente de OFP SimBrief"} readOnly={requiresSimbrief} /></label>
           {requiresSimbrief ? (
             <>
-              <label><span>Estado SimBrief</span><input value={simbriefOfp ? "Cargado" : (simbriefStatus === "error" ? "Error" : "Sin cargar")} readOnly /></label>
+              <label><span>Estado SimBrief</span><input value={simbriefStatus === "error" ? "Error" : simbriefOfp ? "Cargado" : "Sin cargar"} readOnly /></label>
               <label><span>Combustible OFP</span><input value={simbriefOfp ? `${Math.round(asNumber(simbriefOfp.blockFuelKg, 0))} kg block / ${Math.round(asNumber(simbriefOfp.tripFuelKg, 0))} kg trip` : "Pendiente de OFP SimBrief"} readOnly /></label>
               <label><span>Payload OFP</span><input value={simbriefOfp ? `${Math.round(asNumber(simbriefOfp.payloadKg, 0))} kg` : "Pendiente de OFP SimBrief"} readOnly /></label>
               <label><span>PAX / Carga OFP</span><input value={simbriefOfp ? `${Math.round(asNumber(simbriefOfp.passengerCount, 0))} pax / ${Math.round(asNumber(simbriefOfp.cargoKg, 0))} kg` : "Pendiente de OFP SimBrief"} readOnly /></label>
@@ -853,6 +853,7 @@ function PlanStage({
             <button type="button" className={styles.continueButton} onClick={onLoadSimbriefOfp}>Cargar OFP</button>
           </div>
         ) : null}
+        {requiresSimbrief ? <p className={styles.smallNote}>Detalle: {simbriefMessage}</p> : null}
       </section>
       <section className={styles.darkPanel}>
         <header>Destino</header>
@@ -890,7 +891,7 @@ function PlanStage({
         <div><span>Salida</span><strong>{departureTime}</strong></div>
         <div><span>Origen</span><IcaoFlagBadge icao={originIdent} countryCode={originAirport?.iso_country || originAirport?.country} size="sm" /></div>
         <div><span>Destino</span><IcaoFlagBadge icao={destinationIdent} countryCode={destinationAirport?.iso_country || destinationAirport?.country} size="sm" /></div>
-        <div><span>Estado</span><strong className={styles.pendingBadge}>{requiresSimbrief ? (simbriefOfp ? "OFP cargado" : "Pendiente OFP") : "Planificado"}</strong></div>
+        <div><span>Estado</span><strong className={styles.pendingBadge}>{requiresSimbrief ? (simbriefStatus === "error" ? "Error OFP" : simbriefOfp ? "OFP cargado" : "Pendiente OFP") : "Planificado"}</strong></div>
       </section>
     </div>
   );
@@ -1462,8 +1463,22 @@ export default function DispatchRoomClient({
           expectedAircraftCode: mapper.simbriefCode || selectedAircraft?.model_code || "",
         }),
       });
-      const payload = (await response.json().catch(() => null)) as { ok?: boolean; code?: string; ofp?: SimbriefOfp } | null;
-      if (!response.ok || !payload?.ok || !payload.ofp) {
+      const payload = (await response.json().catch(() => null)) as {
+        ok?: boolean;
+        code?: string;
+        ofp?: SimbriefOfp;
+        warnings?: string[];
+        routeValidation?: {
+          valid?: boolean;
+          severity?: "warning" | "error";
+          message?: string;
+          route?: string;
+        };
+      } | null;
+      if (payload?.ofp) {
+        setSimbriefOfp(payload.ofp);
+      }
+      if (!response.ok || !payload?.ok || !payload?.ofp) {
         const code = payload?.code || "SIMBRIEF_FETCH_FAILED";
         setSimbriefStatus(code.includes("MISMATCH") ? "mismatch" : "error");
         // Extraer código normalizado de aeronave para mensajes claros
@@ -1488,12 +1503,20 @@ export default function DispatchRoomClient({
         setSimbriefMessage(errorMessages[code as keyof typeof errorMessages] || `Error al cargar OFP (${code}).`);
         return;
       }
-      
-      setSimbriefOfp(payload.ofp);
-      const routeValidation = validateIfrRoute(payload.ofp.route, originIdent, destinationIdent);
-      if (!routeValidation.valid) {
+
+      const routeValidation = payload.routeValidation || validateIfrRoute(payload.ofp.route, originIdent, destinationIdent);
+      const hasCriticalMtow = payload.code === "SIMBRIEF_PAYLOAD_LIMITED_BY_MTOW" || Boolean(payload.warnings?.includes("SIMBRIEF_PAYLOAD_LIMITED_BY_MTOW"));
+      if (hasCriticalMtow) {
         setSimbriefStatus("error");
-        setSimbriefMessage("El OFP no contiene una ruta válida. Selecciona o genera una ruta en SimBrief y vuelve a cargar el OFP.");
+        setSimbriefMessage("SIMBRIEF_PAYLOAD_LIMITED_BY_MTOW: SimBrief limitó el payload por MTOW. Ajusta el load sheet en SimBrief o selecciona otra aeronave.");
+        return;
+      }
+
+      if (!routeValidation.valid) {
+        setSimbriefStatus("loaded");
+        const routeWarningMessage = (routeValidation as { message?: string; errorMessage?: string }).message
+          || (routeValidation as { message?: string; errorMessage?: string }).errorMessage;
+        setSimbriefMessage(`OFP cargado con advertencia de ruta: ${routeWarningMessage || "Revisa la ruta OFP."}`);
         return;
       }
       setSimbriefStatus("loaded");

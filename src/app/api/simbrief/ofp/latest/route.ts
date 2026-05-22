@@ -133,11 +133,12 @@ export async function POST(request: Request) {
   }
 
   const routeValidation = validateIfrRoute(ofp.route, ofp.origin, ofp.destination);
+  const warnings: string[] = [];
   if (!routeValidation.valid) {
-    return error("SIMBRIEF_ROUTE_MISSING");
+    warnings.push(routeValidation.errorCode || "SIMBRIEF_ROUTE_WARNING");
   }
   if (ofp.mtowLimited) {
-    return error("SIMBRIEF_PAYLOAD_LIMITED_BY_MTOW");
+    warnings.push("SIMBRIEF_PAYLOAD_LIMITED_BY_MTOW");
   }
   
   // Comparación flexible de flight number (acepta PWG695 vs 695)
@@ -170,5 +171,18 @@ export async function POST(request: Request) {
   }
 
   console.info(`[simbrief-ofp] OFP loaded successfully for ${user.callsign}`);
-  return NextResponse.json({ ok: true, ofp });
+  return NextResponse.json({
+    ok: true,
+    ofp,
+    warnings,
+    routeValidation: {
+      valid: routeValidation.valid,
+      severity: routeValidation.valid ? "warning" : "error",
+      message: routeValidation.errorMessage || "Ruta OFP recibida.",
+      route: routeValidation.route || ofp.route || "",
+      origin: routeValidation.origin || ofp.origin || "",
+      destination: routeValidation.destination || ofp.destination || "",
+    },
+    code: ofp.mtowLimited ? "SIMBRIEF_PAYLOAD_LIMITED_BY_MTOW" : undefined,
+  });
 }
