@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getRankMedal } from "@/lib/ranks/medals";
 
 type NavItem = string | { label: string; href: string; external?: boolean };
 
@@ -31,7 +32,7 @@ const navGroups: { label: string; items: NavItem[] }[] = [
 ];
 
 type CrewHeaderProps = {
-  pilot?: { name?: string; callsign?: string; rank?: string };
+  pilot?: { name?: string; callsign?: string; rank?: string; rankCode?: string };
 };
 
 const bellIcon = String.fromCodePoint(0x1f514);
@@ -50,6 +51,7 @@ export function CrewHeader({ pilot }: CrewHeaderProps) {
   const pilotName = pilot?.name || "Claudio Lizama";
   const callsign = pilot?.callsign || "PWG001";
   const rank = pilot?.rank || "First Officer";
+  const rankMedal = getRankMedal(pilot?.rankCode || "");
   return (
     <header className="pw-sur-header">
       <div className="pw-sur-header-inner">
@@ -97,7 +99,10 @@ export function CrewHeader({ pilot }: CrewHeaderProps) {
                 <div className="pw-sur-avatar">{initials(pilotName)}</div>
                 <div style={{ color: "#ffffff" }}>
                   <strong style={{ color: "#ffffff" }}>{pilotName}</strong>
-                  <small style={{ color: "rgba(255,255,255,0.9)" }}>{rank}</small>
+                  <small style={{ color: "rgba(255,255,255,0.9)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <Image src={rankMedal.medalUrl} alt={rankMedal.name} width={18} height={18} />
+                    <span>{rank}</span>
+                  </small>
                 </div>
               </div>
               <Link href="/mi-perfil">Mi perfil</Link>
