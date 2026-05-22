@@ -62,20 +62,6 @@ export async function POST(request: Request) {
     const reservationId = payload.reservationId;
     const pilotCallsign = user.callsign?.toUpperCase() || payload.pilotCallsign || "";
 
-    if (!dispatchToken && !reservationId) {
-      return NextResponse.json(
-        {
-          ok: false,
-          code: "ACARS_CLIENT_OUTDATED",
-          message:
-            "Tu version de ACARS es antigua para iniciar vuelo con este endpoint. Descarga la version actual desde Patagonia Wings.",
-          latestVersion: LATEST_VERSION,
-          downloadUrl: DOWNLOAD_URL,
-        },
-        { status: 426 },
-      );
-    }
-
     const direct = await claimDirectAcarsDispatch({
       reservationId,
       dispatchToken,
@@ -108,12 +94,25 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           ok: false,
-          code,
-          message: "No hay despacho listo para ACARS para este piloto.",
+          code: "NO_ACTIVE_DISPATCH",
+          message: "No existe un despacho activo para iniciar vuelo ACARS.",
           latestVersion: LATEST_VERSION,
           downloadUrl: DOWNLOAD_URL,
         },
         { status: 404 },
+      );
+    }
+
+    if (code === "DISPATCH_NOT_OWNED_BY_PILOT") {
+      return NextResponse.json(
+        {
+          ok: false,
+          code,
+          message: "El despacho pertenece a otro piloto.",
+          latestVersion: LATEST_VERSION,
+          downloadUrl: DOWNLOAD_URL,
+        },
+        { status: 403 },
       );
     }
 

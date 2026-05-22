@@ -213,14 +213,18 @@ export async function claimDirectAcarsDispatch(input: ClaimDirectDispatchInput) 
         params.push(reservationId);
         where += " and id = $2::uuid";
       }
+      if (pilotCallsign) {
+        params.push(pilotCallsign);
+        where += ` and upper(coalesce(pilot_callsign, '')) = $${params.length}`;
+      }
     } else {
       params.push(pilotCallsign);
       where = `
         upper(coalesce(pilot_callsign, '')) = $1
         and coalesce(payload_version, acars_payload_version, '') = 'pw3-dispatch-v1'
         and (
-          upper(coalesce(acars_state, '')) = 'ACARS_READY'
-          or upper(coalesce(status, '')) = 'ACARS_READY'
+          upper(coalesce(acars_state, '')) in ('ACARS_READY', 'CLAIMED')
+          or upper(coalesce(status, '')) in ('ACARS_READY', 'ACARS_CLAIMED')
         )
       `;
     }
@@ -262,7 +266,25 @@ export async function claimDirectAcarsDispatch(input: ClaimDirectDispatchInput) 
     );
 
     const row = result.rows[0];
-    if (!row) throw new Error("NO_ACARS_READY_DISPATCH");
+    if (!row) {
+      if (dispatchToken && pilotCallsign) {
+        const ownerCheck = await client.query<{ pilot_callsign: string | null }>(
+          `
+          select pilot_callsign
+          from public.training_dispatch_reservations
+          where dispatch_token_hash = $1
+            and upper(coalesce(status, '')) not in ('CANCELLED','EXPIRED','FINALIZED','COMPLETED')
+          order by coalesce(sent_to_acars_at, acars_ready_at, created_at) desc
+          limit 1
+          `,
+          [hashDispatchToken(dispatchToken)],
+        );
+        if (ownerCheck.rows[0] && upper(ownerCheck.rows[0].pilot_callsign) !== pilotCallsign) {
+          throw new Error("DISPATCH_NOT_OWNED_BY_PILOT");
+        }
+      }
+      throw new Error("NO_ACARS_READY_DISPATCH");
+    }
 
     const claimCount = Math.max(0, Number(row.acars_claim_count ?? 0));
     const payload = buildClaimPayload(row, dispatchToken, claimCount, acarsVersion, clientName);

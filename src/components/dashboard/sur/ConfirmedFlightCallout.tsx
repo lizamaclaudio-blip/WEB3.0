@@ -34,7 +34,7 @@ type ConfirmedFlightCalloutProps = {
 function statusLabel(value?: string | null) {
   const status = String(value ?? "").trim().toUpperCase();
   const labels: Record<string, string> = {
-    TEMP_RESERVED: "Reserva temporal",
+    TEMP_RESERVED: "Despacho temporal",
     ACARS_READY: "Listo para ACARS",
     ACARS_CLAIMED: "Tomado por ACARS",
     IN_FLIGHT: "Vuelo en curso",
@@ -44,7 +44,7 @@ function statusLabel(value?: string | null) {
     RESERVED: "Reservado",
     DISPATCHED: "Despachado",
   };
-  return labels[status] ?? (status ? status.replaceAll("_", " ") : "Reserva activa");
+  return labels[status] ?? (status ? status.replaceAll("_", " ") : "Despacho activo");
 }
 
 function operationLabel(value?: string | null, fallback?: string | null) {
@@ -58,7 +58,7 @@ function operationLabel(value?: string | null, fallback?: string | null) {
     AIRCRAFT_TRANSFER: "Traslado de aeronave",
     EVENT_TOUR: "Evento / Tour",
   };
-  return labels[code] ?? fallback ?? "Vuelo reservado";
+  return labels[code] ?? fallback ?? "Despacho activo";
 }
 
 function formatRemaining(expiresAt?: string | null) {
@@ -90,7 +90,7 @@ export function ConfirmedFlightCallout({ reservedFlight }: ConfirmedFlightCallou
         const json = (await response.json()) as ActiveReservationResponse;
         if (!cancelled) setFlight(json.reservation ?? json.activeReservation ?? null);
       } catch {
-        // No bloquea la carga visual del Crew Center.
+        // Non-blocking for dashboard rendering.
       }
     }
 
@@ -116,14 +116,14 @@ export function ConfirmedFlightCallout({ reservedFlight }: ConfirmedFlightCallou
 
   async function cancelReservation() {
     if (!flight?.id || loading) return;
-    const ok = window.confirm("¿Anular esta reserva activa? Podras crear un nuevo despacho despues de anularla.");
+    const ok = window.confirm("Anular este despacho activo? Podras crear un nuevo despacho despues.");
     if (!ok) return;
 
     setLoading(true);
     setMessage(null);
 
     try {
-      const response = await fetch("/api/dispatch/active-reservation/cancel", {
+      const response = await fetch("/api/dispatch/cancel-active", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -131,13 +131,13 @@ export function ConfirmedFlightCallout({ reservedFlight }: ConfirmedFlightCallou
       });
       const json = (await response.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
       if (!response.ok || !json?.ok) {
-        throw new Error(json?.error || "No se pudo anular la reserva.");
+        throw new Error(json?.error || "No se pudo anular el despacho.");
       }
-      setMessage("Reserva anulada correctamente.");
+      setMessage("Despacho anulado correctamente.");
       setFlight(null);
       window.setTimeout(() => window.location.reload(), 350);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "No se pudo anular la reserva.");
+      setMessage(error instanceof Error ? error.message : "No se pudo anular el despacho.");
     } finally {
       setLoading(false);
     }
@@ -146,16 +146,16 @@ export function ConfirmedFlightCallout({ reservedFlight }: ConfirmedFlightCallou
   return (
     <section className="pw-active-reservation-banner" aria-live="polite">
       <div className="pw-active-reservation-main">
-        <span className="pw-active-reservation-kicker">Vuelo reservado activo</span>
+        <span className="pw-active-reservation-kicker">Despacho ACARS activo</span>
         <h2>
-          {operationLabel(flight.operationType, flight.flightNumber)} · <strong>{origin}</strong> → <strong>{destination}</strong>
+          {operationLabel(flight.operationType, flight.flightNumber)} - <strong>{origin}</strong> - <strong>{destination}</strong>
         </h2>
         <p>
-          Aeronave <strong>{aircraft}</strong> · Estado <strong>{statusLabel(flight.status)}</strong>
-          {remaining ? <> · Tiempo restante <strong>{remaining}</strong></> : null}
+          Aeronave <strong>{aircraft}</strong> - Estado <strong>{statusLabel(flight.status)}</strong>
+          {remaining ? <> - Tiempo restante <strong>{remaining}</strong></> : null}
         </p>
         <small>
-          No puedes crear otro despacho hasta continuar, finalizar o anular esta reserva desde Neon.
+          No puedes crear otro despacho hasta continuar, finalizar o anular este despacho activo.
         </small>
         {message ? <p className="pw-active-reservation-message">{message}</p> : null}
       </div>
@@ -163,7 +163,7 @@ export function ConfirmedFlightCallout({ reservedFlight }: ConfirmedFlightCallou
         <a href="/dashboard#despachos" className="pw-sur-btn pw-sur-btn-primary">Continuar despacho</a>
         {canCancel ? (
           <button type="button" className="pw-sur-btn pw-sur-btn-dark" onClick={cancelReservation} disabled={loading}>
-            {loading ? "Anulando..." : "Anular reserva"}
+            {loading ? "Anulando..." : "Anular despacho activo"}
           </button>
         ) : (
           <button type="button" className="pw-sur-btn pw-sur-btn-disabled" disabled>No anulable</button>

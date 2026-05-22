@@ -10,6 +10,7 @@ const ACTIVE_TRAINING_STATUSES = [
   "RESERVED",
   "DISPATCHED",
   "IN_FLIGHT",
+  "STARTED",
   "LANDED",
   "PENDING_EVALUATION",
   "EVALUATED",
@@ -21,6 +22,7 @@ const CANCELLABLE_STATUSES = [
   "ACARS_CLAIMED",
   "RESERVED",
   "DISPATCHED",
+  "STARTED",
 ];
 
 type ActiveTrainingRow = {

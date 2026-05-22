@@ -366,7 +366,6 @@ export function DispatchPageShell({ variant = "dashboard" }: DispatchPageShellPr
   const cargoOperation = operationByCode.get("CARGO_OFFICIAL");
   const routeOperation = rankCode === "CADET" ? schoolRouteOperation : commercialRouteOperation || schoolRouteOperation;
   const aircraftTransferOperation = operationByCode.get("AIRCRAFT_TRANSFER");
-  const trainingTtlMinutes = trainingOperation?.reservation_expires_minutes ?? 15;
   const readyRoutes = useMemo(() => routes.filter((route) => (route.blocked_reasons || []).length === 0), [routes]);
   const routeReadyCount = readyRoutes.filter((route) => {
     const cat = (route.category ?? "").trim().toUpperCase();
@@ -428,8 +427,8 @@ export function DispatchPageShell({ variant = "dashboard" }: DispatchPageShellPr
 
       {hasBlockingReservation ? (
         <div className={styles.noticeAmber}>
-          Ya tienes un vuelo reservado o despacho activo: <strong>{activeReservationLabel}</strong>.
-          Debes continuar o anular esa reserva antes de crear otro vuelo.
+          Ya tienes un despacho activo: <strong>{activeReservationLabel}</strong>.
+          Debes continuar o anular ese despacho antes de crear otro vuelo.
         </div>
       ) : null}
 
@@ -437,7 +436,7 @@ export function DispatchPageShell({ variant = "dashboard" }: DispatchPageShellPr
         <h3 className={styles.sectionTitle}>Operaciones disponibles</h3>
         <SimpleAccordion title="Entrenamiento / Ruta oficial / Charter / Carga" section="operations" openSections={openSections} toggle={toggle}>
           <div className={styles.noticeGreen}>
-            Cada flujo selecciona su aeronave dentro de la sala de despacho. Todas las operaciones que van a ACARS usan reserva temporal de {trainingTtlMinutes} minutos y luego Enviar a ACARS.
+            Cada flujo selecciona su aeronave dentro de la sala de despacho. Verifica el OFP y envia el despacho directo a ACARS.
           </div>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -446,7 +445,7 @@ export function DispatchPageShell({ variant = "dashboard" }: DispatchPageShellPr
                 <OperationAccessRow
                   label={normalizeText(trainingOperation?.label, "Entrenamiento libre")}
                   description={normalizeText(trainingOperation?.description, "Vuelo libre referencial. No mueve piloto ni aeronave.")}
-                  status={hasBlockingReservation ? "Reserva activa" : "Disponible"}
+                  status={hasBlockingReservation ? "Despacho activo" : "Disponible"}
                   typeTone="training"
                   href={buildDispatchRoomHref("training_free")}
                   onStart={() => setActiveRoomMode("training_free")}
@@ -455,7 +454,7 @@ export function DispatchPageShell({ variant = "dashboard" }: DispatchPageShellPr
                 <OperationAccessRow
                   label="Ruta oficial"
                   description={normalizeText(routeOperation?.description, rankCode === "CADET" ? "Ruta oficial formativa disponible segun rutas y aeronaves compatibles." : "Ruta oficial regulada por rango, ruta y aeronave compatible.")}
-                  status={hasBlockingReservation ? "Reserva activa" : routeOperation?.allowed_for_rank === false ? "Bloqueada" : `${routeReadyCount} rutas`}
+                  status={hasBlockingReservation ? "Despacho activo" : routeOperation?.allowed_for_rank === false ? "Bloqueada" : `${routeReadyCount} rutas`}
                   typeTone="official"
                   href={buildDispatchRoomHref("official_route")}
                   onStart={() => setActiveRoomMode("official_route")}
@@ -464,7 +463,7 @@ export function DispatchPageShell({ variant = "dashboard" }: DispatchPageShellPr
                 <OperationAccessRow
                   label={normalizeText(charterOperation?.label, "Charter")}
                   description={charterOperation?.allowed_for_rank ? normalizeText(charterOperation?.description, "Vuelo solicitado por el piloto, sujeto a rango, destino y aeronave.") : normalizeText(charterOperation?.blocked_reason, "Tu rango actual aun no permite charter oficial.")}
-                  status={hasBlockingReservation ? "Reserva activa" : charterOperation?.allowed_for_rank ? "Disponible" : "Bloqueada"}
+                  status={hasBlockingReservation ? "Despacho activo" : charterOperation?.allowed_for_rank ? "Disponible" : "Bloqueada"}
                   typeTone="charter"
                   href={buildDispatchRoomHref("charter_official")}
                   onStart={() => setActiveRoomMode("charter_official")}
@@ -473,7 +472,7 @@ export function DispatchPageShell({ variant = "dashboard" }: DispatchPageShellPr
                 <OperationAccessRow
                   label={normalizeText(cargoOperation?.label, "Carga oficial")}
                   description={cargoOperation?.allowed_for_rank === false ? normalizeText(cargoOperation?.blocked_reason, "Tu rango actual aun no permite operaciones de carga.") : "Vuelo oficial de carga. No transporta pasajeros. Requiere ruta cargo, aeronave compatible y carga kg mayor a 0."}
-                  status={hasBlockingReservation ? "Reserva activa" : cargoOperation?.allowed_for_rank === false ? "Bloqueada" : cargoRouteReadyCount > 0 ? `${cargoRouteReadyCount} rutas` : "Sin rutas cargo"}
+                  status={hasBlockingReservation ? "Despacho activo" : cargoOperation?.allowed_for_rank === false ? "Bloqueada" : cargoRouteReadyCount > 0 ? `${cargoRouteReadyCount} rutas` : "Sin rutas cargo"}
                   typeTone="cargo"
                   onStart={() => setActiveRoomMode("cargo_official")}
                   disabled={hasBlockingReservation || cargoOperation?.allowed_for_rank === false || cargoRouteReadyCount === 0}

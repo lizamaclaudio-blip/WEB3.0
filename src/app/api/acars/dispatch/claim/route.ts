@@ -18,6 +18,7 @@ function errorResponse(error: unknown) {
     ACARS_PAYLOAD_MISSING: "El payload ACARS no esta preparado. Vuelve a presionar Enviar a ACARS en la web.",
     RESERVATION_NOT_READY: "El despacho no esta disponible para ACARS.",
     NO_ACARS_READY_DISPATCH: "No hay despacho listo para ACARS para este piloto.",
+    DISPATCH_NOT_OWNED_BY_PILOT: "El despacho pertenece a otro piloto.",
     UNAUTHENTICATED: "Inicia sesion en ACARS para reclamar el despacho.",
   };
 
@@ -28,6 +29,7 @@ function errorResponse(error: unknown) {
     ACARS_NOT_READY: 409,
     ACARS_PAYLOAD_MISSING: 409,
     NO_ACARS_READY_DISPATCH: 404,
+    DISPATCH_NOT_OWNED_BY_PILOT: 403,
     UNAUTHENTICATED: 401,
   };
 
