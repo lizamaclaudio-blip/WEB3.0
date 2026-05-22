@@ -24,7 +24,7 @@ export default function DownloadsPage() {
                 Patagonia Wings ACARS
               </h2>
               <p className="mb-1 text-slate-300">
-                Version actual: <span className="font-mono text-cyan-400">7.1.2</span>
+                Version actual: <span className="font-mono text-cyan-400">7.1.5</span>
               </p>
               <p className="mb-4 text-sm text-slate-400">
                 Sistema de registro de vuelos para Microsoft Flight Simulator
@@ -38,26 +38,24 @@ export default function DownloadsPage() {
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                Descargar instalador
+                Descargar / Actualizar ACARS
               </a>
             </div>
           </div>
 
           <div className="mt-6 rounded-lg border border-cyan-500/30 bg-cyan-500/10 p-4">
             <p className="text-sm text-cyan-200">
-              <strong>Versión 7.1.2 — Hotfix Login Web 3.0</strong><br />
-              • Corrige autenticación ACARS contra Web 3.0.<br />
-              • El cliente ahora envía email normalizado al endpoint /api/auth/login.<br />
-              • Mensaje de credenciales incorrectas mejorado.<br />
-              • Claim/finalize no fueron modificados.
+              <strong>Version 7.1.5 - Update obligatorio por version/revision</strong><br />
+              - Alinea ACARS con despacho directo Web 3.0.<br />
+              - Fuerza actualizacion solo cuando hay version o revision mas nueva.<br />
+              - Evita bucle de update cuando ya tienes la misma version/revision.
             </p>
           </div>
 
           <div className="mt-6 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
             <p className="text-sm text-amber-200">
-              <strong>Nota importante:</strong> Si tienes una version anterior conectada al actualizador antiguo, 
-              instala manualmente esta version una vez. Desde 7.1.1 las futuras actualizaciones se consultaran 
-              directamente desde Patagonia Wings Web.
+              <strong>Nota importante:</strong> Si tu ACARS no se actualiza automaticamente, descarga este instalador oficial.
+              El instalador reemplaza la version anterior y mantiene la configuracion del piloto.
             </p>
           </div>
         </div>
