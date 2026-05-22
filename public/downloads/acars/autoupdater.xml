@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <item>
-  <version>7.1.5</version>
-  <latestVersion>7.1.5</latestVersion>
-  <revision>2026.5.22.3</revision>
+  <version>7.1.6</version>
+  <latestVersion>7.1.6</latestVersion>
+  <revision>2026.5.22.4</revision>
   <forceUpdate>true</forceUpdate>
   <url>https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe</url>
-  <changelog>ACARS 7.1.5 - Mandatory update by version/revision with anti-loop protection.</changelog>
+  <changelog>ACARS 7.1.6 - Mandatory update by version/revision with anti-loop protection.</changelog>
   <mandatory>true</mandatory>
   <required>true</required>
 </item>
