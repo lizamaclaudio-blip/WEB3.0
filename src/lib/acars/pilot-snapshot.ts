@@ -15,6 +15,14 @@ type SnapshotFlight = {
   createdAt: string | null;
 };
 
+type AirportSnapshot = {
+  ident: string | null;
+  icao: string | null;
+  name: string | null;
+  city: string | null;
+  country: string | null;
+};
+
 function text(value: unknown, fallback = "") {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
 }
@@ -80,6 +88,9 @@ export async function buildAcarsPilotSnapshot(user: AuthenticatedPilot) {
     transferred_hours: number | null;
     pw_score: number | null;
     score: number | null;
+    base_hub: string | null;
+    current_airport_code: string | null;
+    current_airport_icao: string | null;
   }>(
     `select
        callsign,
@@ -93,7 +104,10 @@ export async function buildAcarsPilotSnapshot(user: AuthenticatedPilot) {
        career_hours,
        transferred_hours,
        pw_score,
-       score
+       score,
+       base_hub,
+       current_airport_code,
+       current_airport_icao
      from public.pilot_profiles
      where id = $1::uuid
      limit 1`,
@@ -108,15 +122,41 @@ export async function buildAcarsPilotSnapshot(user: AuthenticatedPilot) {
     text(user.displayName) ||
     text(user.email, "Piloto Patagonia Wings");
 
+  const metrics = await dbOne<{ total_hours: number | null; avg_score: number | null }>(
+    `select
+       coalesce(sum(coalesce(flight_time_minutes,0)),0)::numeric / 60.0 as total_hours,
+       nullif(coalesce(avg(score),0)::numeric, 0) as avg_score
+     from public.pw3_flight_reports
+     where pilot_user_id = $1::uuid
+       and lower(final_status) in ('completed','diverted')`,
+    [user.userId],
+  ).catch(() => ({ total_hours: 0, avg_score: null }));
+
   const totalHours =
     num(profile?.total_hours) ||
     num(profile?.career_hours) ||
     num(profile?.transferred_hours) ||
+    num(metrics?.total_hours) ||
     0;
 
-  const score = optionalNum(profile?.pw_score ?? profile?.score);
-  const locationIcao = upper(user.currentAirportIdent || user.currentAirportIcao);
-  const baseIcao = upper(user.baseAirportIdent || user.baseAirportIcao);
+  const score = optionalNum(profile?.pw_score ?? profile?.score ?? metrics?.avg_score);
+  const baseIcao = upper(
+    user.baseAirportIdent || user.baseAirportIcao || profile?.base_hub || profile?.current_airport_code,
+  );
+  const locationIcao = upper(
+    user.currentAirportIdent || user.currentAirportIcao || profile?.current_airport_icao || profile?.current_airport_code || baseIcao,
+  );
+
+  const locationAirport = locationIcao
+    ? await dbOne<AirportSnapshot>(
+        `select ident, icao, name, city, country
+         from public.airports
+         where upper(coalesce(ident,'')) = $1
+            or upper(coalesce(icao,'')) = $1
+         limit 1`,
+        [locationIcao],
+      ).catch(() => null)
+    : null;
 
   const reservations = await dbQuery<Record<string, unknown>>(
     `select
@@ -155,6 +195,16 @@ export async function buildAcarsPilotSnapshot(user: AuthenticatedPilot) {
     [upper(profile?.callsign || user.callsign), locationIcao || baseIcao || "----"],
   );
 
+  const online = Math.max(1, num(community?.online, 0));
+  const inBase = Math.max(
+    locationIcao && baseIcao && locationIcao === baseIcao ? 1 : 0,
+    num(community?.in_base, 0),
+  );
+
+  const locationName = text(user.currentAirportName || locationAirport?.name, "Aeropuerto no disponible");
+  const locationCity = text(user.currentAirportCity || locationAirport?.city, "No registrado");
+  const locationCountry = text(user.currentAirportCountry || locationAirport?.country, "No registrado");
+
   return {
     ok: true,
     pilot: {
@@ -172,18 +222,18 @@ export async function buildAcarsPilotSnapshot(user: AuthenticatedPilot) {
       currentLocation: locationIcao
         ? {
             icao: locationIcao,
-            name: text(user.currentAirportName, "Aeropuerto no disponible"),
-            city: text(user.currentAirportCity, "No registrado"),
-            country: text(user.currentAirportCountry, "No registrado"),
+            name: locationName,
+            city: locationCity,
+            country: locationCountry,
             isHub: locationIcao === baseIcao,
-            label: `${locationIcao} - ${text(user.currentAirportName, "Aeropuerto no disponible")}`,
+            label: `${locationIcao} - ${locationName}`,
           }
         : null,
     },
     recentFlights,
     community: {
-      online: num(community?.online, 0),
-      inBase: num(community?.in_base, 0),
+      online,
+      inBase,
       baseIcao: baseIcao || null,
     },
   };
