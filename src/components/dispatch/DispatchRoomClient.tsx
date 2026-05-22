@@ -1697,7 +1697,7 @@ export default function DispatchRoomClient({
         airlineIcao: "PWG",
         flightNumber: simbriefOfp?.flightNumber || pwgFlight.flightNumber,
         callsign: simbriefOfp?.flightNumber?.startsWith("PWG") ? simbriefOfp.flightNumber : pwgFlight.callsign,
-        routeCode: routeCode || pwgFlight.routeCode,
+        routeCode: pwgFlight.routeCode,
       };
       const loading = {
         passengerCount: effectivePassengerCount,

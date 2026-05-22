@@ -71,6 +71,8 @@ export async function POST(request: Request) {
     const destinationIdent = upper(body.destinationIdent);
     const routeId = text(body.routeId) || null;
     const routeCodeInput = upper(body.routeCode);
+    const flightInput = (body.flight && typeof body.flight === "object" ? body.flight : {}) as Record<string, unknown>;
+    const flightRouteCodeInput = upper(flightInput.routeCode ?? flightInput.route_code);
     const aircraftCode = upper(body.aircraftCode);
     const aircraftRegistration = upper(body.aircraftRegistration);
     const operationType = upper(body.operationType || "TRAINING_FREE");
@@ -103,12 +105,12 @@ export async function POST(request: Request) {
     ]);
     if (!originAirportId || !destinationAirportId) return fail("MISSING_ROUTE", "Airport not found", { originIdent, destinationIdent });
 
-    const previewFlight = getSimbriefFlightNumber(routeCodeInput || null, originIdent, destinationIdent);
+    const previewFlight = getSimbriefFlightNumber(flightRouteCodeInput || routeCodeInput || null, originIdent, destinationIdent);
     const assignedFlight = {
-      airlineIcao: text((body.flight as Record<string, unknown> | null)?.airlineIcao) || "PWG",
-      flightNumber: text((body.flight as Record<string, unknown> | null)?.flightNumber) || previewFlight.flightNumber,
-      callsign: text((body.flight as Record<string, unknown> | null)?.callsign) || previewFlight.callsign,
-      routeCode: routeCodeInput || previewFlight.routeCode,
+      airlineIcao: text(flightInput.airlineIcao ?? flightInput.airline_icao) || "PWG",
+      flightNumber: text(flightInput.flightNumber ?? flightInput.flight_number) || previewFlight.flightNumber,
+      callsign: text(flightInput.callsign) || previewFlight.callsign,
+      routeCode: previewFlight.routeCode,
     };
     if (!assignedFlight.flightNumber || !assignedFlight.callsign)
       return fail("MISSING_FLIGHT", "Missing flight number/callsign");

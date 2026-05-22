@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { claimTrainingReservationForAcars } from "@/lib/dispatch/training-reservations";
+import { getAuthenticatedPilot } from "@/lib/auth/service";
+import { claimDirectAcarsDispatch } from "@/lib/acars/direct-dispatch-claim";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -15,6 +17,8 @@ function errorResponse(error: unknown) {
     ACARS_NOT_READY: "El despacho aun no fue preparado para ACARS desde la web.",
     ACARS_PAYLOAD_MISSING: "El payload ACARS no esta preparado. Vuelve a presionar Enviar a ACARS en la web.",
     RESERVATION_NOT_READY: "El despacho no esta disponible para ACARS.",
+    NO_ACARS_READY_DISPATCH: "No hay despacho listo para ACARS para este piloto.",
+    UNAUTHENTICATED: "Inicia sesion en ACARS para reclamar el despacho.",
   };
 
   const statusByCode: Record<string, number> = {
@@ -23,6 +27,8 @@ function errorResponse(error: unknown) {
     RESERVATION_EXPIRED: 410,
     ACARS_NOT_READY: 409,
     ACARS_PAYLOAD_MISSING: 409,
+    NO_ACARS_READY_DISPATCH: 404,
+    UNAUTHENTICATED: 401,
   };
 
   return NextResponse.json(
@@ -31,16 +37,69 @@ function errorResponse(error: unknown) {
   );
 }
 
+function bearerToken(request: Request) {
+  const auth = request.headers.get("authorization") ?? "";
+  const match = auth.match(/^Bearer\s+(.+)$/i);
+  return match?.[1]?.trim() || null;
+}
+
+function text(value: unknown) {
+  return String(value ?? "").trim();
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
     if (!body) return NextResponse.json({ ok: false, error: "INVALID_BODY" }, { status: 400 });
 
+    const token = bearerToken(request);
+    const user = await getAuthenticatedPilot(token);
+    const bodyCallsign = text(body.pilotCallsign ?? body.pilot_callsign ?? body.callsign ?? body.pilotNumber ?? body.pilot_number).toUpperCase();
+    const pilotCallsign = (user?.callsign ?? bodyCallsign).toUpperCase();
+    const dispatchToken = text(body.dispatchToken ?? body.dispatch_token);
+    const reservationId = text(body.reservationId ?? body.reservation_id ?? body.dispatchId ?? body.dispatch_id);
+    const acarsVersion = typeof body.acarsVersion === "string" ? body.acarsVersion : typeof body.acars_version === "string" ? body.acars_version : null;
+    const clientName = typeof body.clientName === "string" ? body.clientName : typeof body.client_name === "string" ? body.client_name : "PatagoniaWingsACARS";
+
+    if (dispatchToken || pilotCallsign) {
+      if (!dispatchToken && !user) {
+        throw new Error("UNAUTHENTICATED");
+      }
+
+      const direct = await claimDirectAcarsDispatch({
+        reservationId,
+        dispatchToken,
+        pilotCallsign,
+        acarsVersion,
+        clientName,
+      });
+
+      return NextResponse.json({
+        ok: true,
+        claimed: true,
+        status: "ACARS_CLAIMED",
+        message: "Despacho entregado a ACARS.",
+        reservationId: direct.row.id,
+        dispatchId: direct.row.id,
+        dispatchToken: direct.payload.dispatchToken ?? direct.payload.dispatch_token,
+        payloadVersion: direct.payload.payloadVersion ?? direct.payload.payload_version,
+        dispatchPayload: direct.payload,
+        dispatch: direct.payload,
+        flight: direct.payload.flight,
+        route: direct.payload.route,
+        aircraft: direct.payload.aircraft,
+        simbrief: direct.payload.simbrief,
+        loading: direct.payload.loading,
+        schedule: direct.payload.schedule,
+        economySnapshot: direct.payload.economySnapshot ?? direct.payload.economy_snapshot,
+      });
+    }
+
     const dispatch = await claimTrainingReservationForAcars({
-      reservationId: String(body.reservationId ?? body.reservation_id ?? ""),
-      dispatchToken: String(body.dispatchToken ?? body.dispatch_token ?? ""),
-      acarsVersion: typeof body.acarsVersion === "string" ? body.acarsVersion : typeof body.acars_version === "string" ? body.acars_version : null,
-      clientName: typeof body.clientName === "string" ? body.clientName : typeof body.client_name === "string" ? body.client_name : "PatagoniaWingsACARS",
+      reservationId,
+      dispatchToken,
+      acarsVersion,
+      clientName,
     });
 
     return NextResponse.json({
