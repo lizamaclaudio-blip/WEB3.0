@@ -7,6 +7,8 @@ import { getSimbriefFlightNumber } from "@/lib/dispatch/flight-number";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function text(value: unknown) {
   return String(value ?? "").trim();
@@ -19,6 +21,10 @@ function upper(value: unknown) {
 function numeric(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
+}
+
+function fail(code: string, error: string, details?: Record<string, unknown>, status = 400) {
+  return NextResponse.json({ ok: false, code, error, details }, { status });
 }
 
 function hashDispatchToken(token: string) {
@@ -68,17 +74,24 @@ export async function POST(request: Request) {
         ? (body.economySnapshot as Record<string, unknown>)
         : null;
 
-    if (!originIdent || !destinationIdent || !aircraftRegistration || !aircraftCode) {
-      return NextResponse.json({ ok: false, error: "DISPATCH_DATA_REQUIRED" }, { status: 400 });
-    }
+    const simbriefRoute = text(simbrief.route);
+    const invalidRoute =
+      !simbriefRoute ||
+      simbriefRoute.toUpperCase() === destinationIdent ||
+      simbriefRoute.toUpperCase() === originIdent;
+    if (!originIdent || !destinationIdent) return fail("MISSING_ROUTE", "Missing origin/destination");
+    if (!aircraftRegistration || !aircraftCode) return fail("MISSING_AIRCRAFT", "Missing aircraft code/registration");
+    if (!simbrief || Object.keys(simbrief).length === 0 || invalidRoute)
+      return fail("MISSING_SIMBRIEF", "Missing or invalid SimBrief OFP", { simbriefRoute, destinationIdent, originIdent });
+    if (!loading || Object.keys(loading).length === 0) return fail("MISSING_LOADING", "Missing loading block");
+    if (!schedule || Object.keys(schedule).length === 0) return fail("MISSING_SCHEDULE", "Missing schedule block");
+    if (!economySnapshot) return fail("MISSING_ECONOMY_SNAPSHOT", "Missing economy snapshot");
 
     const [originAirportId, destinationAirportId] = await Promise.all([
       getAirportIdByIdent(originIdent),
       getAirportIdByIdent(destinationIdent),
     ]);
-    if (!originAirportId || !destinationAirportId) {
-      return NextResponse.json({ ok: false, error: "AIRPORT_NOT_FOUND" }, { status: 400 });
-    }
+    if (!originAirportId || !destinationAirportId) return fail("MISSING_ROUTE", "Airport not found", { originIdent, destinationIdent });
 
     const previewFlight = getSimbriefFlightNumber(routeCodeInput || null, originIdent, destinationIdent);
     const assignedFlight = {
@@ -87,6 +100,24 @@ export async function POST(request: Request) {
       callsign: text((body.flight as Record<string, unknown> | null)?.callsign) || previewFlight.callsign,
       routeCode: routeCodeInput || previewFlight.routeCode,
     };
+    if (!assignedFlight.flightNumber || !assignedFlight.callsign)
+      return fail("MISSING_FLIGHT", "Missing flight number/callsign");
+    const normalizedRouteId = routeId && UUID_PATTERN.test(routeId) ? routeId : null;
+
+    console.info("[send-to-acars] request", {
+      pilot: user.callsign,
+      routeId: normalizedRouteId,
+      routeCodeInput,
+      originIdent,
+      destinationIdent,
+      aircraftCode,
+      aircraftRegistration,
+      hasSimbrief: Boolean(simbrief),
+      simbriefRoute: simbriefRoute.slice(0, 120),
+      hasLoading: Boolean(loading),
+      hasSchedule: Boolean(schedule),
+      hasEconomySnapshot: Boolean(economySnapshot),
+    });
 
     const dispatchId = randomUUID();
     const dispatchToken = createDispatchToken();
@@ -110,11 +141,11 @@ export async function POST(request: Request) {
         route_code: assignedFlight.routeCode,
       },
       route: {
-        route_id: routeId,
+        route_id: normalizedRouteId,
         route_code: assignedFlight.routeCode,
         origin_ident: originIdent,
         destination_ident: destinationIdent,
-        route_text: text(simbrief.route) || `${originIdent} DCT ${destinationIdent}`,
+        route_text: simbriefRoute || `${originIdent} DCT ${destinationIdent}`,
       },
       aircraft: {
         model_code: aircraftCode,
@@ -202,12 +233,12 @@ export async function POST(request: Request) {
         aircraftCode,
         originAirportId,
         destinationAirportId,
-        routeId ?? "",
+        normalizedRouteId ?? "",
         assignedFlight.routeCode,
         originIdent,
         destinationIdent,
         departureLocalTime,
-        text(simbrief.route) || `${originIdent} DCT ${destinationIdent}`,
+        simbriefRoute || `${originIdent} DCT ${destinationIdent}`,
         operationType,
         scoreMode,
         dispatchTokenHash,
@@ -230,7 +261,9 @@ export async function POST(request: Request) {
       acarsPayload,
     });
   } catch (error) {
-    console.error("[dispatch] direct send-to-acars failed", error);
-    return NextResponse.json({ ok: false, error: "SEND_TO_ACARS_FAILED" }, { status: 500 });
+    console.error("[dispatch] direct send-to-acars failed", error instanceof Error ? error.message : error);
+    return fail("ACARS_DISPATCH_INSERT_FAILED", "Failed to insert ACARS dispatch", {
+      reason: error instanceof Error ? error.message : "unknown",
+    }, 500);
   }
 }

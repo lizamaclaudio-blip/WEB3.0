@@ -4,8 +4,10 @@ import path from "node:path";
 const root = process.cwd();
 const uiPath = path.join(root, "src/components/dispatch/DispatchRoomClient.tsx");
 const apiPath = path.join(root, "src/app/api/dispatch/send-to-acars/route.ts");
+const ofpPath = path.join(root, "src/lib/simbrief/ofp.ts");
 const ui = fs.readFileSync(uiPath, "utf8");
 const api = fs.existsSync(apiPath) ? fs.readFileSync(apiPath, "utf8") : "";
+const ofp = fs.existsSync(ofpPath) ? fs.readFileSync(ofpPath, "utf8") : "";
 
 let failed = 0;
 const check = (ok, label) => {
@@ -24,6 +26,9 @@ check(api.includes("simbrief"), "payload includes simbrief");
 check(api.includes("loading"), "payload includes loading");
 check(api.includes("schedule"), "payload includes schedule");
 check(api.includes("economy_snapshot"), "payload includes economy snapshot");
+check(ofp.includes("routeClean.toUpperCase() === destination.toUpperCase()"), "destination-only OFP route invalid");
+check(ofp.includes("if (hasOrigin && hasDest)"), "SCTE DCT SCIE-style OFP route valid");
+check(ui.includes("setSimbriefOfp(payload.ofp);"), "OFP is stored before final route-status handling");
 
 if (failed > 0) {
   console.error(`\n[fail] validate-dispatch-direct-acars: ${failed} check(s) failed`);

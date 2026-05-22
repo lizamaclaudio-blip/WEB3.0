@@ -1489,13 +1489,13 @@ export default function DispatchRoomClient({
         return;
       }
       
+      setSimbriefOfp(payload.ofp);
       const routeValidation = validateIfrRoute(payload.ofp.route, originIdent, destinationIdent);
       if (!routeValidation.valid) {
         setSimbriefStatus("error");
         setSimbriefMessage("El OFP no contiene una ruta válida. Selecciona o genera una ruta en SimBrief y vuelve a cargar el OFP.");
         return;
       }
-      setSimbriefOfp(payload.ofp);
       setSimbriefStatus("loaded");
       setSimbriefMessage("OFP cargado correctamente desde SimBrief.");
     } catch {
@@ -1606,7 +1606,7 @@ export default function DispatchRoomClient({
         status: "ready",
         message: reservation.reusedExistingReservation
           ? "Ya tienes una reserva activa. Envíala a ACARS o cancélala antes de crear otra."
-          : "Reserva temporal creada. Disponible por 15 minutos.",
+          : "Despacho intermedio generado.",
         reservation,
         acarsPayload: null,
       });
@@ -1618,7 +1618,7 @@ export default function DispatchRoomClient({
   async function prepareAcarsDispatch() {
     const reservation = reservationState.reservation;
     if (!reservation?.id || !reservation.dispatch_token) {
-      setReservationState((current) => ({ ...current, status: "error", message: "Primero crea una reserva temporal vigente." }));
+      setReservationState((current) => ({ ...current, status: "error", message: "Completa ruta, aeronave y OFP antes de enviar a ACARS." }));
       return;
     }
     setReservationState((current) => ({ ...current, status: "sending", message: "Preparando despacho para ACARS..." }));
@@ -1669,6 +1669,49 @@ export default function DispatchRoomClient({
     try {
       const routeCode = getRouteCode(selectedRoute) || null;
       const pwgFlight = getSimbriefFlightNumber(routeCode, originIdent, destinationIdent);
+      const routeId = selectedRouteInternalId || null;
+      const flight = {
+        airlineIcao: "PWG",
+        flightNumber: simbriefOfp?.flightNumber || pwgFlight.flightNumber,
+        callsign: simbriefOfp?.flightNumber?.startsWith("PWG") ? simbriefOfp.flightNumber : pwgFlight.callsign,
+        routeCode: routeCode || pwgFlight.routeCode,
+      };
+      const loading = {
+        passengerCount: effectivePassengerCount,
+        cargoKg: effectiveCargoKg,
+        fuelKg: effectiveFuelKg,
+      };
+      const schedule = {
+        departureLocalTime: departureTime,
+        estimatedArrivalLocalTime: calculateLocalArrival(departureTime, parseDurationToMinutes(simbriefOfp?.blockTimeMinutes)),
+        estimatedBlockMinutes: simbriefOfp?.blockTimeMinutes || null,
+        estimatedFlightMinutes: simbriefOfp?.flightTimeMinutes || null,
+      };
+      const economySnapshot = {
+        source: "none",
+        routeId: routeId || "",
+        aircraftCode: selectedAircraft.model_code || "",
+      };
+
+      console.log("[send-to-acars] request", {
+        routeId,
+        routeCode,
+        origin: originIdent,
+        destination: destinationIdent,
+        aircraftCode: selectedAircraft.model_code,
+        aircraftRegistration: selectedAircraft.registration,
+        flight,
+        hasSimbrief: Boolean(simbriefOfp),
+        simbriefRoute: simbriefOfp?.route,
+        blockFuelKg: simbriefOfp?.blockFuelKg,
+        tripFuelKg: simbriefOfp?.tripFuelKg,
+        payloadKg: simbriefOfp?.payloadKg,
+        passengerCount: simbriefOfp?.passengerCount,
+        cargoKg: simbriefOfp?.cargoKg,
+        schedule,
+        hasEconomySnapshot: Boolean(economySnapshot),
+      });
+
       const response = await fetch("/api/dispatch/send-to-acars", {
         method: "POST",
         credentials: "include",
@@ -1676,43 +1719,33 @@ export default function DispatchRoomClient({
         body: JSON.stringify({
           operationType: operationCode,
           scoreMode: "SERVER_CONTROLLED",
-          routeId: selectedRouteInternalId || null,
+          routeId,
           routeCode,
           originIdent,
           destinationIdent,
           aircraftCode: selectedAircraft.model_code,
           aircraftRegistration: selectedAircraft.registration,
           departureLocalTime: departureTime,
-          flight: {
-            airlineIcao: "PWG",
-            flightNumber: simbriefOfp?.flightNumber || pwgFlight.flightNumber,
-            callsign: simbriefOfp?.flightNumber?.startsWith("PWG") ? simbriefOfp.flightNumber : pwgFlight.callsign,
-            routeCode: routeCode || pwgFlight.routeCode,
-          },
+          flight,
           simbrief: simbriefOfp,
-          loading: {
-            passengerCount: effectivePassengerCount,
-            cargoKg: effectiveCargoKg,
-            fuelKg: effectiveFuelKg,
-          },
-          schedule: {
-            departureLocalTime: departureTime,
-            estimatedArrivalLocalTime: calculateLocalArrival(departureTime, parseDurationToMinutes(simbriefOfp?.blockTimeMinutes)),
-            estimatedBlockMinutes: simbriefOfp?.blockTimeMinutes || null,
-            estimatedFlightMinutes: simbriefOfp?.flightTimeMinutes || null,
-          },
-          economySnapshot: null,
+          loading,
+          schedule,
+          economySnapshot,
         }),
       });
       const payload = (await response.json().catch(() => null)) as {
         ok?: boolean;
+        code?: string;
         dispatchId?: string;
         dispatchToken?: string;
         acarsPayload?: DispatchAcarsPayload;
-        message?: string;
         error?: string;
+        details?: Record<string, unknown>;
       } | null;
-      if (!response.ok || !payload?.ok || !payload.dispatchToken) throw new Error(payload?.message || payload?.error || "No se pudo preparar el despacho para ACARS.");
+      if (!response.ok || !payload?.ok || !payload.dispatchToken) {
+        const detailText = payload?.details ? ` ${JSON.stringify(payload.details)}` : "";
+        throw new Error(`${payload?.code || "SEND_TO_ACARS_FAILED"}: ${payload?.error || "No se pudo preparar el despacho para ACARS."}${detailText}`);
+      }
       setReservationState({
         status: "acars_ready",
         message: "Despacho listo para ACARS.",
