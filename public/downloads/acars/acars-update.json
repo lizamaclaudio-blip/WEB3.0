@@ -20,7 +20,7 @@
     "installerSizeBytes":  30279289,
     "payloadVersion":  "pw3-acars-8",
     "releaseDate":  "2026-05-23",
-    "publishedAt":  "2026-05-23T05:38:22.9650041Z",
+    "publishedAt":  "2026-05-23T05:44:45.9080168Z",
     "notes":  "ACARS 8.0.0 - Mandatory major update with BlackBox recorder, Web/Neon API hardening, live heartbeat, performance snapshots and server-side evaluation base.",
     "releaseNotes":  "Patagonia Wings ACARS 8.0: BlackBox recorder foundation, Web/Neon API hardening, evaluation engine base, live heartbeat and performance snapshots."
 }
