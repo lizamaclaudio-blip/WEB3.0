@@ -1,4 +1,4 @@
-{
+﻿{
     "version":  "8.0.0",
     "latestVersion":  "8.0.0",
     "currentVersion":  "8.0.0",
@@ -14,13 +14,13 @@
     "directDownloadUrl":  "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
     "packageUrl":  "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
     "url":  "https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe",
-    "sha256":  "2ABA650162F834F8F0A772F2B5916E940498856735C393981BAB9433BB54A9B5",
-    "installerSha256":  "2ABA650162F834F8F0A772F2B5916E940498856735C393981BAB9433BB54A9B5",
-    "sizeBytes":  30274510,
-    "installerSizeBytes":  30274510,
+    "sha256":  "056926098F26CBF2DC3CD46D92D02D1B4C986605EFE80A329F83DF207DF1F4BE",
+    "installerSha256":  "056926098F26CBF2DC3CD46D92D02D1B4C986605EFE80A329F83DF207DF1F4BE",
+    "sizeBytes":  30279289,
+    "installerSizeBytes":  30279289,
     "payloadVersion":  "pw3-acars-8",
     "releaseDate":  "2026-05-23",
-    "publishedAt":  "2026-05-23T05:13:37.2277357Z",
+    "publishedAt":  "2026-05-23T05:38:22.9725203Z",
     "notes":  "ACARS 8.0.0 - Mandatory major update with BlackBox recorder, Web/Neon API hardening, live heartbeat, performance snapshots and server-side evaluation base.",
     "releaseNotes":  "Patagonia Wings ACARS 8.0: BlackBox recorder foundation, Web/Neon API hardening, evaluation engine base, live heartbeat and performance snapshots."
 }

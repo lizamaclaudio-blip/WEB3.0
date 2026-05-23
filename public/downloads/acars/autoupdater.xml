@@ -8,7 +8,7 @@
   <mandatory>true</mandatory>
   <required>true</required>
   <forceUpdate>true</forceUpdate>
-  <sha256>2ABA650162F834F8F0A772F2B5916E940498856735C393981BAB9433BB54A9B5</sha256>
-  <sizeBytes>30274510</sizeBytes>
+  <sha256>056926098F26CBF2DC3CD46D92D02D1B4C986605EFE80A329F83DF207DF1F4BE</sha256>
+  <sizeBytes>30279289</sizeBytes>
   <changelog>Patagonia Wings ACARS 8.0: BlackBox recorder foundation, Web/Neon API hardening, evaluation engine base, live heartbeat and performance snapshots.</changelog>
 </item>
