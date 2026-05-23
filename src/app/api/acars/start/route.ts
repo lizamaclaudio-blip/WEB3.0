@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedPilot } from "@/lib/auth/service";
 import { claimDirectAcarsDispatch } from "@/lib/acars/direct-dispatch-claim";
+import { dbQuery } from "@/lib/db/client";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -70,10 +71,22 @@ export async function POST(request: Request) {
       clientName: text(body?.clientName ?? body?.client_name) || "PatagoniaWingsACARS",
     });
 
+    await dbQuery(
+      `update public.training_dispatch_reservations
+          set status = 'STARTED',
+              acars_state = 'STARTED',
+              acars_status = 'STARTED',
+              acars_claim_last_at = now(),
+              updated_at = now()
+        where id = $1::uuid
+          and upper(coalesce(pilot_callsign, '')) = $2`,
+      [direct.row.id, pilotCallsign],
+    ).catch(() => null);
+
     return NextResponse.json({
       ok: true,
       started: true,
-      status: "ACARS_CLAIMED",
+      status: "STARTED",
       message: "Vuelo ACARS iniciado con despacho Web 3.0.",
       reservationId: direct.row.id,
       dispatchId: direct.row.id,

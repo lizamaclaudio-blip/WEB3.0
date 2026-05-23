@@ -98,6 +98,121 @@ export async function getDispatchReservationById(reservationId: string) {
   );
 }
 
+export async function findActiveReservationForReport(input: {
+  pilotCallsign: string;
+  reservationId?: string | null;
+  dispatchToken?: string | null;
+  flightNumber?: string | null;
+  origin?: string | null;
+  destination?: string | null;
+  aircraftCode?: string | null;
+}) {
+  const pilotCallsign = String(input.pilotCallsign ?? "").trim().toUpperCase();
+  if (!pilotCallsign) return null;
+
+  const reservationId = String(input.reservationId ?? "").trim();
+  if (reservationId) {
+    const byId = await getDispatchReservationById(reservationId);
+    if (byId && String(byId.pilot_callsign ?? "").trim().toUpperCase() === pilotCallsign) return byId;
+  }
+
+  const dispatchToken = String(input.dispatchToken ?? "").trim();
+  if (dispatchToken) {
+    const byToken = await dbOne<DispatchReservationRecord>(
+      `select
+        id::text,
+        pilot_user_id::text,
+        pilot_callsign,
+        aircraft_id::text,
+        aircraft_registration,
+        aircraft_model_code,
+        route_id::text,
+        origin_ident,
+        destination_ident,
+        operation_type,
+        score_mode,
+        status,
+        affects_economy,
+        dispatch_token_hash,
+        prepared_acars_payload,
+        final_status,
+        finalized_at::text
+      from public.training_dispatch_reservations
+      where dispatch_token_hash = $1
+        and upper(coalesce(pilot_callsign, '')) = $2
+        and upper(coalesce(status, '')) in ('ACARS_CLAIMED','STARTED','IN_FLIGHT','ACARS_STARTED','REPORT_PENDING','ACARS_READY')
+      order by coalesce(updated_at, created_at) desc
+      limit 1`,
+      [hashDispatchToken(dispatchToken), pilotCallsign],
+    );
+    if (byToken) return byToken;
+  }
+
+  const flightNumber = String(input.flightNumber ?? "").trim().toUpperCase();
+  const origin = String(input.origin ?? "").trim().toUpperCase();
+  const destination = String(input.destination ?? "").trim().toUpperCase();
+  const aircraftCode = String(input.aircraftCode ?? "").trim().toUpperCase();
+
+  const byPilotAndFlight = await dbOne<DispatchReservationRecord>(
+    `select
+      id::text,
+      pilot_user_id::text,
+      pilot_callsign,
+      aircraft_id::text,
+      aircraft_registration,
+      aircraft_model_code,
+      route_id::text,
+      origin_ident,
+      destination_ident,
+      operation_type,
+      score_mode,
+      status,
+      affects_economy,
+      dispatch_token_hash,
+      prepared_acars_payload,
+      final_status,
+      finalized_at::text
+    from public.training_dispatch_reservations
+    where upper(coalesce(pilot_callsign, '')) = $1
+      and upper(coalesce(status, '')) in ('ACARS_CLAIMED','STARTED','IN_FLIGHT','ACARS_STARTED','REPORT_PENDING','ACARS_READY')
+      and ($2 = '' or upper(coalesce(assigned_callsign,'')) = $2 or upper(coalesce(route_code,'')) = $2)
+      and ($3 = '' or upper(coalesce(origin_ident,'')) = $3)
+      and ($4 = '' or upper(coalesce(destination_ident,'')) = $4)
+      and ($5 = '' or upper(coalesce(aircraft_model_code,'')) = $5)
+    order by coalesce(updated_at, created_at) desc
+    limit 1`,
+    [pilotCallsign, flightNumber, origin, destination, aircraftCode],
+  );
+  if (byPilotAndFlight) return byPilotAndFlight;
+
+  return dbOne<DispatchReservationRecord>(
+    `select
+      id::text,
+      pilot_user_id::text,
+      pilot_callsign,
+      aircraft_id::text,
+      aircraft_registration,
+      aircraft_model_code,
+      route_id::text,
+      origin_ident,
+      destination_ident,
+      operation_type,
+      score_mode,
+      status,
+      affects_economy,
+      dispatch_token_hash,
+      prepared_acars_payload,
+      final_status,
+      finalized_at::text
+    from public.training_dispatch_reservations
+    where upper(coalesce(pilot_callsign, '')) = $1
+      and upper(coalesce(status, '')) in ('ACARS_CLAIMED','STARTED','IN_FLIGHT','ACARS_STARTED','REPORT_PENDING','ACARS_READY')
+    order by coalesce(updated_at, created_at) desc
+    limit 1`,
+    [pilotCallsign],
+  );
+}
+
 export function validateFinalizeToken(row: DispatchReservationRecord, dispatchToken?: string) {
   if (!row.dispatch_token_hash) return true;
   if (!dispatchToken) return false;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedPilot } from "@/lib/auth/service";
-import { getDispatchReservationById } from "@/lib/acars/finalize-reservation";
+import { findActiveReservationForReport } from "@/lib/acars/finalize-reservation";
 import { POST as finalizePost } from "@/app/api/acars/finalize/route";
 
 export const dynamic = "force-dynamic";
@@ -68,14 +68,26 @@ export async function POST(request: Request) {
       return response;
     }
 
-    const reservationId = text(body.reservationId || body.ReservationId);
-    if (!reservationId) {
-      return NextResponse.json({ ok: false, code: "NO_ACTIVE_FLIGHT", message: "No existe un vuelo activo para cerrar." }, { status: 404 });
-    }
-
-    const reservation = await getDispatchReservationById(reservationId);
+    const reservation = await findActiveReservationForReport({
+      pilotCallsign: text(user.callsign),
+      reservationId: text(body.reservationId || body.ReservationId),
+      dispatchToken: text(body.dispatchToken || body.DispatchToken),
+      flightNumber: text(body.flightNumber || body.FlightNumber),
+      origin: text(body.departureIcao || body.DepartureIcao),
+      destination: text(body.arrivalIcao || body.ArrivalIcao),
+      aircraftCode: text(body.aircraftIcao || body.AircraftIcao),
+    });
     if (!reservation) {
-      return NextResponse.json({ ok: false, code: "NO_ACTIVE_FLIGHT", message: "No existe un vuelo activo para cerrar." }, { status: 404 });
+      return NextResponse.json({
+        ok: false,
+        code: "NO_ACTIVE_FLIGHT",
+        message: "No existe un vuelo activo para cerrar.",
+        debug: {
+          searchedStates: ["ACARS_CLAIMED", "ACARS_STARTED", "STARTED", "IN_FLIGHT", "REPORT_PENDING", "ACARS_READY"],
+          pilotCallsign: text(user.callsign).toUpperCase(),
+          flightNumber: text(body.flightNumber || body.FlightNumber),
+        },
+      }, { status: 404 });
     }
 
     const userCallsign = text(user.callsign).toUpperCase();
@@ -84,6 +96,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, code: "DISPATCH_NOT_OWNED_BY_PILOT", message: "El despacho pertenece a otro piloto." }, { status: 403 });
     }
 
+    const reservationId = reservation.id;
     const finalStatus = mapLegacyStatus(text(body.resultStatus || body.ResultStatus || body.status || body.Status));
     const operationType = text(body.operationType || body.OperationType || reservation.operation_type || "TRAINING_FREE").toUpperCase();
     const flightType = inferFlightType(operationType);
