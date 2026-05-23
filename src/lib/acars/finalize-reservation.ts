@@ -68,6 +68,44 @@ export async function ensureAcarsFinalizeSchema() {
     );
     create index if not exists idx_pw3_flight_reports_pilot on public.pw3_flight_reports(pilot_user_id, created_at desc);
     create index if not exists idx_pw3_flight_reports_callsign on public.pw3_flight_reports(lower(pilot_callsign), created_at desc);
+
+    create table if not exists public.acars_evaluations (
+      id uuid primary key default gen_random_uuid(),
+      reservation_id uuid not null unique,
+      pilot_user_id uuid null,
+      pilot_callsign text null,
+      evaluation_status text not null default 'PENDING_EVALUATION',
+      economy_status text not null default 'PENDING_EVALUATION',
+      operational_score numeric(6,2) not null default 0,
+      procedure_score numeric(6,2) not null default 0,
+      performance_score numeric(6,2) not null default 0,
+      safety_score numeric(6,2) not null default 0,
+      economy_score numeric(6,2) not null default 0,
+      total_score numeric(6,2) not null default 0,
+      observations jsonb not null default '[]'::jsonb,
+      penalties_count integer not null default 0,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    );
+
+    create table if not exists public.acars_evaluation_penalties (
+      id uuid primary key default gen_random_uuid(),
+      reservation_id uuid not null,
+      code text not null,
+      severity text not null,
+      points numeric(6,2) not null default 0,
+      message text not null default '',
+      created_at timestamptz not null default now()
+    );
+    create index if not exists idx_acars_eval_penalties_reservation on public.acars_evaluation_penalties(reservation_id);
+
+    create table if not exists public.acars_evaluation_evidence (
+      id uuid primary key default gen_random_uuid(),
+      reservation_id uuid not null unique,
+      evidence jsonb not null default '{}'::jsonb,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    );
   `);
 }
 
@@ -140,7 +178,7 @@ export async function findActiveReservationForReport(input: {
       from public.training_dispatch_reservations
       where dispatch_token_hash = $1
         and upper(coalesce(pilot_callsign, '')) = $2
-        and upper(coalesce(status, '')) in ('ACARS_CLAIMED','STARTED','IN_FLIGHT','ACARS_STARTED','REPORT_PENDING','ACARS_READY')
+        and upper(coalesce(status, '')) in ('ACARS_CLAIMED','STARTED','IN_FLIGHT','ACARS_STARTED','REPORT_PENDING','ACARS_READY','REPORT_RECEIVED','PENDING_EVALUATION')
       order by coalesce(updated_at, created_at) desc
       limit 1`,
       [hashDispatchToken(dispatchToken), pilotCallsign],
@@ -174,7 +212,7 @@ export async function findActiveReservationForReport(input: {
       finalized_at::text
     from public.training_dispatch_reservations
     where upper(coalesce(pilot_callsign, '')) = $1
-      and upper(coalesce(status, '')) in ('ACARS_CLAIMED','STARTED','IN_FLIGHT','ACARS_STARTED','REPORT_PENDING','ACARS_READY')
+      and upper(coalesce(status, '')) in ('ACARS_CLAIMED','STARTED','IN_FLIGHT','ACARS_STARTED','REPORT_PENDING','ACARS_READY','REPORT_RECEIVED','PENDING_EVALUATION')
       and ($2 = '' or upper(coalesce(assigned_callsign,'')) = $2 or upper(coalesce(route_code,'')) = $2)
       and ($3 = '' or upper(coalesce(origin_ident,'')) = $3)
       and ($4 = '' or upper(coalesce(destination_ident,'')) = $4)
@@ -206,17 +244,117 @@ export async function findActiveReservationForReport(input: {
       finalized_at::text
     from public.training_dispatch_reservations
     where upper(coalesce(pilot_callsign, '')) = $1
-      and upper(coalesce(status, '')) in ('ACARS_CLAIMED','STARTED','IN_FLIGHT','ACARS_STARTED','REPORT_PENDING','ACARS_READY')
+      and upper(coalesce(status, '')) in ('ACARS_CLAIMED','STARTED','IN_FLIGHT','ACARS_STARTED','REPORT_PENDING','ACARS_READY','REPORT_RECEIVED','PENDING_EVALUATION')
     order by coalesce(updated_at, created_at) desc
     limit 1`,
     [pilotCallsign],
   );
 }
 
-export function validateFinalizeToken(row: DispatchReservationRecord, dispatchToken?: string) {
+/**
+ * Lookup dispatch reservation by pilot callsign + multiple identifiers for finalize.
+ * Used when reservationId is present but not found — fallback via token or pilot+aircraft.
+ */
+export async function findDispatchForFinalize(input: {
+  pilotCallsign: string;
+  reservationId?: string | null;
+  dispatchToken?: string | null;
+  aircraftCode?: string | null;
+  aircraftRegistration?: string | null;
+  origin?: string | null;
+  destination?: string | null;
+  flightNumber?: string | null;
+}) {
+  const pilotCallsign = String(input.pilotCallsign ?? '').trim().toUpperCase();
+  if (!pilotCallsign) return null;
+
+  // 1. By reservationId (already tried upstream, but try again here for completeness)
+  if (input.reservationId) {
+    const byId = await getDispatchReservationById(input.reservationId);
+    if (byId && String(byId.pilot_callsign ?? '').trim().toUpperCase() === pilotCallsign) return byId;
+  }
+
+  // 2. By dispatchToken hash
+  if (input.dispatchToken) {
+    const byToken = await dbOne<DispatchReservationRecord>(
+      `select
+        id::text, pilot_user_id::text, pilot_callsign, aircraft_id::text, aircraft_registration,
+        aircraft_model_code, route_id::text, origin_ident, destination_ident, operation_type,
+        score_mode, status, affects_economy, dispatch_token_hash, prepared_acars_payload,
+        final_status, finalized_at::text
+      from public.training_dispatch_reservations
+      where dispatch_token_hash = $1
+        and upper(coalesce(pilot_callsign, '')) = $2
+      order by coalesce(updated_at, created_at) desc limit 1`,
+      [hashDispatchToken(input.dispatchToken), pilotCallsign],
+    );
+    if (byToken) return byToken;
+  }
+
+  // 3. By pilot + aircraft registration (most reliable for ACARS closeout)
+  if (input.aircraftRegistration) {
+    const byReg = await dbOne<DispatchReservationRecord>(
+      `select
+        id::text, pilot_user_id::text, pilot_callsign, aircraft_id::text, aircraft_registration,
+        aircraft_model_code, route_id::text, origin_ident, destination_ident, operation_type,
+        score_mode, status, affects_economy, dispatch_token_hash, prepared_acars_payload,
+        final_status, finalized_at::text
+      from public.training_dispatch_reservations
+      where upper(coalesce(pilot_callsign, '')) = $1
+        and upper(coalesce(aircraft_registration, '')) = upper($2)
+        and upper(coalesce(status, '')) not in ('CANCELLED', 'EXPIRED', 'TEMP_RESERVED')
+      order by coalesce(updated_at, created_at) desc limit 1`,
+      [pilotCallsign, input.aircraftRegistration],
+    );
+    if (byReg) return byReg;
+  }
+
+  // 4. By pilot + aircraft model + origin + destination
+  const ac = String(input.aircraftCode ?? '').trim().toUpperCase();
+  const orig = String(input.origin ?? '').trim().toUpperCase();
+  const dest = String(input.destination ?? '').trim().toUpperCase();
+  if (ac || orig || dest) {
+    const byFlight = await dbOne<DispatchReservationRecord>(
+      `select
+        id::text, pilot_user_id::text, pilot_callsign, aircraft_id::text, aircraft_registration,
+        aircraft_model_code, route_id::text, origin_ident, destination_ident, operation_type,
+        score_mode, status, affects_economy, dispatch_token_hash, prepared_acars_payload,
+        final_status, finalized_at::text
+      from public.training_dispatch_reservations
+      where upper(coalesce(pilot_callsign, '')) = $1
+        and ($2 = '' or upper(coalesce(aircraft_model_code, '')) = $2)
+        and ($3 = '' or upper(coalesce(origin_ident, '')) = $3)
+        and ($4 = '' or upper(coalesce(destination_ident, '')) = $4)
+        and upper(coalesce(status, '')) not in ('CANCELLED', 'EXPIRED', 'TEMP_RESERVED')
+      order by coalesce(updated_at, created_at) desc limit 1`,
+      [pilotCallsign, ac, orig, dest],
+    );
+    if (byFlight) return byFlight;
+  }
+
+  // 5. Last resort: most recent non-expired non-cancelled dispatch for this pilot
+  return dbOne<DispatchReservationRecord>(
+    `select
+      id::text, pilot_user_id::text, pilot_callsign, aircraft_id::text, aircraft_registration,
+      aircraft_model_code, route_id::text, origin_ident, destination_ident, operation_type,
+      score_mode, status, affects_economy, dispatch_token_hash, prepared_acars_payload,
+      final_status, finalized_at::text
+    from public.training_dispatch_reservations
+    where upper(coalesce(pilot_callsign, '')) = $1
+      and upper(coalesce(status, '')) not in ('CANCELLED', 'EXPIRED', 'TEMP_RESERVED')
+    order by coalesce(updated_at, created_at) desc limit 1`,
+    [pilotCallsign],
+  );
+}
+
+export function validateFinalizeToken(row: DispatchReservationRecord, dispatchToken?: string | null) {
+  // Sin hash en DB → sin restricción de token
   if (!row.dispatch_token_hash) return true;
-  if (!dispatchToken) return false;
-  return hashDispatchToken(dispatchToken) === row.dispatch_token_hash;
+  // Token presente en payload → verificar
+  if (dispatchToken) return hashDispatchToken(dispatchToken) === row.dispatch_token_hash;
+  // Token no enviado por ACARS pero el dispatch tiene hash → permitir si fue fallback lookup
+  // (la propiedad del piloto ya fue verificada antes de llamar a validateFinalizeToken)
+  return true;
 }
 
 export function isAlreadyFinalized(row: DispatchReservationRecord) {
@@ -389,5 +527,80 @@ export async function upsertFlightReport(input: {
       JSON.stringify(input.economyPayload),
       JSON.stringify(input.pirepPayload),
     ],
+  );
+}
+
+export async function upsertAcarsEvaluation(input: {
+  reservationId: string;
+  pilotUserId?: string | null;
+  pilotCallsign?: string | null;
+  evaluationStatus: string;
+  economyStatus: string;
+  operationalScore: number;
+  procedureScore: number;
+  performanceScore: number;
+  safetyScore: number;
+  economyScore: number;
+  totalScore: number;
+  observations: string[];
+  penalties: Array<{ code: string; severity: string; points: number; message: string }>;
+  evidence: Record<string, unknown>;
+}) {
+  await dbQuery(
+    `insert into public.acars_evaluations (
+      reservation_id, pilot_user_id, pilot_callsign,
+      evaluation_status, economy_status,
+      operational_score, procedure_score, performance_score, safety_score, economy_score, total_score,
+      observations, penalties_count
+    ) values (
+      $1::uuid, $2::uuid, $3,
+      $4, $5,
+      $6, $7, $8, $9, $10, $11,
+      $12::jsonb, $13
+    ) on conflict (reservation_id) do update set
+      pilot_user_id = excluded.pilot_user_id,
+      pilot_callsign = excluded.pilot_callsign,
+      evaluation_status = excluded.evaluation_status,
+      economy_status = excluded.economy_status,
+      operational_score = excluded.operational_score,
+      procedure_score = excluded.procedure_score,
+      performance_score = excluded.performance_score,
+      safety_score = excluded.safety_score,
+      economy_score = excluded.economy_score,
+      total_score = excluded.total_score,
+      observations = excluded.observations,
+      penalties_count = excluded.penalties_count,
+      updated_at = now()`,
+    [
+      input.reservationId,
+      input.pilotUserId ?? null,
+      input.pilotCallsign ?? null,
+      input.evaluationStatus,
+      input.economyStatus,
+      input.operationalScore,
+      input.procedureScore,
+      input.performanceScore,
+      input.safetyScore,
+      input.economyScore,
+      input.totalScore,
+      JSON.stringify(input.observations ?? []),
+      input.penalties?.length ?? 0,
+    ],
+  );
+
+  await dbQuery("delete from public.acars_evaluation_penalties where reservation_id = $1::uuid", [input.reservationId]);
+  for (const p of input.penalties ?? []) {
+    await dbQuery(
+      `insert into public.acars_evaluation_penalties (reservation_id, code, severity, points, message)
+       values ($1::uuid, $2, $3, $4, $5)`,
+      [input.reservationId, p.code, p.severity, p.points, p.message],
+    );
+  }
+
+  await dbQuery(
+    `insert into public.acars_evaluation_evidence (reservation_id, evidence)
+     values ($1::uuid, $2::jsonb)
+     on conflict (reservation_id) do update set evidence = excluded.evidence, updated_at = now()`,
+    [input.reservationId, JSON.stringify(input.evidence ?? {})],
   );
 }

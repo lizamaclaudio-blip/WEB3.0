@@ -51,7 +51,7 @@ export function validateAcarsFinalizePayload(input: unknown): ValidationResult {
   const finalStatus = asString(body.finalStatus).toLowerCase() as FinalizeStatus;
 
   if (payloadVersion !== "pw3-acars-finalize-v1") errors.push("payloadVersion debe ser pw3-acars-finalize-v1.");
-  if (!reservationId) errors.push("reservationId es obligatorio.");
+  // reservationId es opcional — si falta, finalize buscará por piloto/aeronave/ruta
   if (!pilotCallsign) errors.push("pilotCallsign es obligatorio.");
   if (!aircraftCode) errors.push("aircraftCode es obligatorio.");
   if (!operationType) errors.push("operationType es obligatorio.");

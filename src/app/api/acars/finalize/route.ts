@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { calculateRealEconomyFromFinalize } from "@/lib/acars/finalize-economy";
 import { writeFinalizeLedger } from "@/lib/acars/finalize-ledger";
 import { validateAcarsFinalizePayload, normalizeFinalizePayload } from "@/lib/acars/finalize-schema";
@@ -10,12 +10,14 @@ import {
   findDispatchForFinalize,
   getDispatchReservationById,
   isAlreadyFinalized,
+  upsertAcarsEvaluation,
   upsertFlightReport,
   updatePilotAndAircraftPosition,
   validateFinalizeToken,
 } from "@/lib/acars/finalize-reservation";
 import { buildFinalizeSummary, buildSummaryUrl } from "@/lib/acars/finalize-summary";
 import { acarsJson } from "@/lib/acars/api-response";
+import { evaluateFinalizePayload } from "@/lib/acars/evaluation-engine";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -119,6 +121,7 @@ export async function POST(request: Request) {
 
     const scoreResult = calculateFlightScore(payload);
     const economy = calculateRealEconomyFromFinalize(payload);
+    const evaluation = evaluateFinalizePayload(payload);
 
     if (["crashed", "aborted", "cancelled"].includes(payload.finalStatus)) {
       economy.economyEligible = false;
@@ -144,7 +147,7 @@ export async function POST(request: Request) {
       pilotCallsign: payload.pilotCallsign,
       aircraftCode: payload.aircraftCode,
       finalStatus: payload.finalStatus,
-      score: scoreResult.score,
+      score: evaluation.totalScore,
       blockTimeMinutes: payload.actual.blockTimeMinutes ?? 0,
       flightTimeMinutes: payload.actual.flightTimeMinutes ?? 0,
       events: payload.events ?? [],
@@ -154,18 +157,18 @@ export async function POST(request: Request) {
       alreadyProcessed: false,
       reservationClosed: true,
       economyEligible: economy.economyEligible,
-      score: scoreResult.score,
+      score: evaluation.totalScore,
       summaryUrl,
       ledgerWritten: ledger.ledgerWritten,
       pilotAccrualUsd: ledger.pilotAccrualUsd,
       finalStatus: payload.finalStatus,
-      warnings: [...scoreResult.warnings, ...economy.notes],
+      warnings: [...scoreResult.warnings, ...economy.notes, ...evaluation.observations],
     });
 
     await closeDispatchReservation({
       reservationId: resolvedReservationId,
       finalStatus: payload.finalStatus.toUpperCase(),
-      score: scoreResult.score,
+      score: evaluation.totalScore,
       finalizeIdempotencyKey,
       payload: payload as unknown as Record<string, unknown>,
       summary: summary as unknown as Record<string, unknown>,
@@ -194,7 +197,7 @@ export async function POST(request: Request) {
       operationType: payload.operationType,
       flightType: payload.flightType,
       finalStatus: payload.finalStatus,
-      score: scoreResult.score,
+      score: evaluation.totalScore,
       blockMinutes: payload.actual.blockTimeMinutes ?? 0,
       flightMinutes: payload.actual.flightTimeMinutes ?? 0,
       distanceNm: payload.actual.distanceNm ?? payload.planned.distanceNm ?? 0,
@@ -204,13 +207,44 @@ export async function POST(request: Request) {
       pirepPayload,
     });
 
+    await upsertAcarsEvaluation({
+      reservationId: resolvedReservationId,
+      pilotUserId: reservation.pilot_user_id,
+      pilotCallsign: reservation.pilot_callsign ?? payload.pilotCallsign,
+      evaluationStatus: evaluation.evaluationStatus,
+      economyStatus: evaluation.economyStatus,
+      operationalScore: evaluation.operationalScore,
+      procedureScore: evaluation.procedureScore,
+      performanceScore: evaluation.performanceScore,
+      safetyScore: evaluation.safetyScore,
+      economyScore: evaluation.economyScore,
+      totalScore: evaluation.totalScore,
+      observations: evaluation.observations,
+      penalties: evaluation.penalties,
+      evidence: evaluation.evidence,
+    });
+
     return acarsJson(200, {
       ok: true,
       code: "FINALIZE_ACCEPTED",
       message: "Cierre recibido correctamente.",
       status: "REPORT_RECEIVED",
-      evaluationStatus: "PENDING_EVALUATION",
-      extra: summary as unknown as Record<string, unknown>,
+      evaluationStatus: evaluation.evaluationStatus,
+      extra: {
+        ...(summary as unknown as Record<string, unknown>),
+        evaluationStatus: evaluation.evaluationStatus,
+        economyStatus: evaluation.economyStatus,
+        evaluation: {
+          operationalScore: evaluation.operationalScore,
+          procedureScore: evaluation.procedureScore,
+          performanceScore: evaluation.performanceScore,
+          safetyScore: evaluation.safetyScore,
+          economyScore: evaluation.economyScore,
+          totalScore: evaluation.totalScore,
+          penalties: evaluation.penalties,
+          observations: evaluation.observations,
+        },
+      },
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "FINALIZE_FAILED";
