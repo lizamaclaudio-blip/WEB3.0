@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedPilot } from "@/lib/auth/service";
 import { buildAcarsPilotSnapshot } from "@/lib/acars/pilot-snapshot";
+import { acarsJson } from "@/lib/acars/api-response";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -17,23 +18,28 @@ export async function GET(request: Request) {
     const user = await getAuthenticatedPilot(token);
 
     if (!user) {
-      return NextResponse.json(
-        { ok: false, code: "UNAUTHORIZED", message: "Sesion invalida o expirada." },
-        { status: 401 },
-      );
+      return acarsJson(401, { ok: false, code: "UNAUTHORIZED", message: "Sesion invalida o expirada." });
     }
 
     const snapshot = await buildAcarsPilotSnapshot(user);
-    return NextResponse.json(snapshot);
+    return acarsJson(200, {
+      ok: true,
+      code: "PILOT_SNAPSHOT_OK",
+      message: "Snapshot cargado.",
+      status: "ACARS_READY",
+      extra: {
+        snapshot,
+        pilot: (snapshot as Record<string, unknown>).pilot ?? null,
+        recentFlights: (snapshot as Record<string, unknown>).recentFlights ?? [],
+        community: (snapshot as Record<string, unknown>).community ?? null,
+      },
+    });
   } catch (error) {
     console.error("[api/acars/pilot/snapshot] failed", error);
-    return NextResponse.json(
-      {
-        ok: false,
-        code: "PILOT_SNAPSHOT_FAILED",
-        message: "No se pudo cargar la Sala de Pilotos.",
-      },
-      { status: 500 },
-    );
+    return acarsJson(500, {
+      ok: false,
+      code: "PILOT_SNAPSHOT_FAILED",
+      message: "No se pudo cargar la Sala de Pilotos.",
+    });
   }
 }

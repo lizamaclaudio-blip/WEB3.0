@@ -7,6 +7,7 @@ import {
   acquireFinalizeLock,
   closeDispatchReservation,
   ensureAcarsFinalizeSchema,
+  findDispatchForFinalize,
   getDispatchReservationById,
   isAlreadyFinalized,
   upsertFlightReport,
@@ -14,12 +15,13 @@ import {
   validateFinalizeToken,
 } from "@/lib/acars/finalize-reservation";
 import { buildFinalizeSummary, buildSummaryUrl } from "@/lib/acars/finalize-summary";
+import { acarsJson } from "@/lib/acars/api-response";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 function error(status: number, code: string, message: string, details?: unknown) {
-  return NextResponse.json({ success: false, error: code, message, details }, { status });
+  return acarsJson(status, { ok: false, code, message, details });
 }
 
 export async function POST(request: Request) {
@@ -33,17 +35,43 @@ export async function POST(request: Request) {
     }
 
     const payload = normalizeFinalizePayload(validated.payload);
-    const reservation = await getDispatchReservationById(payload.reservationId);
+
+    // Intento 1: lookup directo por reservationId
+    let reservation = payload.reservationId
+      ? await getDispatchReservationById(payload.reservationId)
+      : null;
+
+    // Intento 2: fallback lookup por piloto/aeronave/ruta si no se encontró por ID
     if (!reservation) {
-      return error(404, "RESERVATION_NOT_FOUND", "Reserva no encontrada.");
+      console.warn(`[acars-finalize] reservationId ${payload.reservationId} not found, trying fallback lookup for pilot ${payload.pilotCallsign}`);
+      reservation = await findDispatchForFinalize({
+        pilotCallsign: payload.pilotCallsign,
+        reservationId: payload.reservationId,
+        dispatchToken: payload.dispatchToken,
+        aircraftCode: payload.aircraftCode,
+        origin: payload.origin,
+        destination: payload.destination,
+      });
+    }
+
+    if (!reservation) {
+      return error(404, "NO_ACTIVE_DISPATCH_OR_REPORT", "No se encontró un despacho o vuelo activo para finalizar. Verifica que el vuelo haya sido despachado desde la Web antes de cerrar.");
+    }
+
+    // Asegurar que el piloto coincide
+    const reservationCallsign = String(reservation.pilot_callsign ?? '').trim().toUpperCase();
+    if (reservationCallsign && reservationCallsign !== payload.pilotCallsign.toUpperCase()) {
+      return error(403, "DISPATCH_NOT_OWNED_BY_PILOT", "El despacho pertenece a otro piloto.");
     }
 
     if (!validateFinalizeToken(reservation, payload.dispatchToken)) {
       return error(403, "DISPATCH_TOKEN_INVALID", "dispatchToken invalido.");
     }
 
-    const summaryUrl = buildSummaryUrl(payload.reservationId);
-    const finalizeIdempotencyKey = `acars_finalize:${payload.reservationId}`;
+    // Usar siempre el ID real del despacho encontrado (puede diferir del payload si fue fallback lookup)
+    const resolvedReservationId = reservation.id || payload.reservationId;
+    const summaryUrl = buildSummaryUrl(resolvedReservationId);
+    const finalizeIdempotencyKey = `acars_finalize:${resolvedReservationId}`;
     if (isAlreadyFinalized(reservation)) {
       const already = buildFinalizeSummary({
         alreadyProcessed: true,
@@ -56,10 +84,17 @@ export async function POST(request: Request) {
         finalStatus: (reservation.final_status?.toLowerCase() as typeof payload.finalStatus) || payload.finalStatus,
         warnings: ["Finalize ya procesado previamente."],
       });
-      return NextResponse.json(already);
+      return acarsJson(200, {
+        ok: true,
+        code: "FINALIZE_ALREADY_PROCESSED",
+        message: "Finalize ya procesado previamente.",
+        status: "COMPLETED",
+        evaluationStatus: "PENDING_EVALUATION",
+        extra: already as unknown as Record<string, unknown>,
+      });
     }
 
-    const locked = await acquireFinalizeLock(payload.reservationId, finalizeIdempotencyKey);
+    const locked = await acquireFinalizeLock(resolvedReservationId, finalizeIdempotencyKey);
     if (!locked) {
       const already = buildFinalizeSummary({
         alreadyProcessed: true,
@@ -72,7 +107,14 @@ export async function POST(request: Request) {
         finalStatus: payload.finalStatus,
         warnings: ["Finalize ya procesado previamente."],
       });
-      return NextResponse.json(already);
+      return acarsJson(200, {
+        ok: true,
+        code: "FINALIZE_ALREADY_PROCESSED",
+        message: "Finalize ya procesado previamente.",
+        status: "COMPLETED",
+        evaluationStatus: "PENDING_EVALUATION",
+        extra: already as unknown as Record<string, unknown>,
+      });
     }
 
     const scoreResult = calculateFlightScore(payload);
@@ -87,7 +129,7 @@ export async function POST(request: Request) {
     }
 
     const ledger = await writeFinalizeLedger({
-      reservationId: payload.reservationId,
+      reservationId: resolvedReservationId,
       routeId: reservation.route_id,
       pilotId: reservation.pilot_user_id,
       callsign: reservation.pilot_callsign ?? payload.pilotCallsign,
@@ -98,7 +140,7 @@ export async function POST(request: Request) {
     const landingAirport = payload.actual.landingAirport || (payload.finalStatus === "diverted" ? payload.actual.landingAirport : payload.destination) || reservation.destination_ident;
 
     const pirepPayload = {
-      reservationId: payload.reservationId,
+      reservationId: resolvedReservationId,
       pilotCallsign: payload.pilotCallsign,
       aircraftCode: payload.aircraftCode,
       finalStatus: payload.finalStatus,
@@ -121,7 +163,7 @@ export async function POST(request: Request) {
     });
 
     await closeDispatchReservation({
-      reservationId: payload.reservationId,
+      reservationId: resolvedReservationId,
       finalStatus: payload.finalStatus.toUpperCase(),
       score: scoreResult.score,
       finalizeIdempotencyKey,
@@ -142,7 +184,7 @@ export async function POST(request: Request) {
     }).catch(() => false);
 
     await upsertFlightReport({
-      reservationId: payload.reservationId,
+      reservationId: resolvedReservationId,
       pilotUserId: reservation.pilot_user_id,
       pilotCallsign: reservation.pilot_callsign ?? payload.pilotCallsign,
       aircraftCode: payload.aircraftCode,
@@ -162,7 +204,14 @@ export async function POST(request: Request) {
       pirepPayload,
     });
 
-    return NextResponse.json(summary);
+    return acarsJson(200, {
+      ok: true,
+      code: "FINALIZE_ACCEPTED",
+      message: "Cierre recibido correctamente.",
+      status: "REPORT_RECEIVED",
+      evaluationStatus: "PENDING_EVALUATION",
+      extra: summary as unknown as Record<string, unknown>,
+    });
   } catch (e) {
     const message = e instanceof Error ? e.message : "FINALIZE_FAILED";
     console.error("[acars-finalize] failed", message);

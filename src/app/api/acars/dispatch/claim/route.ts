@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { claimTrainingReservationForAcars } from "@/lib/dispatch/training-reservations";
 import { getAuthenticatedPilot } from "@/lib/auth/service";
 import { claimDirectAcarsDispatch } from "@/lib/acars/direct-dispatch-claim";
+import { acarsJson } from "@/lib/acars/api-response";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -34,7 +35,7 @@ function errorResponse(error: unknown) {
   };
 
   return NextResponse.json(
-    { ok: false, error: code, message: messageByCode[code] ?? "No se pudo reclamar el despacho ACARS." },
+    { ok: false, code, message: messageByCode[code] ?? "No se pudo reclamar el despacho ACARS." },
     { status: statusByCode[code] ?? 400 },
   );
 }
@@ -52,7 +53,7 @@ function text(value: unknown) {
 export async function POST(request: Request) {
   try {
     const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
-    if (!body) return NextResponse.json({ ok: false, error: "INVALID_BODY" }, { status: 400 });
+    if (!body) return acarsJson(400, { ok: false, code: "INVALID_BODY", message: "Body JSON invalido." });
 
     const token = bearerToken(request);
     const user = await getAuthenticatedPilot(token);
@@ -76,24 +77,28 @@ export async function POST(request: Request) {
         clientName,
       });
 
-      return NextResponse.json({
+      return acarsJson(200, {
         ok: true,
-        claimed: true,
-        status: "ACARS_CLAIMED",
+        code: "DISPATCH_CLAIMED",
         message: "Despacho entregado a ACARS.",
-        reservationId: direct.row.id,
-        dispatchId: direct.row.id,
-        dispatchToken: direct.payload.dispatchToken ?? direct.payload.dispatch_token,
-        payloadVersion: direct.payload.payloadVersion ?? direct.payload.payload_version,
-        dispatchPayload: direct.payload,
-        dispatch: direct.payload,
-        flight: direct.payload.flight,
-        route: direct.payload.route,
-        aircraft: direct.payload.aircraft,
-        simbrief: direct.payload.simbrief,
-        loading: direct.payload.loading,
-        schedule: direct.payload.schedule,
-        economySnapshot: direct.payload.economySnapshot ?? direct.payload.economy_snapshot,
+        status: "ACARS_CLAIMED",
+        evaluationStatus: null,
+        extra: {
+          claimed: true,
+          reservationId: direct.row.id,
+          dispatchId: direct.row.id,
+          dispatchToken: direct.payload.dispatchToken ?? direct.payload.dispatch_token,
+          payloadVersion: direct.payload.payloadVersion ?? direct.payload.payload_version,
+          dispatchPayload: direct.payload,
+          dispatch: direct.payload,
+          flight: direct.payload.flight,
+          route: direct.payload.route,
+          aircraft: direct.payload.aircraft,
+          simbrief: direct.payload.simbrief,
+          loading: direct.payload.loading,
+          schedule: direct.payload.schedule,
+          economySnapshot: direct.payload.economySnapshot ?? direct.payload.economy_snapshot,
+        },
       });
     }
 
@@ -104,11 +109,12 @@ export async function POST(request: Request) {
       clientName,
     });
 
-    return NextResponse.json({
+    return acarsJson(200, {
       ok: true,
-      status: "ACARS_CLAIMED",
+      code: "DISPATCH_CLAIMED",
       message: "Despacho entregado a ACARS.",
-      dispatch,
+      status: "ACARS_CLAIMED",
+      extra: { dispatch },
     });
   } catch (error) {
     console.error("[acars] dispatch claim failed", error instanceof Error ? error.message : error);

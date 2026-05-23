@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuthenticatedPilot } from "@/lib/auth/service";
 import { claimDirectAcarsDispatch } from "@/lib/acars/direct-dispatch-claim";
 import { dbQuery } from "@/lib/db/client";
+import { acarsJson } from "@/lib/acars/api-response";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -46,16 +47,12 @@ export async function POST(request: Request) {
     const token = bearerToken(request);
     const user = await getAuthenticatedPilot(token);
     if (!user) {
-      return NextResponse.json(
-        {
-          ok: false,
-          code: "UNAUTHENTICATED",
-          message: "Inicia sesion en ACARS antes de iniciar el vuelo.",
-          latestVersion: LATEST_VERSION,
-          downloadUrl: DOWNLOAD_URL,
-        },
-        { status: 401 },
-      );
+      return acarsJson(401, {
+        ok: false,
+        code: "UNAUTHENTICATED",
+        message: "Inicia sesion en ACARS antes de iniciar el vuelo.",
+        extra: { latestVersion: LATEST_VERSION, downloadUrl: DOWNLOAD_URL },
+      });
     }
 
     const payload = resolveStartPayload(body);
@@ -73,85 +70,73 @@ export async function POST(request: Request) {
 
     await dbQuery(
       `update public.training_dispatch_reservations
-          set status = 'STARTED',
-              acars_state = 'STARTED',
-              acars_status = 'STARTED',
+          set status = 'ACARS_STARTED',
+              acars_state = 'ACARS_STARTED',
+              acars_status = 'ACARS_STARTED',
               acars_claim_last_at = now(),
               updated_at = now()
         where id = $1::uuid
-          and upper(coalesce(pilot_callsign, '')) = $2`,
+          and upper(coalesce(pilot_callsign, '')) = $2
+          and upper(coalesce(status,'')) in ('ACARS_READY','ACARS_CLAIMED','ACARS_STARTED','IN_FLIGHT')`,
       [direct.row.id, pilotCallsign],
     ).catch(() => null);
 
-    return NextResponse.json({
+    return acarsJson(200, {
       ok: true,
-      started: true,
-      status: "STARTED",
+      code: "FLIGHT_STARTED",
       message: "Vuelo ACARS iniciado con despacho Web 3.0.",
-      reservationId: direct.row.id,
-      dispatchId: direct.row.id,
-      dispatchToken: direct.payload.dispatchToken ?? direct.payload.dispatch_token,
-      payloadVersion: direct.payload.payloadVersion ?? direct.payload.payload_version,
-      dispatch: direct.payload,
-      flight: direct.payload.flight,
-      route: direct.payload.route,
-      aircraft: direct.payload.aircraft,
-      simbrief: direct.payload.simbrief,
-      loading: direct.payload.loading,
-      schedule: direct.payload.schedule,
-      economySnapshot: direct.payload.economySnapshot ?? direct.payload.economy_snapshot,
+      status: "ACARS_STARTED",
+      extra: {
+        started: true,
+        reservationId: direct.row.id,
+        dispatchId: direct.row.id,
+        dispatchToken: direct.payload.dispatchToken ?? direct.payload.dispatch_token,
+        payloadVersion: direct.payload.payloadVersion ?? direct.payload.payload_version,
+        dispatch: direct.payload,
+        flight: direct.payload.flight,
+        route: direct.payload.route,
+        aircraft: direct.payload.aircraft,
+        simbrief: direct.payload.simbrief,
+        loading: direct.payload.loading,
+        schedule: direct.payload.schedule,
+        economySnapshot: direct.payload.economySnapshot ?? direct.payload.economy_snapshot,
+      },
     });
   } catch (error) {
     const code = error instanceof Error ? error.message : "ACARS_START_FAILED";
     if (code === "NO_ACARS_READY_DISPATCH") {
-      return NextResponse.json(
-        {
-          ok: false,
-          code: "NO_ACTIVE_DISPATCH",
-          message: "No existe un despacho activo para iniciar vuelo ACARS.",
-          latestVersion: LATEST_VERSION,
-          downloadUrl: DOWNLOAD_URL,
-        },
-        { status: 404 },
-      );
+      return acarsJson(404, {
+        ok: false,
+        code: "NO_ACTIVE_DISPATCH",
+        message: "No existe un despacho activo para iniciar vuelo ACARS.",
+        extra: { latestVersion: LATEST_VERSION, downloadUrl: DOWNLOAD_URL },
+      });
     }
 
     if (code === "DISPATCH_NOT_OWNED_BY_PILOT") {
-      return NextResponse.json(
-        {
-          ok: false,
-          code,
-          message: "El despacho pertenece a otro piloto.",
-          latestVersion: LATEST_VERSION,
-          downloadUrl: DOWNLOAD_URL,
-        },
-        { status: 403 },
-      );
+      return acarsJson(403, {
+        ok: false,
+        code,
+        message: "El despacho pertenece a otro piloto.",
+        extra: { latestVersion: LATEST_VERSION, downloadUrl: DOWNLOAD_URL },
+      });
     }
 
     if (code === "UNAUTHENTICATED") {
-      return NextResponse.json(
-        {
-          ok: false,
-          code,
-          message: "Inicia sesion en ACARS para iniciar el vuelo.",
-          latestVersion: LATEST_VERSION,
-          downloadUrl: DOWNLOAD_URL,
-        },
-        { status: 401 },
-      );
+      return acarsJson(401, {
+        ok: false,
+        code,
+        message: "Inicia sesion en ACARS para iniciar el vuelo.",
+        extra: { latestVersion: LATEST_VERSION, downloadUrl: DOWNLOAD_URL },
+      });
     }
 
     console.error("[acars] start legacy failed", error instanceof Error ? error.message : error);
-    return NextResponse.json(
-      {
-        ok: false,
-        code: "ACARS_START_FAILED",
-        message: "No se pudo iniciar el vuelo ACARS.",
-        latestVersion: LATEST_VERSION,
-        downloadUrl: DOWNLOAD_URL,
-      },
-      { status: 500 },
-    );
+    return acarsJson(500, {
+      ok: false,
+      code: "ACARS_START_FAILED",
+      message: "No se pudo iniciar el vuelo ACARS.",
+      extra: { latestVersion: LATEST_VERSION, downloadUrl: DOWNLOAD_URL },
+    });
   }
 }

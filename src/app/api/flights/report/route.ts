@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuthenticatedPilot } from "@/lib/auth/service";
 import { findActiveReservationForReport } from "@/lib/acars/finalize-reservation";
 import { POST as finalizePost } from "@/app/api/acars/finalize/route";
+import { acarsJson } from "@/lib/acars/api-response";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -61,13 +62,13 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
     if (!body) {
-      return NextResponse.json({ ok: false, code: "INVALID_REPORT_PAYLOAD", message: "Payload de cierre invalido." }, { status: 400 });
+      return acarsJson(400, { ok: false, code: "INVALID_REPORT_PAYLOAD", message: "Payload de cierre invalido." });
     }
 
     const token = bearerToken(request);
     const user = await getAuthenticatedPilot(token);
     if (!user) {
-      return NextResponse.json({ ok: false, code: "UNAUTHORIZED", message: "Sesion ACARS no valida." }, { status: 401 });
+      return acarsJson(401, { ok: false, code: "UNAUTHORIZED", message: "Sesion ACARS no valida." });
     }
 
     const payloadVersion = text(body.payloadVersion || body.payload_version);
@@ -90,22 +91,24 @@ export async function POST(request: Request) {
       aircraftCode: text(body.aircraftIcao || body.AircraftIcao),
     });
     if (!reservation) {
-      return NextResponse.json({
+      return acarsJson(404, {
         ok: false,
-        code: "NO_ACTIVE_FLIGHT",
+        code: "NO_ACTIVE_DISPATCH_OR_REPORT",
         message: "No existe un vuelo activo para cerrar.",
-        debug: {
-          searchedStates: ["ACARS_CLAIMED", "ACARS_STARTED", "STARTED", "IN_FLIGHT", "REPORT_PENDING", "ACARS_READY"],
-          pilotCallsign: text(user.callsign).toUpperCase(),
-          flightNumber: text(body.flightNumber || body.FlightNumber),
+        extra: {
+          debug: {
+            searchedStates: ["ACARS_CLAIMED", "ACARS_STARTED", "STARTED", "IN_FLIGHT", "REPORT_PENDING", "ACARS_READY"],
+            pilotCallsign: text(user.callsign).toUpperCase(),
+            flightNumber: text(body.flightNumber || body.FlightNumber),
+          },
         },
-      }, { status: 404 });
+      });
     }
 
     const userCallsign = text(user.callsign).toUpperCase();
     const reservationCallsign = text(reservation.pilot_callsign).toUpperCase();
     if (!userCallsign || userCallsign !== reservationCallsign) {
-      return NextResponse.json({ ok: false, code: "DISPATCH_NOT_OWNED_BY_PILOT", message: "El despacho pertenece a otro piloto." }, { status: 403 });
+      return acarsJson(403, { ok: false, code: "DISPATCH_NOT_OWNED_BY_PILOT", message: "El despacho pertenece a otro piloto." });
     }
 
     const reservationId = reservation.id;
@@ -161,44 +164,45 @@ export async function POST(request: Request) {
       const forwardedCode = text(result?.error || result?.code);
       const forwardedMessage = text(result?.message);
       if (forwardedCode === "DISPATCH_TOKEN_INVALID") {
-        return NextResponse.json({
+        return acarsJson(403, {
           ok: false,
           code: "DISPATCH_NOT_OWNED_BY_PILOT",
           message: forwardedMessage || "El despacho pertenece a otro piloto.",
-        }, { status: 403 });
+        });
       }
-      if (forwardedCode === "RESERVATION_NOT_FOUND") {
-        return NextResponse.json({
+      if (forwardedCode === "RESERVATION_NOT_FOUND" || forwardedCode === "NO_ACTIVE_DISPATCH_OR_REPORT") {
+        return acarsJson(404, {
           ok: false,
-          code: "NO_ACTIVE_FLIGHT",
-          message: "No existe un vuelo activo para cerrar.",
-        }, { status: 404 });
+          code: "NO_ACTIVE_DISPATCH_OR_REPORT",
+          message: "No se encontró un despacho o vuelo activo para finalizar. Verifica que el vuelo haya sido despachado desde la Web.",
+        });
       }
-      return NextResponse.json({
+      return acarsJson(response.status || 500, {
         ok: false,
         code: forwardedCode || "REPORT_FORWARD_FAILED",
         message: forwardedMessage || "No se pudo procesar el cierre del vuelo.",
         details: result ?? null,
-      }, { status: response.status || 500 });
+      });
     }
 
     const success = Boolean(result.success);
     const alreadyProcessed = Boolean(result.alreadyProcessed);
 
-    return NextResponse.json({
+    return acarsJson(200, {
       ok: success || alreadyProcessed,
       code: alreadyProcessed ? "REPORT_ALREADY_RECEIVED" : "REPORT_RECEIVED",
       message: alreadyProcessed ? "El cierre ya fue recibido anteriormente." : "Cierre recibido correctamente.",
-      flightNumber: text(body.flightNumber || body.FlightNumber),
-      status: "Pending",
-      flightStatus: "Pending",
+      status: "REPORT_RECEIVED",
       evaluationStatus: "PENDING_EVALUATION",
-      summaryUrl: text(result.summaryUrl),
-      score: null,
-      finalize: result,
+      extra: {
+        flightNumber: text(body.flightNumber || body.FlightNumber),
+        summaryUrl: text(result.summaryUrl),
+        score: null,
+        finalize: result,
+      },
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "FLIGHT_REPORT_FAILED";
-    return NextResponse.json({ ok: false, code: "FLIGHT_REPORT_FAILED", message: "No se pudo enviar el cierre de vuelo.", details: message }, { status: 500 });
+    return acarsJson(500, { ok: false, code: "FLIGHT_REPORT_FAILED", message: "No se pudo enviar el cierre de vuelo.", details: message });
   }
 }
