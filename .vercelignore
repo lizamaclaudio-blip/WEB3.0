@@ -1,0 +1,33 @@
+﻿.git
+.next
+.vercel/output
+node_modules
+coverage
+dist
+build
+*.zip
+*.7z
+*.rar
+*.binlog
+*.log
+*.tmp
+*.bak
+*.old
+
+# backups locales
+_BACKUPS_LOCAL
+backup
+backups
+
+# No subir instaladores antiguos, pero permitir 8.0 actual y genérico
+public/downloads/acars/PatagoniaWingsACARSSetup-7*.exe
+public/downloads/acars/*.msi
+public/downloads/acars/*.zip
+public/downloads/acars/*.7z
+
+release-web-downloads/**/*.exe
+release-web-downloads/**/*.msi
+release-web-downloads/**/*.zip
+downloads/**/*.exe
+downloads/**/*.msi
+downloads/**/*.zip

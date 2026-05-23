@@ -1,11 +1,14 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <item>
-  <version>7.1.6</version>
-  <latestVersion>7.1.6</latestVersion>
-  <revision>2026.5.22.4</revision>
-  <forceUpdate>true</forceUpdate>
+  <version>8.0.0</version>
+  <revision>2026.5.23.1</revision>
+  <informationalVersion>8.0.0+2026.5.23.1</informationalVersion>
   <url>https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe</url>
-  <changelog>ACARS 7.1.6 - Mandatory update by version/revision with anti-loop protection.</changelog>
+  <downloadUrl>https://www.patagoniaw.com/downloads/acars/PatagoniaWingsACARSSetup.exe</downloadUrl>
   <mandatory>true</mandatory>
   <required>true</required>
+  <forceUpdate>true</forceUpdate>
+  <sha256>2ABA650162F834F8F0A772F2B5916E940498856735C393981BAB9433BB54A9B5</sha256>
+  <sizeBytes>30274510</sizeBytes>
+  <changelog>Patagonia Wings ACARS 8.0: BlackBox recorder foundation, Web/Neon API hardening, evaluation engine base, live heartbeat and performance snapshots.</changelog>
 </item>
