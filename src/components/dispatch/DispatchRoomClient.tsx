@@ -975,6 +975,7 @@ function FinalStage({
   reservationState,
   canSendToAcars,
   onSendToAcars,
+  onGoBack,
 }: {
   mode: DispatchMode;
   operationLabel: string;
@@ -987,6 +988,7 @@ function FinalStage({
   reservationState: ReservationState;
   canSendToAcars: boolean;
   onSendToAcars: () => void;
+  onGoBack?: () => void;
 }) {
   // Usar helper para flight number PWG correcto
   const pwgFlight = getSimbriefFlightNumber(null, originIdent, destinationIdent);
@@ -995,6 +997,11 @@ function FinalStage({
   const endTime = blockMinutes > 0 ? calculateLocalArrival(departureTime, blockMinutes) : "Por calcular";
   const isSending = reservationState.status === "sending";
   const isAcarsReady = reservationState.status === "acars_ready";
+  const canGoBack = !isAcarsReady && reservationState.status !== "sending";
+  // Calcular ruta display para mostrar en pantalla
+  const ofpRoute = simbriefOfp?.route || "";
+  const isDirectRoute = ofpRoute && destinationIdent && ofpRoute.toUpperCase() === destinationIdent.toUpperCase();
+  const displayRoute = isDirectRoute ? `Vuelo directo: ${originIdent} → ${destinationIdent}` : ofpRoute || `${originIdent} → ${destinationIdent}`;
 
   const ruleText = mode === "training_free"
     ? "Entrenamiento libre: no mueve piloto, no mueve aeronave, no genera economia y queda como evaluacion referencial."
@@ -1011,6 +1018,7 @@ function FinalStage({
         <div><span>Comienzo local</span><strong className={styles.greenTime}>{departureTime}</strong></div>
         <div><span>Destino</span><IcaoFlagBadge icao={destinationIdent} size="sm" /></div>
         <div><span>Fin local</span><strong className={styles.greenTime}>{endTime}</strong></div>
+        <div><span>Ruta</span><strong>{isDirectRoute ? "Vuelo directo" : displayRoute}</strong></div>
         <div><span>Equipo</span><strong>{selectedAircraft?.model_code || "N/D"}</strong></div>
         <div><span>Estado</span><strong className={styles.programmedText}>{isAcarsReady ? "Listo para ACARS" : "Pre-programado"}</strong></div>
       </section>
@@ -1024,6 +1032,11 @@ function FinalStage({
         </div>
       </section>
       <div className={styles.finalButtons}>
+        {canGoBack && onGoBack ? (
+          <button type="button" className={styles.backButton} onClick={onGoBack}>Volver</button>
+        ) : isAcarsReady ? (
+          <span className={styles.acarsLockedNote}>El despacho ya fue enviado a ACARS. Para modificarlo debes anular el despacho activo.</span>
+        ) : null}
         <button type="button" disabled>Imprimir Despacho</button>
         <button type="button" disabled={!canSendToAcars || isSending || isAcarsReady} onClick={onSendToAcars}>{isSending ? "Preparando..." : isAcarsReady ? "Listo para ACARS" : "Enviar a ACARS"}</button>
         <a href="/dashboard">HUB Center</a>
@@ -1908,7 +1921,7 @@ export default function DispatchRoomClient({
                   <div className={styles.navButtons}><button type="button" className={styles.backButton} onClick={() => setStep(3)}>Volver</button><button type="button" className={styles.continueButton} disabled={!canContinueWeight} onClick={() => setStep(5)}>Validar y preparar ACARS</button></div>
                 </>
               ) : null}
-              {step === 5 ? <FinalStage mode={mode} operationLabel={selectedOperationLabel} originIdent={originIdent} destinationIdent={destinationIdent} departureTime={departureTime} selectedAircraft={selectedAircraft} flightLevel={flightLevel} simbriefOfp={simbriefOfp} reservationState={reservationState} canSendToAcars={canSendToAcars} onSendToAcars={prepareAcarsDispatchDirect} /> : null}
+              {step === 5 ? <FinalStage mode={mode} operationLabel={selectedOperationLabel} originIdent={originIdent} destinationIdent={destinationIdent} departureTime={departureTime} selectedAircraft={selectedAircraft} flightLevel={flightLevel} simbriefOfp={simbriefOfp} reservationState={reservationState} canSendToAcars={canSendToAcars} onSendToAcars={prepareAcarsDispatchDirect} onGoBack={() => setStep(4)} /> : null}
             </section>
           </section>
           <aside className={styles.sideCard}>

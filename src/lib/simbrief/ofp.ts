@@ -310,18 +310,22 @@ export type IfrRouteValidationResult = {
   errorCode?: "SIMBRIEF_IFR_ROUTE_MISSING" | "SIMBRIEF_IFR_ROUTE_INVALID";
   errorMessage?: string;
   route?: string;
+  normalizedRoute?: string;
+  displayRoute?: string;
+  isDirectFlight?: boolean;
   origin?: string;
   destination?: string;
 };
 
 /**
- * Valida que una ruta sea una ruta IFR válida (no solo destino u origen-destino sin puntos)
- * 
- * Reglas de validación:
- * - Debe contener waypoints, airways, SID o STAR (mínimo 2 segmentos útiles)
- * - NO es válida si es solo el destino (ej: "SCIE")
- * - NO es válida si es solo origen-destino sin puntos intermedios (ej: "SCTE DCT SCIE")
- * - NO es válida si está vacía o null
+ * Valida que una ruta sea una ruta IFR válida.
+ * Acepta ruta directa cuando el OFP entrega solo el destino (vuelo DCT).
+ *
+ * Reglas:
+ * - route vacío/null → INVALID
+ * - route === destination Y origin/destination válidos → VALID como vuelo directo
+ * - route === destination Y destination no coincide → INVALID
+ * - route con waypoints, airways, SID/STAR → VALID
  */
 export function validateIfrRoute(
   route: string | null | undefined,
@@ -330,7 +334,7 @@ export function validateIfrRoute(
 ): IfrRouteValidationResult {
   const routeClean = text(route);
   
-  // REGLA: Bloquear solo si ruta es null, vacía, o exactamente igual al destino
+  // REGLA: Bloquear si ruta vacía/null
   if (!routeClean) {
     return {
       valid: false,
@@ -342,13 +346,27 @@ export function validateIfrRoute(
     };
   }
   
-  // REGLA: Rechazar SOLO si la ruta es exactamente el destino (ej: "SCIE")
-  // Esto indica que SimBrief no generó una ruta válida
+  // REGLA: Si ruta es exactamente el destino → vuelo directo
+  // Aceptar SOLO si el destino coincide con el esperado (no es un ICAO aleatorio)
   if (destination && routeClean.toUpperCase() === destination.toUpperCase()) {
+    // Verificar que tenemos ambos origin y destination para construir ruta normalizada
+    if (origin && destination) {
+      const normalizedRoute = `${origin.toUpperCase()} DCT ${destination.toUpperCase()}`;
+      return {
+        valid: true,
+        route: routeClean,
+        normalizedRoute,
+        displayRoute: "Vuelo directo",
+        isDirectFlight: true,
+        origin,
+        destination,
+      };
+    }
+    // No tenemos origen, no podemos confirmar que es válido
     return {
       valid: false,
       errorCode: "SIMBRIEF_IFR_ROUTE_INVALID",
-      errorMessage: `El OFP no tiene ruta definida (solo muestra destino ${destination}). Selecciona una ruta sugerida en SimBrief.`,
+      errorMessage: `El OFP muestra solo el destino (${destination}) como ruta. Genera el plan con origen y destino correctos en SimBrief.`,
       route: routeClean,
       origin,
       destination,

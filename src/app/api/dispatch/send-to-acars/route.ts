@@ -87,10 +87,13 @@ export async function POST(request: Request) {
         : null;
 
     const simbriefRoute = text(simbrief.route);
+    // REGLA: Ruta directa válida cuando route === destination (SimBrief vuelo DCT)
+    // Solo inválida si: vacía, o solo el origen sin destino
+    const isDirectRoute = simbriefRoute && destinationIdent &&
+      simbriefRoute.toUpperCase() === destinationIdent.toUpperCase();
     const invalidRoute =
       !simbriefRoute ||
-      simbriefRoute.toUpperCase() === destinationIdent ||
-      simbriefRoute.toUpperCase() === originIdent;
+      (!isDirectRoute && simbriefRoute.toUpperCase() === originIdent);
     if (!originIdent || !destinationIdent) return fail("MISSING_ROUTE", "Missing origin/destination");
     if (!aircraftRegistration || !aircraftCode) return fail("MISSING_AIRCRAFT", "Missing aircraft code/registration");
     if (!simbrief || Object.keys(simbrief).length === 0 || invalidRoute)
@@ -115,6 +118,10 @@ export async function POST(request: Request) {
     if (!assignedFlight.flightNumber || !assignedFlight.callsign)
       return fail("MISSING_FLIGHT", "Missing flight number/callsign");
     const normalizedRouteId = routeId && UUID_PATTERN.test(routeId) ? routeId : null;
+    // Normalizar ruta directa: si SimBrief entrega solo el destino, construir "ORIGIN DCT DESTINATION"
+    const normalizedSimbriefRoute = isDirectRoute
+      ? `${originIdent} DCT ${destinationIdent}`
+      : simbriefRoute;
 
     console.info("[send-to-acars] request", {
       pilot: user.callsign,
@@ -165,7 +172,7 @@ export async function POST(request: Request) {
         route_code: assignedFlight.routeCode,
         origin_ident: originIdent,
         destination_ident: destinationIdent,
-        route_text: simbriefRoute || `${originIdent} DCT ${destinationIdent}`,
+        route_text: normalizedSimbriefRoute || `${originIdent} DCT ${destinationIdent}`,
       },
       aircraft: {
         aircraftCode,
