@@ -45,6 +45,18 @@ function inferFlightType(operationType: string) {
   return "training";
 }
 
+function pickDispatchToken(
+  body: Record<string, unknown>,
+  reservationPreparedPayload: Record<string, unknown> | null | undefined,
+) {
+  const fromBody = text(body.dispatchToken || body.DispatchToken);
+  if (fromBody) return fromBody;
+  const source = reservationPreparedPayload && typeof reservationPreparedPayload === "object"
+    ? reservationPreparedPayload
+    : {};
+  return text((source as Record<string, unknown>).dispatchToken || (source as Record<string, unknown>).dispatch_token);
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json().catch(() => null)) as Record<string, unknown> | null;
@@ -106,7 +118,7 @@ export async function POST(request: Request) {
     const finalizePayload = {
       payloadVersion: "pw3-acars-finalize-v1",
       reservationId,
-      dispatchToken: text(body.dispatchToken || body.DispatchToken) || undefined,
+      dispatchToken: pickDispatchToken(body, reservation.prepared_acars_payload) || undefined,
       pilotCallsign: userCallsign,
       aircraftCode: text(body.aircraftIcao || body.AircraftIcao || reservation.aircraft_model_code).toUpperCase(),
       operationType,
@@ -146,10 +158,26 @@ export async function POST(request: Request) {
 
     const result = await response.json().catch(() => null) as Record<string, unknown> | null;
     if (!response.ok || !result) {
+      const forwardedCode = text(result?.error || result?.code);
+      const forwardedMessage = text(result?.message);
+      if (forwardedCode === "DISPATCH_TOKEN_INVALID") {
+        return NextResponse.json({
+          ok: false,
+          code: "DISPATCH_NOT_OWNED_BY_PILOT",
+          message: forwardedMessage || "El despacho pertenece a otro piloto.",
+        }, { status: 403 });
+      }
+      if (forwardedCode === "RESERVATION_NOT_FOUND") {
+        return NextResponse.json({
+          ok: false,
+          code: "NO_ACTIVE_FLIGHT",
+          message: "No existe un vuelo activo para cerrar.",
+        }, { status: 404 });
+      }
       return NextResponse.json({
         ok: false,
-        code: "REPORT_FORWARD_FAILED",
-        message: "No se pudo procesar el cierre del vuelo.",
+        code: forwardedCode || "REPORT_FORWARD_FAILED",
+        message: forwardedMessage || "No se pudo procesar el cierre del vuelo.",
         details: result ?? null,
       }, { status: response.status || 500 });
     }
