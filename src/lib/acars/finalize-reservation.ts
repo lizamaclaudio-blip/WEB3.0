@@ -1,4 +1,4 @@
-﻿import "server-only";
+import "server-only";
 import { createHash } from "crypto";
 import { columnExists, dbOne, dbQuery, dbTransaction } from "@/lib/db/client";
 
@@ -41,6 +41,8 @@ export async function ensureAcarsFinalizeSchema() {
     alter table public.training_dispatch_reservations add column if not exists actual_fuel_used_kg numeric(12,2);
     alter table public.training_dispatch_reservations add column if not exists actual_landing_airport text;
     alter table public.training_dispatch_reservations add column if not exists finalize_idempotency_key text;
+    alter table public.training_dispatch_reservations add column if not exists affects_aircraft_position boolean not null default true;
+    alter table public.training_dispatch_reservations add column if not exists acars_state text;
     create unique index if not exists idx_training_finalize_idem on public.training_dispatch_reservations(finalize_idempotency_key) where finalize_idempotency_key is not null;
 
     create table if not exists public.pw3_flight_reports (
@@ -393,6 +395,8 @@ export async function closeDispatchReservation(input: {
     `update public.training_dispatch_reservations
        set status = 'FINALIZED',
            acars_status = 'FINALIZED',
+           acars_state = 'COMPLETED',
+           affects_aircraft_position = true,
            finalized_at = now(),
            final_status = $2,
            score = $3,
@@ -422,42 +426,130 @@ export async function closeDispatchReservation(input: {
       input.actualLandingAirport,
     ],
   );
+
+  const landingIdent = String(input.actualLandingAirport ?? "").trim().toUpperCase();
+  if (!landingIdent) return;
+
+  const reservation = await getDispatchReservationById(input.reservationId);
+  if (!reservation) return;
+
+  await updatePilotAndAircraftPosition({
+    pilotUserId: reservation.pilot_user_id,
+    pilotCallsign: reservation.pilot_callsign,
+    aircraftId: reservation.aircraft_id,
+    aircraftRegistration: reservation.aircraft_registration,
+    landingIdent,
+  });
 }
 
 export async function updatePilotAndAircraftPosition(input: {
-  pilotUserId: string;
+  pilotUserId?: string | null;
+  pilotCallsign?: string | null;
   aircraftId?: string | null;
+  aircraftRegistration?: string | null;
   landingIdent: string;
 }) {
+  const landingIdent = String(input.landingIdent ?? "").trim().toUpperCase();
+  if (!landingIdent) return false;
+
   const airport = await dbOne<{ id: string }>(
-    `select id::text from public.airports
-      where upper(coalesce(ident,icao,iata,'')) = upper($1)
+    `select id::text
+       from public.airports
+      where upper(coalesce(ident, icao, iata, '')) = upper($1)
+         or upper(coalesce(icao, ident, iata, '')) = upper($1)
       limit 1`,
-    [input.landingIdent],
+    [landingIdent],
   );
   if (!airport?.id) return false;
 
+  const pilotUserId = String(input.pilotUserId ?? "").trim();
+  const pilotCallsign = String(input.pilotCallsign ?? "").trim().toUpperCase();
+  const aircraftId = String(input.aircraftId ?? "").trim();
+  const aircraftRegistration = String(input.aircraftRegistration ?? "").trim().toUpperCase();
+
   await dbTransaction(async (client) => {
     if (await columnExists("pilot_profiles", "current_airport_id")) {
-      await client.query(
-        `update public.pilot_profiles set current_airport_id = $2::uuid where id = $1::uuid`,
-        [input.pilotUserId, airport.id],
-      );
+      if (pilotUserId) {
+        await client.query(
+          `update public.pilot_profiles
+              set current_airport_id = $2::uuid
+            where id = $1::uuid`,
+          [pilotUserId, airport.id],
+        );
+      }
+
+      if (pilotCallsign && await columnExists("pilot_profiles", "callsign")) {
+        await client.query(
+          `update public.pilot_profiles
+              set current_airport_id = $2::uuid
+            where upper(callsign::text) = $1`,
+          [pilotCallsign, airport.id],
+        );
+      }
     }
+
     if (await columnExists("app_users", "current_airport_id")) {
-      await client.query(
-        `update public.app_users set current_airport_id = $2::uuid where id = $1::uuid`,
-        [input.pilotUserId, airport.id],
-      );
+      if (pilotUserId) {
+        await client.query(
+          `update public.app_users
+              set current_airport_id = $2::uuid
+            where id = $1::uuid`,
+          [pilotUserId, airport.id],
+        );
+      }
+
+      if (pilotCallsign && await columnExists("app_users", "callsign")) {
+        await client.query(
+          `update public.app_users
+              set current_airport_id = $2::uuid
+            where upper(callsign::text) = $1`,
+          [pilotCallsign, airport.id],
+        );
+      }
     }
-    if (input.aircraftId && await columnExists("fleet_aircraft", "current_airport_id")) {
-      await client.query(
-        `update public.fleet_aircraft
-            set current_airport_id = $2::uuid,
-                updated_at = now()
-          where id = $1::uuid`,
-        [input.aircraftId, airport.id],
-      );
+
+    if (await columnExists("fleet_aircraft", "current_airport_id")) {
+      if (aircraftId) {
+        await client.query(
+          `update public.fleet_aircraft
+              set current_airport_id = $2::uuid,
+                  updated_at = now()
+            where id = $1::uuid`,
+          [aircraftId, airport.id],
+        );
+      }
+
+      if (aircraftRegistration && await columnExists("fleet_aircraft", "registration")) {
+        await client.query(
+          `update public.fleet_aircraft
+              set current_airport_id = $2::uuid,
+                  updated_at = now()
+            where upper(registration::text) = $1`,
+          [aircraftRegistration, airport.id],
+        );
+      }
+
+      if (await columnExists("fleet_aircraft", "aircraft_status")) {
+        if (aircraftId) {
+          await client.query(
+            `update public.fleet_aircraft
+                set aircraft_status = 'AVAILABLE',
+                    updated_at = now()
+              where id = $1::uuid`,
+            [aircraftId],
+          );
+        }
+
+        if (aircraftRegistration && await columnExists("fleet_aircraft", "registration")) {
+          await client.query(
+            `update public.fleet_aircraft
+                set aircraft_status = 'AVAILABLE',
+                    updated_at = now()
+              where upper(registration::text) = $1`,
+            [aircraftRegistration],
+          );
+        }
+      }
     }
   });
 
