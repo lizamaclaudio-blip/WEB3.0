@@ -19,6 +19,18 @@ export type EvaluationCategoryView = {
   description: string;
 };
 
+export type TelemetrySignalView = {
+  key: string;
+  label: string;
+  status: string;
+  detected: boolean;
+  confidence: string;
+  sources: string[];
+  reason: string;
+  evaluable: boolean;
+  canPenalize: boolean;
+};
+
 export type FlightEvaluationSummaryData = {
   reservationId: string;
   found: boolean;
@@ -65,11 +77,17 @@ export type FlightEvaluationSummaryData = {
     penaltiesCount: number;
   };
   categories: EvaluationCategoryView[];
+  signalCertification: TelemetrySignalView[];
+  certificationObservations: string[];
   integrity: {
     blackboxReceived: boolean;
     airborneDetected: boolean;
     touchdownDetected: boolean;
     enoughFrames: boolean;
+    airborneStatus: string;
+    touchdownStatus: string;
+    airborneSources: string[];
+    touchdownSources: string[];
     evaluationStatus: string;
     economyStatus: string;
   };
@@ -254,10 +272,46 @@ async function safeRows<T extends JsonRow>(sql: string, params: readonly unknown
 function buildObservations(evaluation: JsonRow, evidence: JsonRow): string[] {
   const raw = parseJsonArray(evaluation.observations);
   const evidenceObs = parseJsonArray(evidence.observations);
-  return [...raw, ...evidenceObs]
+  const certificationObs = collectCertificationObservations(evidence);
+  return [...raw, ...evidenceObs, ...certificationObs]
     .map((item) => text(item))
     .filter(Boolean)
     .filter((value, index, array) => array.indexOf(value) === index);
+}
+
+function normalizeSignal(value: unknown): TelemetrySignalView | null {
+  const record = asRecord(value);
+  const key = upper(record.key);
+  if (!key) return null;
+
+  return {
+    key,
+    label: text(record.label, key),
+    status: upper(record.status, "NOT_AVAILABLE"),
+    detected: Boolean(record.detected),
+    confidence: upper(record.confidence, "NONE"),
+    sources: asArray(record.sources).map((item) => text(item)).filter(Boolean),
+    reason: text(record.reason, "Sin detalle de certificación."),
+    evaluable: Boolean(record.evaluable),
+    canPenalize: Boolean(record.canPenalize),
+  };
+}
+
+function collectSignalCertification(evidence: JsonRow): TelemetrySignalView[] {
+  const certification = asRecord(evidence.telemetryCertification);
+  const signals = parseJsonArray(certification.signals ?? evidence.signals);
+  return signals.map((signal) => normalizeSignal(signal)).filter((signal): signal is TelemetrySignalView => Boolean(signal));
+}
+
+function signalByKey(signals: TelemetrySignalView[], key: string): TelemetrySignalView | null {
+  return signals.find((signal) => signal.key === key) ?? null;
+}
+
+function collectCertificationObservations(evidence: JsonRow): string[] {
+  const certification = asRecord(evidence.telemetryCertification);
+  const observations = parseJsonArray(certification.observations);
+  const warnings = parseJsonArray(certification.warnings);
+  return [...observations, ...warnings].map((item) => text(item)).filter(Boolean);
 }
 
 function normalizePenalty(row: JsonRow): EvaluationPenaltyView {
@@ -353,6 +407,8 @@ export async function getFlightEvaluationSummaryData(reservationId: string): Pro
     "Sin alternativo",
   );
 
+  const signalCertification = collectSignalCertification(evidence);
+  const certificationObservations = collectCertificationObservations(evidence);
   const observations = buildObservations(evaluation ?? {}, evidence);
   const penalties = penaltyRows.map((row) => normalizePenalty(row.row));
   const timeline = collectTimeline(payload, evidence);
@@ -360,6 +416,9 @@ export async function getFlightEvaluationSummaryData(reservationId: string): Pro
     ...timeline.map((event) => event.type),
     ...parseJsonArray(evidence.eventTypes).map((event) => upper(event)),
   ]);
+  const airborneSignal = signalByKey(signalCertification, "AIRBORNE");
+  const touchdownSignal = signalByKey(signalCertification, "TOUCHDOWN");
+  const blackboxSignal = signalByKey(signalCertification, "BLACKBOX");
 
   const totalScore = num(evaluation?.total_score ?? summary.score, 0);
   const operationalScore = num(evaluation?.operational_score, totalScore);
@@ -430,11 +489,17 @@ export async function getFlightEvaluationSummaryData(reservationId: string): Pro
       penaltiesCount: penalties.length || num(evaluation?.penalties_count, 0),
     },
     categories,
+    signalCertification,
+    certificationObservations,
     integrity: {
-      blackboxReceived: blackboxFrames > 0 || Object.keys(blackbox).length > 0 || Object.keys(evidence).length > 0,
-      airborneDetected: eventTypes.has("AIRBORNE"),
-      touchdownDetected: eventTypes.has("TOUCHDOWN"),
+      blackboxReceived: Boolean(blackboxSignal?.detected) || blackboxFrames > 0 || Object.keys(blackbox).length > 0 || Object.keys(evidence).length > 0,
+      airborneDetected: Boolean(airborneSignal?.detected) || eventTypes.has("AIRBORNE"),
+      touchdownDetected: Boolean(touchdownSignal?.detected) || eventTypes.has("TOUCHDOWN"),
       enoughFrames: blackboxFrames >= 5 || telemetrySamplesCount >= 5,
+      airborneStatus: airborneSignal?.status ?? (eventTypes.has("AIRBORNE") ? "CERTIFIED" : "NOT_AVAILABLE"),
+      touchdownStatus: touchdownSignal?.status ?? (eventTypes.has("TOUCHDOWN") ? "CERTIFIED" : "NOT_AVAILABLE"),
+      airborneSources: airborneSignal?.sources ?? [],
+      touchdownSources: touchdownSignal?.sources ?? [],
       evaluationStatus: upper(firstText([evaluation?.evaluation_status], "PENDING_EVALUATION")),
       economyStatus: upper(firstText([evaluation?.economy_status], "PENDING_EVALUATION")),
     },

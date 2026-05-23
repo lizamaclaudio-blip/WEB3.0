@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getFlightEvaluationSummaryData, type EvaluationPenaltyView } from "@/lib/acars/summary-data";
+import { getFlightEvaluationSummaryData, type EvaluationPenaltyView, type TelemetrySignalView } from "@/lib/acars/summary-data";
 
 function scoreTone(score: number) {
   if (score >= 95) return "text-emerald-700 bg-emerald-50 border-emerald-200";
@@ -30,10 +30,18 @@ function formatMinutes(value: number) {
   return `${hours} h ${minutes.toString().padStart(2, "0")} min`;
 }
 
-function StatusPill({ ok, label }: { ok: boolean; label: string }) {
+function statusTone(status: string, detected: boolean) {
+  if (status === "CERTIFIED" && detected) return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  if (status === "PARTIAL") return "border-sky-200 bg-sky-50 text-sky-800";
+  if (status === "UNRELIABLE" || status === "NOT_APPLICABLE") return "border-slate-200 bg-slate-50 text-slate-700";
+  if (status === "NOT_AVAILABLE") return "border-amber-200 bg-amber-50 text-amber-800";
+  return "border-slate-200 bg-white text-slate-700";
+}
+
+function StatusPill({ ok, label, detail }: { ok: boolean; label: string; detail?: string }) {
   return (
-    <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-bold ${ok ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}>
-      {ok ? "✓" : "!"} {label}
+    <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-bold ${ok ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}>
+      {ok ? "✓" : "!"} {label}{detail ? <span className="font-medium opacity-80">· {detail}</span> : null}
     </span>
   );
 }
@@ -82,6 +90,27 @@ function PenaltyRow({ penalty }: { penalty: EvaluationPenaltyView }) {
   );
 }
 
+function SignalCard({ signal }: { signal: TelemetrySignalView }) {
+  return (
+    <article className={`rounded-2xl border p-4 ${statusTone(signal.status, signal.detected)}`}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[0.18em]">{signal.key}</p>
+          <h3 className="mt-1 text-base font-black">{signal.label}</h3>
+        </div>
+        <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-black">{signal.status}</span>
+      </div>
+      <p className="mt-3 text-sm leading-6">{signal.reason}</p>
+      <div className="mt-3 flex flex-wrap gap-2 text-xs">
+        <span className="rounded-full bg-white/70 px-2.5 py-1 font-bold">{signal.detected ? "Detectado" : "No detectado"}</span>
+        <span className="rounded-full bg-white/70 px-2.5 py-1 font-bold">Confianza {signal.confidence}</span>
+        <span className="rounded-full bg-white/70 px-2.5 py-1 font-bold">{signal.canPenalize ? "Penalizable" : "No penalizable"}</span>
+      </div>
+      {signal.sources.length ? <p className="mt-3 text-xs leading-5 opacity-80">Fuentes: {signal.sources.join(" · ")}</p> : null}
+    </article>
+  );
+}
+
 export default async function FlightEvaluationSummary({ reservationId }: { reservationId: string }) {
   const data = await getFlightEvaluationSummaryData(reservationId);
 
@@ -100,9 +129,11 @@ export default async function FlightEvaluationSummary({ reservationId }: { reser
 
   const score = data.metrics.totalScore;
   const route = `${data.flight.origin} → ${data.flight.destination}`;
-  const timelinePreview = data.timeline.slice(0, 20);
+  const timelinePreview = data.timeline.slice(0, 24);
   const observations = data.observations.length ? data.observations : ["Sin observaciones adicionales registradas por el motor de evaluación."];
   const penalties = data.penalties.length ? data.penalties : [];
+  const primarySignals = data.signalCertification.filter((signal) => ["AIRBORNE", "TOUCHDOWN", "BLACKBOX", "TELEMETRY_SAMPLES", "FUEL", "TOUCHDOWN_VS"].includes(signal.key));
+  const secondarySignals = data.signalCertification.filter((signal) => !["AIRBORNE", "TOUCHDOWN", "BLACKBOX", "TELEMETRY_SAMPLES", "FUEL", "TOUCHDOWN_VS"].includes(signal.key));
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900">
@@ -153,17 +184,36 @@ export default async function FlightEvaluationSummary({ reservationId }: { reser
         <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Integridad de caja negra</p>
-              <h2 className="mt-2 text-2xl font-black">Evidencia recibida por ACARS 8.0</h2>
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Certificación de telemetría</p>
+              <h2 className="mt-2 text-2xl font-black">Qué leyó realmente ACARS</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">La evaluación es estricta, pero solo penaliza señales certificadas. Las señales no confiables o no aplicables quedan como observación técnica hasta certificar cada aeronave.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               <StatusPill ok={data.integrity.blackboxReceived} label="BlackBox" />
               <StatusPill ok={data.integrity.enoughFrames} label="Frames suficientes" />
-              <StatusPill ok={data.integrity.airborneDetected} label="AIRBORNE" />
-              <StatusPill ok={data.integrity.touchdownDetected} label="TOUCHDOWN" />
+              <StatusPill ok={data.integrity.airborneDetected} label="AIRBORNE" detail={data.integrity.airborneStatus} />
+              <StatusPill ok={data.integrity.touchdownDetected} label="TOUCHDOWN" detail={data.integrity.touchdownStatus} />
             </div>
           </div>
+
+          {primarySignals.length ? (
+            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {primarySignals.map((signal) => <SignalCard key={signal.key} signal={signal} />)}
+            </div>
+          ) : (
+            <p className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">Esta evaluación fue generada antes de activar la matriz de certificación de telemetría.</p>
+          )}
         </section>
+
+        {secondarySignals.length ? (
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Señales por aeronave</p>
+            <h2 className="mt-2 text-2xl font-black">Estado de capacidades y datos no penalizables</h2>
+            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {secondarySignals.map((signal) => <SignalCard key={signal.key} signal={signal} />)}
+            </div>
+          </section>
+        ) : null}
 
         <div className="grid gap-6 lg:grid-cols-[1fr_0.9fr]">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
@@ -177,7 +227,7 @@ export default async function FlightEvaluationSummary({ reservationId }: { reser
             ) : (
               <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800">
                 <strong>Sin penalizaciones registradas.</strong>
-                <p className="mt-1 text-sm">El motor no descontó puntos en esta evaluación. Las observaciones informativas se muestran abajo.</p>
+                <p className="mt-1 text-sm">El motor no descontó puntos en esta evaluación. Las observaciones informativas y señales no certificadas se muestran abajo.</p>
               </div>
             )}
 
@@ -205,7 +255,7 @@ export default async function FlightEvaluationSummary({ reservationId }: { reser
                 ))}
               </ol>
             ) : (
-              <p className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">No se registraron eventos de timeline. La evaluación debe penalizar esta condición en vuelos completados.</p>
+              <p className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">No se registraron eventos de timeline. Si hay BlackBox/XML suficiente, esta condición puede generar penalización.</p>
             )}
           </section>
         </div>
@@ -214,9 +264,9 @@ export default async function FlightEvaluationSummary({ reservationId }: { reser
           <p className="text-xs font-black uppercase tracking-[0.22em] text-slate-500">Cómo se evalúa</p>
           <h2 className="mt-2 text-2xl font-black">Criterio Patagonia Wings</h2>
           <div className="mt-5 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5"><strong>Seguridad 30%</strong><p className="mt-2 text-sm leading-6 text-slate-600">Eventos críticos, coherencia de telemetría, avión correcto, destino/alternativo, crash, stall, overspeed y manipulación.</p></div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5"><strong>Procedimientos 25%</strong><p className="mt-2 text-sm leading-6 text-slate-600">Luces por fase, puertas, frenos, motores, taxi, pista, parking, cold and dark y secuencia operativa.</p></div>
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5"><strong>Performance 20%</strong><p className="mt-2 text-sm leading-6 text-slate-600">Taxi speed, ascenso/descenso, touchdown VS, G-force, aproximación, estabilidad y eficiencia operacional.</p></div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5"><strong>Estricto sobre señales certificadas</strong><p className="mt-2 text-sm leading-6 text-slate-600">AIRBORNE, TOUCHDOWN, stall, overspeed, touchdown VS y telemetría imposible descuentan cuando ACARS los puede leer con evidencia suficiente.</p></div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5"><strong>No castigo por dato no confiable</strong><p className="mt-2 text-sm leading-6 text-slate-600">Puertas, tren, transponder, luces o fuel quedan como observación si la aeronave/perfil todavía no está certificado.</p></div>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5"><strong>Auditoría antes de lanzamiento</strong><p className="mt-2 text-sm leading-6 text-slate-600">Cada avión debe validar qué variables entrega bien antes de activar penalizaciones comerciales para usuarios.</p></div>
           </div>
         </section>
 

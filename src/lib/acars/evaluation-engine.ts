@@ -1,4 +1,5 @@
-import type { AcarsFinalizeEvent, NormalizedFinalizePayload } from "@/lib/acars/finalize-types";
+import { canPenalizeMissing, collectAcarsEvidence, signalByKey } from "@/lib/acars/evidence-collector";
+import type { NormalizedFinalizePayload } from "@/lib/acars/finalize-types";
 
 export type EvaluationPenalty = {
   code: string;
@@ -36,49 +37,11 @@ function asObj(v: unknown): AnyRecord {
   return v && typeof v === "object" && !Array.isArray(v) ? (v as AnyRecord) : {};
 }
 
-function asArray(v: unknown): unknown[] {
-  return Array.isArray(v) ? v : [];
-}
-
-function asEvents(v: unknown): AcarsFinalizeEvent[] {
-  return Array.isArray(v) ? (v as AcarsFinalizeEvent[]) : [];
-}
-
-function eventType(v: unknown) {
-  if (typeof v === "string") return v.trim().toUpperCase();
-  const record = asObj(v);
-  const value = record.type ?? record.event ?? record.name ?? record.code;
-  return typeof value === "string" ? value.trim().toUpperCase() : "";
-}
-
-function unique<T>(values: T[]) {
-  return Array.from(new Set(values));
-}
-
-function collectEventTypes(payload: NormalizedFinalizePayload, raw: AnyRecord, blackbox: AnyRecord) {
-  const eventSources = [
-    ...(payload.events ?? []),
-    ...asArray(raw.events),
-    ...asArray(blackbox.events),
-    ...asArray(blackbox.timeline),
-  ];
-
-  return unique(eventSources.map(eventType).filter(Boolean));
-}
-
-function collectDetailedEvents(payload: NormalizedFinalizePayload, raw: AnyRecord, blackbox: AnyRecord) {
-  return [
-    ...(payload.events ?? []),
-    ...asArray(raw.events),
-    ...asArray(blackbox.events),
-    ...asArray(blackbox.timeline),
-  ].slice(0, 250);
-}
-
 function pushPenalty(penalties: EvaluationPenalty[], penalty: EvaluationPenalty) {
   const existing = penalties.find((item) => item.code === penalty.code);
   if (existing) {
     existing.points = Math.max(existing.points, penalty.points);
+    existing.severity = existing.severity === "critical" || penalty.severity === "critical" ? "critical" : existing.severity === "warning" || penalty.severity === "warning" ? "warning" : "info";
     return;
   }
   penalties.push(penalty);
@@ -89,41 +52,61 @@ function capScore(value: number, cap: number | null) {
   return Math.min(value, cap);
 }
 
+function signalDetected(payloadEvidence: ReturnType<typeof collectAcarsEvidence>, key: Parameters<typeof signalByKey>[1]) {
+  return Boolean(signalByKey(payloadEvidence, key)?.detected);
+}
+
+function signalCanPenalize(payloadEvidence: ReturnType<typeof collectAcarsEvidence>, key: Parameters<typeof signalByKey>[1]) {
+  return Boolean(signalByKey(payloadEvidence, key)?.canPenalize);
+}
+
 export function evaluateFinalizePayload(payload: NormalizedFinalizePayload): EvaluationResult {
   const penalties: EvaluationPenalty[] = [];
   const observations: string[] = [];
+  const evidenceReport = collectAcarsEvidence(payload);
 
   const actual = payload.actual ?? {};
   const ops = payload.acarsOperationalInputs ?? {};
   const raw = asObj(payload.raw);
-  const telemetry = asEvents(raw.telemetrySamples);
-  const blackbox = asObj(raw.blackbox);
-  const blackboxSummary = asObj(blackbox.summary);
-  const events = payload.events ?? [];
-  const eventTypes = collectEventTypes(payload, raw, blackbox);
-  const detailedEvents = collectDetailedEvents(payload, raw, blackbox);
   const completedLike = ["completed", "diverted"].includes(payload.finalStatus);
 
-  const touchdownVs = num(actual.touchdownVsFpm, num(ops.touchdownVsFpm, 0));
-  const touchdownG = num(actual.touchdownGs, 1);
-  const overspeed = num(actual.overspeedEvents, num(ops.overspeedEvents, 0));
-  const stalls = num(actual.stallEvents, 0);
+  const touchdownSignal = signalByKey(evidenceReport, "TOUCHDOWN");
+  const airborneSignal = signalByKey(evidenceReport, "AIRBORNE");
+  const takeoffRollSignal = signalByKey(evidenceReport, "TAKEOFF_ROLL");
+  const parkedSignal = signalByKey(evidenceReport, "PARKED");
+  const blackboxSignal = signalByKey(evidenceReport, "BLACKBOX");
+  const telemetrySignal = signalByKey(evidenceReport, "TELEMETRY_SAMPLES");
+  const fuelSignal = signalByKey(evidenceReport, "FUEL");
+
+  const hasBlackbox = Boolean(blackboxSignal?.detected);
+  const hasEnoughRawEvidence = Boolean(
+    blackboxSignal?.status === "CERTIFIED" ||
+      telemetrySignal?.status === "CERTIFIED" ||
+      evidenceReport.rawFacts.hasPirepXml ||
+      evidenceReport.eventDetails.length >= 3,
+  );
+
+  const hasAirborne = signalDetected(evidenceReport, "AIRBORNE");
+  const hasTouchdown = signalDetected(evidenceReport, "TOUCHDOWN");
+  const hasTakeoffRoll = signalDetected(evidenceReport, "TAKEOFF_ROLL");
+  const hasParked = signalDetected(evidenceReport, "PARKED");
+
+  const touchdownVs = evidenceReport.rawFacts.touchdownVsFpm ?? num(actual.touchdownVsFpm, num(ops.touchdownVsFpm, 0));
+  const touchdownG = evidenceReport.rawFacts.touchdownG ?? num(actual.touchdownGs, 1);
+  const overspeed = evidenceReport.rawFacts.overspeedEvents || num(actual.overspeedEvents, num(ops.overspeedEvents, 0));
+  const stalls = evidenceReport.rawFacts.stallEvents || num(actual.stallEvents, 0);
   const hardBrake = num(actual.hardBrakeEvents, num(ops.hardBrakeEvents, 0));
   const excessiveBank = num(ops.excessiveBankEvents, 0);
   const damage = num(actual.damageEvents, num(ops.damageEvents, 0));
   const flightMins = num(actual.flightTimeMinutes, 0);
   const blockMins = num(actual.blockTimeMinutes, 0);
   const distNm = num(actual.distanceNm, num(payload.planned.distanceNm, 0));
-  const fuelUsed = num(actual.fuelUsedKg, num(ops.actualFuelUsedKg, 0));
-  const blackboxFrameCount = num(blackboxSummary.frameCount, num(blackbox.frameCount, 0));
-  const telemetryCount = telemetry.length;
-  const hasBlackbox = Object.keys(blackbox).length > 0 || blackboxFrameCount > 0;
-  const hasAirborne = eventTypes.includes("AIRBORNE");
-  const hasTouchdown = eventTypes.includes("TOUCHDOWN");
-  const hasTakeoffRoll = eventTypes.includes("TAKEOFF_ROLL") || eventTypes.includes("TAKEOFF");
-  const hasParked = eventTypes.includes("PARKED") || eventTypes.includes("COLD_AND_DARK") || eventTypes.includes("REPORT_SENT");
+  const fuelUsed = evidenceReport.rawFacts.fuelUsedKg ?? num(actual.fuelUsedKg, num(ops.actualFuelUsedKg, 0));
 
   let maxScoreCap: number | null = null;
+
+  observations.push(...evidenceReport.observations);
+  observations.push(...evidenceReport.warnings);
 
   if (payload.finalStatus === "crashed") {
     pushPenalty(penalties, { code: "CRASH", severity: "critical", points: 70, message: "Vuelo marcado como crashed." });
@@ -131,46 +114,52 @@ export function evaluateFinalizePayload(payload: NormalizedFinalizePayload): Eva
   }
 
   if (!hasBlackbox) {
-    pushPenalty(penalties, { code: "BLACKBOX_MISSING", severity: "critical", points: 35, message: "Payload sin caja negra BlackBox." });
+    pushPenalty(penalties, { code: "BLACKBOX_MISSING", severity: "critical", points: 35, message: "Payload sin caja negra BlackBox; vuelo requiere revisión técnica." });
     maxScoreCap = Math.min(maxScoreCap ?? 40, 40);
   }
 
-  if (completedLike && !hasAirborne) {
-    pushPenalty(penalties, { code: "AIRBORNE_MISSING", severity: "critical", points: 22, message: "No se detectó evento AIRBORNE en un vuelo completado." });
-    observations.push("No se detectó evento AIRBORNE en timeline.");
+  // Regla estricta, pero alineada con evidencia certificada:
+  // solo se castiga AIRBORNE/TOUCHDOWN si existía fuente confiable para esperarlos.
+  if (completedLike && !hasAirborne && hasEnoughRawEvidence && canPenalizeMissing(evidenceReport, "AIRBORNE")) {
+    pushPenalty(penalties, { code: "AIRBORNE_MISSING", severity: "critical", points: 22, message: "No se detectó AIRBORNE en ninguna fuente certificada del vuelo." });
+    observations.push("AIRBORNE ausente en fuentes certificadas; penalización aplicada.");
     maxScoreCap = Math.min(maxScoreCap ?? 65, 65);
+  } else if (completedLike && !hasAirborne) {
+    observations.push("AIRBORNE no certificado: la fuente disponible no permite penalizar sin riesgo de falso positivo.");
   }
 
-  if (completedLike && !hasTouchdown) {
-    pushPenalty(penalties, { code: "TOUCHDOWN_MISSING", severity: "critical", points: 22, message: "No se detectó evento TOUCHDOWN en un vuelo completado." });
-    observations.push("No se detectó evento TOUCHDOWN en timeline.");
+  if (completedLike && !hasTouchdown && hasEnoughRawEvidence && canPenalizeMissing(evidenceReport, "TOUCHDOWN")) {
+    pushPenalty(penalties, { code: "TOUCHDOWN_MISSING", severity: "critical", points: 22, message: "No se detectó TOUCHDOWN en ninguna fuente certificada del vuelo." });
+    observations.push("TOUCHDOWN ausente en fuentes certificadas; penalización aplicada.");
     maxScoreCap = Math.min(maxScoreCap ?? 70, 70);
+  } else if (completedLike && !hasTouchdown) {
+    observations.push("TOUCHDOWN no certificado: la fuente disponible no permite penalizar sin riesgo de falso positivo.");
   }
 
-  if (completedLike && !hasAirborne && !hasTouchdown) {
+  if (completedLike && !hasAirborne && !hasTouchdown && hasEnoughRawEvidence) {
     maxScoreCap = Math.min(maxScoreCap ?? 50, 50);
-    pushPenalty(penalties, { code: "FLIGHT_CORE_EVENTS_MISSING", severity: "critical", points: 18, message: "Faltan eventos centrales AIRBORNE y TOUCHDOWN; evaluación limitada automáticamente." });
+    pushPenalty(penalties, { code: "FLIGHT_CORE_EVENTS_MISSING", severity: "critical", points: 18, message: "Faltan AIRBORNE y TOUCHDOWN en fuentes certificadas; evaluación limitada automáticamente." });
   }
 
-  if (completedLike && !hasTakeoffRoll) {
-    pushPenalty(penalties, { code: "TAKEOFF_ROLL_MISSING", severity: "warning", points: 8, message: "No se detectó TAKEOFF_ROLL en timeline." });
+  if (completedLike && !hasTakeoffRoll && signalCanPenalize(evidenceReport, "TAKEOFF_ROLL")) {
+    pushPenalty(penalties, { code: "TAKEOFF_ROLL_MISSING", severity: "warning", points: 6, message: "No se detectó TAKEOFF_ROLL en fuentes certificadas." });
   }
 
-  if (completedLike && !hasParked) {
-    pushPenalty(penalties, { code: "PARKING_SEQUENCE_MISSING", severity: "warning", points: 6, message: "No se detectó evento PARKED/COLD_AND_DARK/REPORT_SENT." });
+  if (completedLike && !hasParked && parkedSignal?.status !== "UNRELIABLE") {
+    pushPenalty(penalties, { code: "PARKING_SEQUENCE_MISSING", severity: "warning", points: 4, message: "No se detectó PARKED/COLD_AND_DARK/REPORT_SENT; revisar secuencia de cierre." });
   }
 
   if (Math.abs(touchdownVs) > 900) pushPenalty(penalties, { code: "TOUCHDOWN_VS_SEVERE", severity: "critical", points: 25, message: "Touchdown vertical speed severa." });
   else if (Math.abs(touchdownVs) > 600) pushPenalty(penalties, { code: "TOUCHDOWN_VS_HARD", severity: "warning", points: 12, message: "Touchdown duro detectado." });
   if (touchdownG >= 2.0) pushPenalty(penalties, { code: "TOUCHDOWN_G_HIGH", severity: "warning", points: 10, message: "G-force alta en touchdown." });
-  if (overspeed > 0) pushPenalty(penalties, { code: "OVERSPEED", severity: "warning", points: overspeed * 4, message: `Overspeed events: ${overspeed}.` });
-  if (stalls > 0) pushPenalty(penalties, { code: "STALL", severity: "critical", points: stalls * 8, message: `Stall events: ${stalls}.` });
+  if (overspeed > 0) pushPenalty(penalties, { code: "OVERSPEED", severity: "warning", points: overspeed * 4, message: `Overspeed events/seconds: ${overspeed}.` });
+  if (stalls > 0) pushPenalty(penalties, { code: "STALL", severity: "critical", points: stalls * 8, message: `Stall events/seconds: ${stalls}.` });
   if (hardBrake > 0) pushPenalty(penalties, { code: "HARD_BRAKE", severity: "warning", points: hardBrake * 3, message: `Hard brake events: ${hardBrake}.` });
   if (excessiveBank > 0) pushPenalty(penalties, { code: "EXCESSIVE_BANK", severity: "warning", points: excessiveBank * 2, message: `Excessive bank events: ${excessiveBank}.` });
   if (damage > 0) pushPenalty(penalties, { code: "DAMAGE", severity: "critical", points: damage * 10, message: `Damage events: ${damage}.` });
 
-  if (completedLike && !payload.actual.landingAirport) {
-    pushPenalty(penalties, { code: "LANDING_AIRPORT_MISSING", severity: "critical", points: 12, message: "Landing airport ausente." });
+  if (completedLike && !payload.actual.landingAirport && !hasTouchdown) {
+    pushPenalty(penalties, { code: "LANDING_AIRPORT_MISSING", severity: "critical", points: 10, message: "Landing airport ausente y sin evidencia touchdown." });
     maxScoreCap = Math.min(maxScoreCap ?? 75, 75);
   }
 
@@ -179,22 +168,22 @@ export function evaluateFinalizePayload(payload: NormalizedFinalizePayload): Eva
     maxScoreCap = Math.min(maxScoreCap ?? 60, 60);
   }
 
-  // Anti-hack / consistency
   if (distNm > 0 && flightMins > 0) {
     const gsAvg = distNm / (flightMins / 60);
     if (gsAvg > 700) {
-      pushPenalty(penalties, { code: "IMPOSSIBLE_SPEED", severity: "critical", points: 25, message: `Velocidad media imposible (${gsAvg.toFixed(1)}kt).` });
+      pushPenalty(penalties, { code: "IMPOSSIBLE_SPEED", severity: "critical", points: 25, message: `Velocidad media imposible (${gsAvg.toFixed(1)} kt).` });
       maxScoreCap = Math.min(maxScoreCap ?? 50, 50);
     }
   }
 
-  if (completedLike && distNm > 0 && fuelUsed <= 0) {
+  // Fuel será estricto solo si la señal está certificada y no inconsistente.
+  if (completedLike && distNm > 0 && fuelUsed <= 0 && fuelSignal?.canPenalize) {
     pushPenalty(penalties, { code: "FUEL_IMPOSSIBLE", severity: "critical", points: 20, message: "Consumo de fuel incoherente." });
     maxScoreCap = Math.min(maxScoreCap ?? 60, 60);
+  } else if (evidenceReport.rawFacts.fuelInconsistent) {
+    observations.push("Fuel queda en observación: unidades/cálculo inconsistentes detectados, sin castigo económico estricto todavía.");
   }
 
-  if (telemetryCount > 0 && telemetryCount < 5) pushPenalty(penalties, { code: "SPARSE_FRAMES", severity: "warning", points: 8, message: "Frames de telemetría demasiado escasos." });
-  if (hasBlackbox && blackboxFrameCount > 0 && blackboxFrameCount < 5) pushPenalty(penalties, { code: "BLACKBOX_INSUFFICIENT", severity: "warning", points: 6, message: "BlackBox con pocos frames." });
   if (completedLike && flightMins <= 0 && blockMins <= 0) pushPenalty(penalties, { code: "TIME_MISSING", severity: "warning", points: 8, message: "Tiempo block/airborne ausente o cero." });
 
   const totalPenalty = penalties.reduce((acc, p) => acc + p.points, 0);
@@ -204,64 +193,54 @@ export function evaluateFinalizePayload(payload: NormalizedFinalizePayload): Eva
     .filter((p) => p.code.includes("LIGHT") || p.code.includes("BRAKE") || p.code.includes("PARK") || p.code.includes("DESTINATION") || p.code.includes("AIRBORNE") || p.code.includes("TOUCHDOWN"))
     .reduce((acc, p) => acc + p.points, 0);
   const performancePenalty = penalties
-    .filter((p) => p.code.includes("OVERSPEED") || p.code.includes("STALL") || p.code.includes("BANK") || p.code.includes("TOUCHDOWN") || p.code.includes("SPEED"))
+    .filter((p) => p.code.includes("OVERSPEED") || p.code.includes("STALL") || p.code.includes("TOUCHDOWN") || p.code.includes("BANK") || p.code.includes("SPEED"))
     .reduce((acc, p) => acc + p.points, 0);
-  const economyPenalty = fuelUsed <= 0 && completedLike ? 30 : 0;
+  const economyPenalty = evidenceReport.rawFacts.fuelInconsistent ? 0 : penalties.filter((p) => p.code.includes("FUEL") || p.code.includes("ECONOMY")).reduce((acc, p) => acc + p.points, 0);
 
-  const operationalScore = capScore(clamp(100 - totalPenalty), maxScoreCap);
-  const procedureScore = capScore(clamp(100 - procedurePenalty - (payload.finalStatus === "aborted" ? 20 : 0)), maxScoreCap);
-  const performanceScore = capScore(clamp(100 - performancePenalty - (Math.abs(touchdownVs) > 600 ? 10 : 0)), maxScoreCap);
-  const safetyScore = capScore(clamp(100 - criticalPenalty - warningPenalty * 0.25 - (payload.finalStatus === "crashed" ? 40 : 0)), maxScoreCap);
-  const economyScore = capScore(clamp(100 - economyPenalty - (payload.finalStatus === "cancelled" ? 100 : 0)), maxScoreCap);
+  const safetyScore = clamp(100 - criticalPenalty - Math.max(0, warningPenalty * 0.35));
+  const procedureScore = clamp(100 - procedurePenalty);
+  const performanceScore = clamp(100 - performancePenalty);
+  const operationalScore = clamp(100 - Math.max(0, totalPenalty * 0.45));
+  const economyScore = clamp(100 - economyPenalty);
 
-  const weightedScore =
+  let totalScore =
     safetyScore * 0.3 +
     procedureScore * 0.25 +
     performanceScore * 0.2 +
     operationalScore * 0.15 +
     economyScore * 0.1;
 
-  const totalScore = clamp(Math.round(capScore(weightedScore, maxScoreCap)));
+  totalScore = capScore(totalScore, maxScoreCap);
+  totalScore = clamp(Math.round(totalScore * 100) / 100);
 
-  if (!observations.length && penalties.length === 0) observations.push("Vuelo evaluado sin observaciones penalizables.");
+  const telemetryCertification = {
+    signals: evidenceReport.signals,
+    observations: evidenceReport.observations,
+    warnings: evidenceReport.warnings,
+    rawFacts: evidenceReport.rawFacts,
+  };
 
   return {
-    operationalScore,
-    procedureScore,
-    performanceScore,
-    safetyScore,
-    economyScore,
+    operationalScore: Math.round(operationalScore * 100) / 100,
+    procedureScore: Math.round(procedureScore * 100) / 100,
+    performanceScore: Math.round(performanceScore * 100) / 100,
+    safetyScore: Math.round(safetyScore * 100) / 100,
+    economyScore: Math.round(economyScore * 100) / 100,
     totalScore,
     penalties,
-    observations,
+    observations: Array.from(new Set(observations.filter(Boolean))),
     evidence: {
-      finalStatus: payload.finalStatus,
-      destination: payload.destination,
-      landingAirport: payload.actual.landingAirport ?? null,
-      touchdownVs,
-      touchdownG,
-      overspeed,
-      stalls,
-      hardBrake,
-      excessiveBank,
-      damage,
-      distanceNm: distNm,
-      flightMinutes: flightMins,
-      blockMinutes: blockMins,
-      fuelUsedKg: fuelUsed,
-      telemetrySamplesCount: telemetryCount,
-      blackboxFrameCount,
-      blackboxSummary,
-      eventTypes,
-      eventDetails: detailedEvents,
+      eventTypes: evidenceReport.eventTypes,
+      eventDetails: evidenceReport.eventDetails,
+      blackboxSummary: asObj(asObj(raw.blackbox ?? raw.BlackBox).summary ?? asObj(raw.blackbox ?? raw.BlackBox).Summary),
+      telemetrySamplesCount: evidenceReport.rawFacts.telemetrySamplesCount,
+      blackboxFrameCount: evidenceReport.rawFacts.blackboxFrameCount,
+      touchdownVs: touchdownVs ?? null,
+      touchdownG: touchdownG ?? null,
+      fuelUsedKg: fuelUsed ?? null,
+      distanceNm: distNm || null,
       maxScoreCap,
-      scoringWeights: {
-        safety: 30,
-        procedure: 25,
-        performance: 20,
-        operational: 15,
-        economy: 10,
-      },
+      telemetryCertification,
     },
     evaluationStatus: "EVALUATED",
     economyStatus: "EVALUATED",
