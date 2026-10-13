@@ -14,6 +14,7 @@ const shapes: Record<GlyphName, React.ReactNode> = {
   compass: <><circle cx="12" cy="12" r="10" /><path d="m16 7-3 6-6 3 3-6Z" /></>,
   check: <path d="m5 12 4 4L19 6" />,
 };
-export function Glyph({ name, size = 24, style }: { name: GlyphName; size?: number; style?: CSSProperties }) {
-  return <svg width={name === "mountain" ? size * 1.65 : size} height={size} viewBox={name === "mountain" ? "0 0 40 24" : "0 0 24 24"} fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={style}>{shapes[name]}</svg>;
+export function Glyph({ name, size = 24, style, className }: { name: GlyphName; size?: number; style?: CSSProperties; className?: string }) {
+  return <svg width={name === "mountain" ? size * 1.65 : size} height={size} viewBox={name === "mountain" ? "0 0 40 24" : "0 0 24 24"} fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={style} className={className}>{shapes[name]}</svg>;
 }
+

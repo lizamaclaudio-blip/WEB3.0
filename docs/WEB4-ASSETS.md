@@ -12,3 +12,10 @@ All new marketing assets are local: no external image URLs or tracking pixels.
 | Existing `public/branding/*` | Previously tracked Patagonia Wings brand resources. | Existing airline identity. |
 
 WebP derivatives are resized/compressed from originals, which remain untouched. Real captures and illustration labels remain visible in the UI. Owner-supplied artwork provenance is recorded; no additional third-party image licenses are claimed. Google fonts Inter and Rajdhani retain the repository's existing Next.js font integration.
+
+Visual review corrected two misleading legacy capture filenames: dispatch now
+uses `m23-3-app-real-despacho.png` (with visible OSM attribution); monitor uses
+`ofp-times/live/beta-Copilot.png`, whose actual content is the instrument monitor.
+Copilot uses `m24-copiloto.png`. Copilot and operations show real WPF interfaces
+with synthetic test inputs and are explicitly labelled as test fixtures in the
+interactive gallery. They are not evidence of a live flight or universal support.

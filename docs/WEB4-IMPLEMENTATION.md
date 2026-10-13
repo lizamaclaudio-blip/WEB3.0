@@ -24,3 +24,9 @@ Petroleum blue `#071A29`, surfaces `#0D273A`, jade `#12D8B1`, cyan `#29C8EB`, te
 ## Commercial boundaries
 
 Product is a development beta, not sold or licensed by this website. No purchase, fabricated downloads, customer claims, invented metrics or partner endorsements. Integration descriptions separate implemented adapters from end-to-end certification. New intake persistence stays off unless explicitly configured after its versioned schema and permissions have been reviewed. No production migration is applied by build or runtime.
+
+## Revised public scope
+The owner subsequently paused the virtual airline and requested Vector only.
+The public Home/header/footer and sitemap now expose only Vector pages in ES/EN.
+Legacy pilot/auth/ACARS routes and data are preserved, unlinked from public product
+navigation. No production deployment or shutdown has been performed.
