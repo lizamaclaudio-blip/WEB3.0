@@ -17,7 +17,7 @@ export function WebHeader({ language = "es" }: { language?: Language }) {
     [en ? "Availability" : "Disponibilidad", "/versiones"],
     [en ? "Support" : "Soporte", "/soporte"],
   ];
-  return <header className="pw4-header">
+  return <header className="pw4-header" lang={language}>
     <a className="pw4-skip" href="#main-content">{en ? "Skip to content" : "Saltar al contenido"}</a>
     <div className="pw4-wrap pw4-nav">
       <Link href={localeHref(language)} className="pw4-brand" aria-label="Copiloto Vector"><Glyph name="mountain" size={31} /><span>COPILOTO <strong>VECTOR</strong><small>BY PATAGONIA PROJECT</small></span></Link>
@@ -33,7 +33,7 @@ export function WebHeader({ language = "es" }: { language?: Language }) {
 
 export function WebFooter({ language = "es" }: { language?: Language }) {
   const en = language === "en";
-  return <footer className="pw4-footer"><div className="pw4-wrap">
+  return <footer className="pw4-footer" lang={language}><div className="pw4-wrap">
     <div className="pw4-footer-top"><Link href={localeHref(language)} className="pw4-brand"><Glyph name="mountain" size={35} /><span>COPILOTO <strong>VECTOR</strong><small>{en ? "FROM THE SOUTH. TOWARDS WHAT'S NEXT." : "DESDE EL SUR. HACIA LO QUE VIENE."}</small></span></Link><p>{en ? "A passion for flight. A new way to accompany it." : "Una pasión por volar. Una nueva forma de acompañarte."}</p></div>
     <div className="pw4-footer-links">
       <div><h3>COPILOTO VECTOR</h3><Link href={localeHref(language, "/copiloto-vector")}>{en ? "Explore the product" : "Conoce el producto"}</Link><Link href={localeHref(language, "/copiloto-vector#modulos")}>{en ? "Six modules" : "Seis módulos"}</Link><Link href={localeHref(language, "/versiones")}>{en ? "Versions & availability" : "Versiones y disponibilidad"}</Link></div>

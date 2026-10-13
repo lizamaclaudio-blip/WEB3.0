@@ -23,14 +23,16 @@ export function Gallery({ language }: { language: Language }) {
     <div id="vector-gallery-panel" role="tabpanel" aria-labelledby={`tab-${active.id}`} tabIndex={0}>
       <button className="pw4-screen pw4-gallery-open" type="button" onClick={() => dialog.current?.showModal()} aria-label={`${en ? "Enlarge screenshot" : "Ampliar captura"}: ${active[language][0]}`}>
         <span className="pw4-screen-bar"><span>COPILOTO VECTOR / {active[language][0].toUpperCase()}</span><span>{en ? "ENLARGE ↗" : "AMPLIAR ↗"}</span></span>
-        <Image src={`/vector/${active.image}.webp`} width={1600} height={captureHeight} sizes="(max-width: 800px) 94vw, 88vw" alt={`${en ? "Real WPF application screenshot" : "Captura real de la aplicación WPF"}: ${active[language][0]}`} />
+        <Image src={`/vector/${active.image}-v2.webp`} width={1600} height={captureHeight} sizes="(max-width: 800px) 94vw, 88vw" alt={`${en ? "Real WPF application screenshot" : "Captura real de la aplicación WPF"}: ${active[language][0]}`} />
       </button>
       <p className="pw4-screen-caption"><span>{active[language][1]}</span><span>{fixture ? (en ? "Real WPF interface · Test fixture data, not a live flight." : "Interfaz WPF real · Datos de prueba, no de un vuelo en vivo.") : (en ? "Real development session · Not live web telemetry." : "Sesión real de desarrollo · Sin telemetría en vivo en la web.")}</span></p>
     </div>
     <dialog ref={dialog} className="pw4-lightbox" aria-label={en ? "Enlarged application screenshot" : "Captura ampliada de la aplicación"} onClick={(event) => { if (event.target === dialog.current) dialog.current?.close(); }}>
       <button type="button" autoFocus onClick={() => dialog.current?.close()}>{en ? "Close" : "Cerrar"} ×</button>
-      <Image src={`/vector/${active.image}.webp`} width={1600} height={captureHeight} sizes="96vw" alt={active[language][0]} />
+      <Image src={`/vector/${active.image}-v2.webp`} width={1600} height={captureHeight} sizes="96vw" alt={active[language][0]} />
     </dialog>
   </div>;
 }
+
+
 

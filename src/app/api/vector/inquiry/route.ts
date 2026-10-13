@@ -8,7 +8,12 @@ function reply(code: string, status: number) { return Response.json({ ok: status
 
 export async function POST(request: Request) {
   const origin = request.headers.get("origin");
-  if (!origin || origin !== new URL(request.url).origin) return reply("ORIGIN_REJECTED", 403);
+  // Next's standalone server can normalise request.url to its internal hostname.
+  // The browser Origin must match the actual HTTP Host, not that internal URL.
+  let source: URL;
+  try { source = new URL(origin || ""); } catch { return reply("ORIGIN_REJECTED", 403); }
+  const host = request.headers.get("host") || new URL(request.url).host;
+  if (source.host !== host || !["http:", "https:"].includes(source.protocol)) return reply("ORIGIN_REJECTED", 403);
   if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) return reply("INVALID_CONTENT_TYPE", 415);
   // Read a bounded stream, including when Content-Length is missing or forged.
   const reader = request.body?.getReader();

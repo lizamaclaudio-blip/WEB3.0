@@ -27,6 +27,10 @@ test('API rejects cross-origin, malformed, overlarge and unconsented requests be
  assert.equal((await POST(request('{'))).status,400);
  assert.equal((await POST(request(' '.repeat(8193)))).status,413);
  assert.equal((await POST(request({...valid,consent:false}))).status,400);
+ // Next may expose an internal URL while retaining the incoming public Host.
+ const forwarded = new Request('http://localhost:3000/api/vector/inquiry', { method:'POST', headers:{ host:'127.0.0.1:3005',origin:'http://127.0.0.1:3005','content-type':'application/json' }, body:JSON.stringify({...valid,consent:false}) });
+ assert.equal((await POST(forwarded)).status,400);
+ assert.equal((await POST(request(valid,{host:'localhost:3004',origin:'https://attacker.test'}))).status,403);
 });
 test('storage-confirmed success, limits and failures return honest outcomes; no raw IP in payload', async () => {
  const originalFetch = globalThis.fetch;

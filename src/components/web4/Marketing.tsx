@@ -5,6 +5,7 @@ import { WebFooter, WebHeader } from "./Chrome";
 import { Gallery } from "./Gallery";
 import { Glyph } from "./Glyph";
 import { modules } from "./modules";
+import { Reveal } from "./Reveal";
 import { localeHref, type Language } from "./locale";
 
 export function marketingMetadata(language: Language, title: string, description: string, route = ""): Metadata {
@@ -12,7 +13,7 @@ export function marketingMetadata(language: Language, title: string, description
   return { title, description, alternates: { canonical: path, languages: { es: localeHref("es", route), en: localeHref("en", route), "x-default": localeHref("es", route) } }, openGraph: { title, description, url: path, siteName: "Copiloto Vector · Patagonia Wings", locale: language === "es" ? "es_CL" : "en_US", type: "website", images: [{ url: "/vector/hero.webp", width: 1916, height: 821, alt: "Copiloto Vector" }] } };
 }
 export function Shell({ language, children }: { language: Language; children: React.ReactNode }) {
-  return <><WebHeader language={language} /><main id="main-content" className="pw4" lang={language}>{children}</main><WebFooter language={language} /></>;
+  return <><WebHeader language={language} /><main id="main-content" className="pw4" lang={language}><Reveal />{children}</main><WebFooter language={language} /></>;
 }
 export function Eyebrow({ children }: { children: React.ReactNode }) { return <p className="pw4-eyebrow"><span className="pw4-dot" />{children}</p>; }
 export function Action({ href, children, primary = false }: { href: string; children: React.ReactNode; primary?: boolean }) { return <Link className={`pw4-button${primary ? " pw4-button-primary" : ""}`} href={href}>{children}<Glyph name="arrow" size={18} /></Link>; }

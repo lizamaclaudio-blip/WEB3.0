@@ -19,3 +19,6 @@ uses `m23-3-app-real-despacho.png` (with visible OSM attribution); monitor uses
 Copilot uses `m24-copiloto.png`. Copilot and operations show real WPF interfaces
 with synthetic test inputs and are explicitly labelled as test fixtures in the
 interactive gallery. They are not evidence of a live flight or universal support.
+
+Corrected gallery assets use an explicit versioned URL so an earlier local/CDN
+image cache cannot show an obsolete screenshot under a corrected module label.

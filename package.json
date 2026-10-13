@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:web4": "node --test tests/web4/inquiry.test.mjs",
+    "smoke:web4": "node scripts/web4-smoke.mjs",
     "pw3:download-airports": "node scripts/pw3/download-ourairports.mjs",
     "pw3:import-airports": "node scripts/pw3/import-ourairports.mjs",
     "pw3:db-master": "node scripts/pw3/run-pw3-supabase-master.mjs",
