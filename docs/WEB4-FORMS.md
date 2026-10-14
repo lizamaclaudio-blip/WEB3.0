@@ -27,6 +27,9 @@ Server-only Preview variables:
 Modern `sb_secret_` keys are sent only in `apikey`; legacy JWT keys retain their
 Bearer header. Neither key is exposed through a `NEXT_PUBLIC_` variable.
 Preview forms identify themselves as tests and request fictional data.
+The form mode defaults to tests independently of inherited Vercel variables.
+`VECTOR_FORMS_MODE=public` is reserved for a separately authorized public launch;
+it is not configured by this work.
 No new production environment variables have been changed.
 
 `POST /api/vector/inquiry` validates same-host Origin, exact JSON content type,
