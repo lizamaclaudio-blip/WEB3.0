@@ -70,12 +70,24 @@ Deployment state and actual browser verification are recorded separately.
   Server-rendered content sections carry their language, and the header syncs
   the document language after hydration and client navigation.
 - Canonical URLs, three-language hreflang, `fr_FR` Open Graph and sitemap are
-  updated. Preview indexing remains disabled. The inactive inquiry service and
+  updated. The existing preview-environment indexing guard is retained. The inactive inquiry service and
   unapplied SQL draft accept French; no live database migration was executed.
 - Build/TypeScript, targeted ESLint, 6 tests and 25 local HTTP checks pass.
   All six French pages also pass browser content/metadata/overflow/image checks
   at 1280 px. Further Preview responsive evidence and captures are saved in
   `artifacts/web4-review/` alongside `french-local-checks.json`.
+- French Preview `dpl_8E8F83M395oDxxsc46gojdfy9BFo` is READY, target=null, commit
+  `a6548536c39e55e76f41764d076f2cb89608182c`:
+  https://web-30-gphy8rdg9-lizamaclaudio-blips-projects.vercel.app/fr
+  All six French pages pass desktop browser checks at 1920 px. Local mobile
+  checks at 375 px pass; ES/EN/FR switching preserves the page in both contexts.
+  French gallery arrow navigation, enlargement/Escape and the inactive contact
+  form were checked. Captures: `home-fr-preview-desktop.jpg` and
+  `three-language-mobile-menu.jpg`; details: `three-language-verification.json`.
+- Preview indexing was not certified remotely: no robots meta was present on
+  its support page, direct robots.txt navigation was blocked by the browser
+  client, and platform response headers were not inspected. The source guard
+  depends on Vercel providing VERCEL_ENV=preview. No protection settings changed.
 
 Supabase env inspection returned 403 and no management connector was available.
 New API/RPC adapter and isolated SQL draft are prepared, but live persistence,
