@@ -1,14 +1,28 @@
 import { writeFile } from 'node:fs/promises';
 const base = 'http://127.0.0.1:3005';
-const results=[];
-for(const path of ['/','/copiloto-vector','/soporte','/versiones','/privacidad','/condiciones','/en','/en/copiloto-vector','/en/soporte','/en/versiones','/en/privacidad','/en/condiciones','/fr','/fr/copiloto-vector','/fr/soporte','/fr/versiones','/fr/privacidad','/fr/condiciones','/robots.txt','/sitemap.xml','/icon.svg','/login','/api/auth/me','/api/acars/status']) {
- const response=await fetch(base+path,{redirect:'manual'}); const text=await response.text();
- const ok = path.startsWith('/api/') ? [200,401,403].includes(response.status) : response.status===200;
- results.push({path,status:response.status,ok,bytes:text.length});
- if(!ok) process.exitCode=1;
+const results = [];
+const pages = ['', '/copiloto-vector', '/soporte', '/versiones', '/privacidad', '/condiciones'];
+const paths = ['','/en','/fr'].flatMap(locale => pages.map(page => locale + (page || (locale ? '' : '/'))));
+for (const path of [...paths, '/robots.txt', '/sitemap.xml', '/icon.svg', '/login']) await check(path, 200);
+for (const path of ['/api/auth/me','/api/acars/status']) await check(path, [401,403]);
+for (const name of ['home','dispatch','monitor','weather','cabin','ground','operations','copilot','journal','replay','landing','settings','report','statistics']) await check('/vector/current/' + name + '.webp', 200, true);
+for (const name of ['monitor','ofp','passengers','airport','copilot','clock']) await check('/vector/current/icons/' + name + '.webp', 200, true);
+await check('/api/vector/unsubscribe', 405);
+for (const [path,body,status] of [
+  ['/api/vector/inquiry',{kind:'interest',email:'qa@example.test',name:'',message:'',locale:'fr',consent:true,newsletterConsent:false,website:''},503],
+  ['/api/vector/unsubscribe',{token:'A'.repeat(43)},503],
+]) {
+  const response = await fetch(base + path, {method:'POST',headers:{origin:base,'content-type':'application/json'},body:JSON.stringify(body)});
+  results.push({path,method:'POST',status:response.status,expected:status,ok:response.status===status});
 }
-const response = await fetch(base+'/api/vector/inquiry',{method:'POST',headers:{origin:base,'content-type':'application/json'},body:JSON.stringify({kind:'interest',email:'qa@example.test',name:'',message:'',locale:'es',consent:true,website:''})});
-results.push({path:'/api/vector/inquiry',status:response.status,expected:503,ok:response.status===503});
-if(response.status!==503) process.exitCode=1;
-console.log(JSON.stringify(results,null,2));
+async function check(path, expected, image=false) {
+  const response = await fetch(base + path,{redirect:'manual'});
+  const bytes = await response.arrayBuffer();
+  const statusOK = Array.isArray(expected) ? expected.includes(response.status) : response.status===expected;
+  const ok = statusOK && (!image || response.headers.get('content-type')?.includes('image/webp'));
+  results.push({path,status:response.status,ok,bytes:bytes.byteLength});
+}
+const failed = results.filter(item=>!item.ok);
+if (failed.length) process.exitCode=1;
+console.log(JSON.stringify({checks:results.length,passed:results.length-failed.length,failed},null,2));
 await writeFile('artifacts/web4-review/http-checks.json',JSON.stringify(results,null,2));

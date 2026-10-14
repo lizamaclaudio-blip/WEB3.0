@@ -17,6 +17,12 @@ function upper(value: unknown) {
   return clean(value).toUpperCase();
 }
 
+function diagnosticFields(value: unknown): Record<string, unknown> | undefined {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+}
+
 function error(code: string, status = 400) {
   return NextResponse.json({ ok: false, code, error: code }, { status });
 }
@@ -70,13 +76,11 @@ export async function POST(request: Request) {
   const ofp = normalizeSimbriefOfp(payload);
   
   // Logging seguro para diagnóstico - Raw y normalizado
-  const rawAircraft = (payload as any)?.aircraft;
-  const rawGeneral = (payload as any)?.general;
-  const rawParams = (payload as any)?.params;
-  const rawAlternate = (payload as any)?.alternate;
-  const rawAirports = (payload as any)?.airports;
-  const rawFuel = (payload as any)?.fuel;
-  const rawWeights = (payload as any)?.weights;
+  const rawAircraft = diagnosticFields(payload.aircraft);
+  const rawAlternate = diagnosticFields(payload.alternate);
+  const rawAirports = diagnosticFields(payload.airports);
+  const rawFuel = diagnosticFields(payload.fuel);
+  const rawWeights = diagnosticFields(payload.weights);
   
   console.info(`[simbrief-ofp] pilot=${user.callsign}`);
   console.info(`[simbrief-ofp] normalized=${JSON.stringify({
@@ -95,7 +99,7 @@ export async function POST(request: Request) {
     cargoKg: ofp.cargoKg,
   })}`);
   console.info(`[simbrief-ofp] rawAlternate=${JSON.stringify({
-    alternate_obj: typeof rawAlternate,
+    alternate_obj: typeof payload.alternate,
     alternate_icao: rawAlternate?.icao_code || rawAlternate?.icao,
     airports_altn: rawAirports?.altn,
   })}`);

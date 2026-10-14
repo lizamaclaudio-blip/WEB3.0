@@ -19,6 +19,7 @@ export function WebHeader({ language = "es" }: { language?: Language }) {
   const t = <T,>(es: T, en: T, fr: T) => localized(language, es, en, fr);
   const links = [
     ["Copiloto Vector", "/copiloto-vector"],
+    [t("Galería", "Gallery", "Galerie"), "/copiloto-vector#galeria"],
     [t("Disponibilidad", "Availability", "Disponibilité"), "/versiones"],
     [t("Soporte", "Support", "Assistance"), "/soporte"],
   ];
