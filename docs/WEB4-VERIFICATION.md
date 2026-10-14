@@ -40,11 +40,26 @@ No production deployment, production branch change, payment or database migratio
 Project `web-3.0`, team `team_7xXzbVXKUJeUnAt0HN2xc3Ax`, feature branch
 `codex/patagonia-wings-web4`. Preview branch alias:
 https://web-30-git-codex-patagonia-52d73e-lizamaclaudio-blips-projects.vercel.app
-The first deployment reached READY with target=null (Preview). The final revision
-is deployed on the same branch. Production/domain/DNS and protection are unchanged.
+Deployment `dpl_DqpFst1owKXqa8kKeu1KZiF8zRPD` was confirmed READY with target=null
+(Preview), built from commit `81a0b7965b2e58d7aa96eddac957ae7ff5928be1`:
+https://web-30-9gtyhi4h8-lizamaclaudio-blips-projects.vercel.app
+Production/domain/DNS and protection are unchanged.
 Remote browser verification is blocked by automatic approval review: it rejected
 both the authentication-bypass fetch tool and navigation to Vercel authentication.
 No bypass was used. Local browser verification and Vercel build status are separate.
+The user authorized review and chose to complete the Google/Vercel login manually.
+That sign-in is left untouched while local verification continues.
+
+## Follow-up local review
+- Reproduced and fixed keyboard focus loss when activating the current page in
+  the mobile menu. Closure now returns focus to its button; Escape also closes it.
+- Reject control characters in email before contacting storage. Regression
+  coverage verifies a NUL-containing address returns 400 rather than storage 503.
+- Rebuilt successfully with TypeScript, passed targeted ESLint and all four
+  inquiry tests. The 19 local HTTP checks pass after these fixes.
+- Browser checks at 390 px confirm current-page activation and Escape both close
+  the menu with focus on its button, no overflow and no console warnings/errors.
+  Screenshot: `artifacts/web4-review/mobile-keyboard-review.jpg`.
 
 Supabase env inspection returned 403 and no management connector was available.
 New API/RPC adapter and isolated SQL draft are prepared, but live persistence,

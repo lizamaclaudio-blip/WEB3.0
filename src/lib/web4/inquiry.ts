@@ -12,7 +12,7 @@ export function validateInquiry(input: unknown): InquiryValidation {
   const email = data.email.trim().toLowerCase();
   const name = data.name.trim();
   const message = data.message.trim();
-  if (email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email) || name.length > 100 || message.length > 2000 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(name + message) || (data.kind === "contact" && message.length < 10)) return { ok: false, code: "INVALID_INPUT" };
+  if (email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email) || name.length > 100 || message.length > 2000 || /[\u0000-\u0008\u000b\u000c\u000e-\u001f]/.test(email + name + message) || (data.kind === "contact" && message.length < 10)) return { ok: false, code: "INVALID_INPUT" };
   return { ok: true, value: { kind: data.kind, email, name, message, locale: data.locale, consent: true } };
 }
 

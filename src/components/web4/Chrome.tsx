@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Glyph } from "./Glyph";
 
 import { localeHref, type Language } from "./locale";
@@ -10,6 +10,11 @@ import { localeHref, type Language } from "./locale";
 export function WebHeader({ language = "es" }: { language?: Language }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
+  function closeMenu() {
+    setOpen(false);
+    if (open) menuButton.current?.focus();
+  }
   const en = language === "en";
   const counterpart = en ? pathname.replace(/^\/en/, "") || "/" : `/en${pathname === "/" ? "" : pathname}`;
   const links = [
@@ -17,15 +22,20 @@ export function WebHeader({ language = "es" }: { language?: Language }) {
     [en ? "Availability" : "Disponibilidad", "/versiones"],
     [en ? "Support" : "Soporte", "/soporte"],
   ];
-  return <header className="pw4-header" lang={language}>
+  return <header className="pw4-header" lang={language} onKeyDown={event => {
+    if (open && event.key === "Escape") {
+      event.preventDefault();
+      closeMenu();
+    }
+  }}>
     <a className="pw4-skip" href="#main-content">{en ? "Skip to content" : "Saltar al contenido"}</a>
     <div className="pw4-wrap pw4-nav">
       <Link href={localeHref(language)} className="pw4-brand" aria-label="Copiloto Vector"><Glyph name="mountain" size={31} /><span>COPILOTO <strong>VECTOR</strong><small>BY PATAGONIA PROJECT</small></span></Link>
-      <button className="pw4-menu-button" type="button" aria-expanded={open} aria-controls="pw4-navigation" onClick={() => setOpen(!open)}>{open ? (en ? "Close" : "Cerrar") : (en ? "Menu" : "Menú")} <span aria-hidden="true">{open ? "−" : "+"}</span></button>
+      <button ref={menuButton} className="pw4-menu-button" type="button" aria-expanded={open} aria-controls="pw4-navigation" onClick={() => setOpen(!open)}>{open ? (en ? "Close" : "Cerrar") : (en ? "Menu" : "Menú")} <span aria-hidden="true">{open ? "−" : "+"}</span></button>
       <nav id="pw4-navigation" className={open ? "pw4-links is-open" : "pw4-links"} aria-label={en ? "Main navigation" : "Navegación principal"}>
-        {links.map(([label, href]) => <Link key={href} href={localeHref(language, href)} aria-current={pathname === localeHref(language, href) ? "page" : undefined} onClick={() => setOpen(false)}>{label}</Link>)}
-        <Link href={counterpart} className="pw4-language" hrefLang={en ? "es" : "en"} onClick={() => setOpen(false)}>{en ? "ES" : "EN"}<span aria-hidden="true"> ↗</span></Link>
-        <Link href={localeHref(language, "/soporte#novedades")} className="pw4-pilot" onClick={() => setOpen(false)}>{en ? "Stay informed" : "Recibir novedades"}<Glyph name="arrow" size={17} /></Link>
+        {links.map(([label, href]) => <Link key={href} href={localeHref(language, href)} aria-current={pathname === localeHref(language, href) ? "page" : undefined} onClick={closeMenu}>{label}</Link>)}
+        <Link href={counterpart} className="pw4-language" hrefLang={en ? "es" : "en"} onClick={closeMenu}>{en ? "ES" : "EN"}<span aria-hidden="true"> ↗</span></Link>
+        <Link href={localeHref(language, "/soporte#novedades")} className="pw4-pilot" onClick={closeMenu}>{en ? "Stay informed" : "Recibir novedades"}<Glyph name="arrow" size={17} /></Link>
       </nav>
     </div>
   </header>;

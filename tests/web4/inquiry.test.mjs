@@ -14,7 +14,7 @@ test('normalizes valid interest; requires explicit consent and rejects spam', ()
  assert.deepEqual(validateInquiry(valid), { ok:true, value:{ kind:'interest', email:'person@example.com', name:'Test', message:'', consent:true, locale:'es' } });
  assert.equal(validateInquiry({...valid, consent:false}).code, 'CONSENT_REQUIRED');
  assert.equal(validateInquiry({...valid, website:'bot'}).code, 'SPAM');
- for (const change of [{email:'bad'}, {email:'x\r\n@example.com'}, {name:'x'.repeat(101)}, {message:'x'.repeat(2001)}, {locale:'xx'}, {kind:'admin'}, {kind:'contact',message:'short'}]) assert.equal(validateInquiry({...valid,...change}).ok, false);
+ for (const change of [{email:'bad'}, {email:'x\r\n@example.com'}, {email:'a\u0000@example.com'}, {email:'a\u0001@example.com'}, {name:'x'.repeat(101)}, {message:'x'.repeat(2001)}, {locale:'xx'}, {kind:'admin'}, {kind:'contact',message:'short'}]) assert.equal(validateInquiry({...valid,...change}).ok, false);
  assert.equal(validateInquiry({...valid,kind:'contact',message:'A real technical question'}).ok,true);
 });
 test('forms fail closed without explicit secure configuration', () => {
@@ -27,6 +27,7 @@ test('API rejects cross-origin, malformed, overlarge and unconsented requests be
  assert.equal((await POST(request('{'))).status,400);
  assert.equal((await POST(request(' '.repeat(8193)))).status,413);
  assert.equal((await POST(request({...valid,consent:false}))).status,400);
+ assert.equal((await POST(request({...valid,email:'a\u0000@example.com'}))).status,400);
  // Next may expose an internal URL while retaining the incoming public Host.
  const forwarded = new Request('http://localhost:3000/api/vector/inquiry', { method:'POST', headers:{ host:'127.0.0.1:3005',origin:'http://127.0.0.1:3005','content-type':'application/json' }, body:JSON.stringify({...valid,consent:false}) });
  assert.equal((await POST(forwarded)).status,400);
