@@ -6,6 +6,8 @@ Portada centrada en el software, identidad azul petróleo/jade, seis módulos,
 relatos visuales de preparación y revisión, compatibilidad y preguntas frecuentes.
 La aerolínea permanece fuera del recorrido público; sus datos, autenticación y
 ACARS se conservan. No se modificó el código de escritorio ni la lógica de vuelo.
+Se corrigió además una regla heredada que pintaba verde el texto de los botones
+verdes dentro de páginas informativas; contraste comprobado tras recompilar.
 
 Galería de siete etapas con 14 capturas WPF nuevas, ampliación a pantalla completa,
 resolución original, controles de teclado, foco restaurado y movimiento reducido.
@@ -67,4 +69,6 @@ identificadas en la auditoría. No se han relajado protecciones de acceso.
 Preview estable de la rama:
 https://web-30-git-codex-patagonia-52d73e-lizamaclaudio-blips-projects.vercel.app
 
-El resultado del despliegue remoto se registra después de verificarlo.
+Commit principal: da38bae. El ajuste de contraste posterior y esta documentación
+se conservan en la misma rama. La URL única y el estado final del Preview se
+entregan junto a las capturas de navegador, sin promover el despliegue.
