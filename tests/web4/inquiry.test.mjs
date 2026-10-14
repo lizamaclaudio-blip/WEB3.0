@@ -47,6 +47,7 @@ test('forms fail closed without explicit secure configuration', () => {
  const configured = {VECTOR_FORMS_ENABLED:'true',SUPABASE_URL:'https://storage.example.test',SUPABASE_SERVICE_ROLE_KEY:'test',VECTOR_FORM_HASH_SECRET:'test-only-32-character-hmac-secret'};
  assert.equal(inquiryConfigured(configured),true);
  assert.equal(inquiryConfigured({...configured,SUPABASE_SERVICE_ROLE_KEY:undefined,SUPABASE_SECRET_KEY:'sb_secret_test-only-key'}),true);
+ assert.equal(inquiryConfigured({...configured,SUPABASE_SECRET_KEY:'sb_publishable_test-only-key'}),false);
  assert.equal(inquiryConfigured({...configured,SUPABASE_SECRET_KEY:''}),true);
  assert.equal(inquiryConfigured({...configured,SUPABASE_SERVICE_ROLE_KEY:undefined,SUPABASE_SECRET_KEY:undefined}),false);
  for (const url of ['not-a-url','http://storage.example.test','https://user:secret@storage.example.test','https://storage.example.test/path','https://storage.example.test/?secret=1']) assert.equal(inquiryConfigured({...configured,SUPABASE_URL:url}),false);

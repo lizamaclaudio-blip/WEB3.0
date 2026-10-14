@@ -26,6 +26,9 @@ Server-only Preview variables:
 `VECTOR_FORMS_ENABLED=true`. Never reuse production secrets in a test environment.
 Modern `sb_secret_` keys are sent only in `apikey`; legacy JWT keys retain their
 Bearer header. Neither key is exposed through a `NEXT_PUBLIC_` variable.
+Publishable keys cannot enable the server-only form. An initial browser test
+with a publishable key was correctly rejected by PostgREST (401 / 42501), stored
+no row and displayed a failure rather than a false confirmation.
 Preview forms identify themselves as tests and request fictional data.
 The form mode defaults to tests independently of inherited Vercel variables.
 `VECTOR_FORMS_MODE=public` is reserved for a separately authorized public launch;
