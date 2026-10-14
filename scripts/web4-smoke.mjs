@@ -6,6 +6,7 @@ const paths = ['','/en','/fr'].flatMap(locale => pages.map(page => locale + (pag
 for (const path of [...paths, '/robots.txt', '/sitemap.xml', '/icon.svg', '/login']) await check(path, 200);
 for (const path of ['/api/auth/me','/api/acars/status']) await check(path, [401,403]);
 for (const name of ['home','dispatch','monitor','weather','cabin','ground','operations','copilot','journal','replay','landing','settings','report','statistics']) await check('/vector/current/' + name + '.webp', 200, true);
+for (const name of ['home','dispatch','operations','copilot','settings']) await check('/vector/m29/' + name + '.webp', 200, true);
 for (const name of ['monitor','ofp','passengers','airport','copilot','clock']) await check('/vector/current/icons/' + name + '.webp', 200, true);
 await check('/api/vector/unsubscribe', 405);
 for (const [path,body,status] of [

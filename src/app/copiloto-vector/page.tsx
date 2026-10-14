@@ -1,3 +1,3 @@
 import { Product, marketingMetadata } from "@/components/web4/Marketing";
-export const metadata = marketingMetadata("es", "Copiloto Vector — El producto", "Seis módulos conectados para preparar, observar y revisar tu vuelo. Capturas reales, compatibilidad y requisitos.", "/copiloto-vector");
+export const metadata = marketingMetadata("es", "Copiloto Vector — Despacho, Copiloto y Landing Lab", "Prepara el OFP, mantén el contexto con checklists y revisa el aterrizaje. Capturas WPF QA, compatibilidad y funciones en validación.", "/copiloto-vector");
 export default function Page() { return <Product language="es" />; }

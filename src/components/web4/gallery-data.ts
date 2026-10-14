@@ -10,6 +10,7 @@ export type GalleryCapture = {
   src: string;
   size: { width: number; height: number };
   evidence: GalleryEvidence;
+  sourceLanguage?: Language;
   title: Translation<string>;
   description: Translation<string>;
   tags: Translation<string[]>;
@@ -18,6 +19,7 @@ export type GalleryCapture = {
 const text = (es: string, en: string, fr: string): Translation<string> => ({ es, en, fr });
 const tags = (es: string[], en: string[], fr: string[]): Translation<string[]> => ({ es, en, fr });
 const size = { width: 1920, height: 1080 };
+const qaTourSize = { width: 1616, height: 868 };
 
 export const galleryGroups: readonly GalleryGroup[] = [
   { id: "preparation", title: text("Preparación", "Preparation", "Préparation") },
@@ -25,7 +27,7 @@ export const galleryGroups: readonly GalleryGroup[] = [
   { id: "ground", title: text("En tierra", "On the ground", "Au sol") },
   { id: "flight", title: text("En vuelo", "In flight", "En vol") },
   { id: "copilot", title: text("Copiloto", "Copilot", "Copilote") },
-  { id: "landing", title: text("Aterrizaje", "Landing", "Atterrissage") },
+  { id: "landing", title: text("Landing Lab", "Landing Lab", "Landing Lab") },
   { id: "journal", title: text("Diario", "Journal", "Journal") },
 ];
 
@@ -33,19 +35,19 @@ export const galleryGroups: readonly GalleryGroup[] = [
 // it does not certify every feature shown. Keep original source-language text and disclose fixtures visibly.
 export const galleryCaptures: readonly GalleryCapture[] = [
   {
-    key: "home", group: "preparation", src: "/vector/current/home.webp", size, evidence: "fixture",
+    key: "home", group: "preparation", src: "/vector/m29/home.webp", size: qaTourSize, evidence: "fixture", sourceLanguage: "en",
     title: text("Tu operación, desde el inicio", "Your operation, from the start", "Vos opérations dès le départ"),
     description: text("Inicio reúne el contexto de la sesión y los accesos a cada etapa del vuelo.", "Home brings together session context and access to each stage of flight.", "L’accueil rassemble le contexte de la session et les accès à chaque étape du vol."),
     tags: tags(["Inicio", "Contexto de sesión"], ["Home", "Session context"], ["Accueil", "Contexte de la session"]),
   },
   {
-    key: "settings", group: "preparation", src: "/vector/current/settings.webp", size, evidence: "offline",
+    key: "settings", group: "preparation", src: "/vector/m29/settings.webp", size: qaTourSize, evidence: "fixture", sourceLanguage: "en",
     title: text("Un espacio para tus preferencias", "A place for your preferences", "Un espace pour vos préférences"),
     description: text("Configuración agrupa las preferencias del producto y el estado de sus conexiones.", "Settings groups product preferences and connection status.", "Les réglages regroupent les préférences du produit et l’état de ses connexions."),
     tags: tags(["Configuración", "Preferencias"], ["Settings", "Preferences"], ["Réglages", "Préférences"]),
   },
   {
-    key: "dispatch", group: "dispatch", src: "/vector/current/dispatch.webp", size, evidence: "fixture",
+    key: "dispatch", group: "dispatch", src: "/vector/m29/dispatch.webp", size: qaTourSize, evidence: "fixture", sourceLanguage: "en",
     title: text("El OFP, de un vistazo", "The flight plan, at a glance", "Le plan de vol en un coup d’œil"),
     description: text("Ruta, horarios, pesos y combustible de un OFP de ejemplo. Los datos planificados conservan su identificación.", "Route, schedule, weights and fuel from an example OFP. Planned values remain clearly identified.", "Itinéraire, horaires, masses et carburant d’un exemple d’OFP. Les valeurs planifiées restent clairement identifiées."),
     tags: tags(["OFP planificado", "Mapa de ruta"], ["Planned OFP", "Route map"], ["OFP planifié", "Carte de l’itinéraire"]),
@@ -75,22 +77,22 @@ export const galleryCaptures: readonly GalleryCapture[] = [
     tags: tags(["Monitor en Vivo", "Instrumentos WPF"], ["Live Monitor", "WPF instruments"], ["Moniteur en direct", "Instruments WPF"]),
   },
   {
-    key: "operations", group: "flight", src: "/vector/current/operations.webp", size, evidence: "fixture",
+    key: "operations", group: "flight", src: "/vector/m29/operations.webp", size: qaTourSize, evidence: "fixture", sourceLanguage: "en",
     title: text("El hilo de la operación", "The thread of the operation", "Le fil des opérations"),
     description: text("Una vista del desarrollo reúne fases, hitos y eventos de la sesión, con la procedencia de sus datos.", "A development view brings together phases, milestones and session events, with data provenance.", "Une vue de développement rassemble les phases, les jalons et les événements de la session, avec la provenance des données."),
     tags: tags(["Operaciones", "Fases y eventos"], ["Operations", "Phases and events"], ["Opérations", "Phases et événements"]),
   },
   {
-    key: "copilot", group: "copilot", src: "/vector/current/copilot.webp", size, evidence: "fixture",
+    key: "copilot", group: "copilot", src: "/vector/m29/copilot.webp", size: qaTourSize, evidence: "fixture", sourceLanguage: "en",
     title: text("Una ayuda junto al piloto", "Support beside the pilot", "Une aide aux côtés du pilote"),
     description: text("Checklists, avisos y consultas contextuales acompañan el flujo de trabajo. Las decisiones siguen a cargo del piloto.", "Checklists, advisories and contextual questions accompany the workflow. Decisions remain with the pilot.", "Les listes de vérification, les alertes et les questions contextuelles accompagnent le travail. Les décisions restent celles du pilote."),
     tags: tags(["Copiloto", "Checklists"], ["Copilot", "Checklists"], ["Copilote", "Listes de vérification"]),
   },
   {
     key: "landing", group: "landing", src: "/vector/current/landing.webp", size, evidence: "fixture",
-    title: text("Revisar la llegada", "Review the arrival", "Revoir l’arrivée"),
-    description: text("Análisis de aterrizaje de un vuelo de prueba dentro del informe de sesión. La interfaz sigue en desarrollo y no acredita validación en un vuelo real.", "Landing analysis for a test flight within the session report. The interface remains in development and does not demonstrate real-flight validation.", "Analyse de l’atterrissage d’un vol de test dans le rapport de session. L’interface reste en développement et ne démontre pas une validation en vol réel."),
-    tags: tags(["Revisión de aterrizaje", "En desarrollo"], ["Landing review", "In development"], ["Bilan de l’atterrissage", "En développement"]),
+    title: text("Landing Lab · Analizar el aterrizaje", "Landing Lab · Review the landing", "Landing Lab · Analyser l’atterrissage"),
+    description: text("Vista DIARIO → ATERRIZAJE M27.2, presentada aquí como Landing Lab. Gráficos, compresión relativa y secuencia de contacto de un vuelo de prueba. La validación real por aeronave sigue pendiente.", "The JOURNAL → LANDING M27.2 view, presented here as Landing Lab. Charts, relative compression and contact sequence from a test flight. Real-flight validation by aircraft remains pending.", "La vue JOURNAL → ATTERRISSAGE M27.2, présentée ici sous le nom Landing Lab. Graphiques, compression relative et séquence de contact d’un vol de test. La validation en vol réel par appareil reste à effectuer."),
+    tags: tags(["Diario → Aterrizaje", "Validación real pendiente"], ["Journal → Landing", "Real-flight validation pending"], ["Journal → Atterrissage", "Validation en vol réel à venir"]),
   },
   {
     key: "journal", group: "journal", src: "/vector/current/journal.webp", size, evidence: "fixture",

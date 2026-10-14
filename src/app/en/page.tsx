@@ -1,3 +1,3 @@
 import { Home, marketingMetadata } from "@/components/web4/Marketing";
-export const metadata = marketingMetadata("en", "Copiloto Vector — Your virtual first officer", "A flight operations workspace for Microsoft Flight Simulator. Explore six connected modules and follow development.", "");
+export const metadata = marketingMetadata("en", "Copiloto Vector — Prepare, follow and review your flight", "OFP dispatch, contextual copilot and Landing Lab for Microsoft Flight Simulator. WPF screenshots and transparent development status.", "");
 export default function Page() { return <Home language="en" />; }

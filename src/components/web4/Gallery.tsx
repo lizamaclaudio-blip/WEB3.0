@@ -30,7 +30,9 @@ export function Gallery({ language, initialGroup = "preparation" }: { language: 
     : active.evidence === "offline"
       ? t("Interfaz WPF mostrada fuera de una sesión de vuelo en vivo.", "WPF interface shown outside a live flight session.", "Interface WPF présentée en dehors d’une session de vol en direct.")
       : t("Captura de una sesión de desarrollo. Esta web no recibe telemetría en directo.", "A development-session screenshot. This website receives no live telemetry.", "Capture d’une session de développement. Ce site ne reçoit aucune télémétrie en direct.");
-  const sourceNote = t("Interfaz capturada en español; las leyendas se traducen.", "The captured interface is in Spanish; captions are translated.", "L’interface capturée est en espagnol ; les légendes sont traduites.");
+  const sourceNote = active.sourceLanguage === "en"
+    ? t("Interfaz capturada en inglés; las leyendas se traducen.", "The captured interface is in English; captions are translated.", "L’interface capturée est en anglais ; les légendes sont traduites.")
+    : t("Interfaz capturada en español; las leyendas se traducen.", "The captured interface is in Spanish; captions are translated.", "L’interface capturée est en espagnol ; les légendes sont traduites.");
   const unavailable = t("Esta captura no está disponible. Puedes consultar las demás.", "This screenshot is unavailable. You can browse the others.", "Cette capture n’est pas disponible. Vous pouvez consulter les autres.");
   const previous = t("Captura anterior", "Previous screenshot", "Capture précédente");
   const next = t("Captura siguiente", "Next screenshot", "Capture suivante");
