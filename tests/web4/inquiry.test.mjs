@@ -16,6 +16,7 @@ test('normalizes valid interest; requires explicit consent and rejects spam', ()
  assert.equal(validateInquiry({...valid, website:'bot'}).code, 'SPAM');
  for (const change of [{email:'bad'}, {email:'x\r\n@example.com'}, {email:'a\u0000@example.com'}, {email:'a\u0001@example.com'}, {name:'x'.repeat(101)}, {message:'x'.repeat(2001)}, {locale:'xx'}, {kind:'admin'}, {kind:'contact',message:'short'}]) assert.equal(validateInquiry({...valid,...change}).ok, false);
  assert.equal(validateInquiry({...valid,kind:'contact',message:'A real technical question'}).ok,true);
+ assert.equal(validateInquiry({...valid,locale:'fr'}).value.locale,'fr');
 });
 test('forms fail closed without explicit secure configuration', () => {
  assert.equal(inquiryConfigured({}),false);
@@ -43,6 +44,8 @@ test('storage-confirmed success, limits and failures return honest outcomes; no 
   globalThis.fetch = async (url,options) => { assert.equal(new URL(url).pathname,'/rest/v1/rpc/vector_submit_inquiry'); stored=JSON.parse(options.body); return Response.json('accepted'); };
   assert.equal((await POST(request(valid,{'x-vercel-forwarded-for':'192.0.2.10'}))).status,201);
   assert.equal(stored.p_email,'person@example.com'); assert.match(stored.p_ip_hash,/^[a-f0-9]{64}$/); assert.equal(JSON.stringify(stored).includes('192.0.2.10'),false);
+  assert.equal((await POST(request({...valid,locale:'fr'}))).status,201);
+  assert.equal(stored.p_locale,'fr');
   globalThis.fetch = async () => Response.json('rate_limited'); assert.equal((await POST(request(valid))).status,429);
   globalThis.fetch = async () => Response.json('unexpected'); assert.equal((await POST(request(valid))).status,503);
   globalThis.fetch = async () => {throw new Error('offline');}; assert.equal((await POST(request(valid))).status,503);

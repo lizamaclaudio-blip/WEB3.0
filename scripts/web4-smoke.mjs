@@ -1,7 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 const base = 'http://127.0.0.1:3005';
 const results=[];
-for(const path of ['/','/copiloto-vector','/soporte','/versiones','/privacidad','/condiciones','/en','/en/copiloto-vector','/en/soporte','/en/versiones','/en/privacidad','/en/condiciones','/robots.txt','/sitemap.xml','/icon.svg','/login','/api/auth/me','/api/acars/status']) {
+for(const path of ['/','/copiloto-vector','/soporte','/versiones','/privacidad','/condiciones','/en','/en/copiloto-vector','/en/soporte','/en/versiones','/en/privacidad','/en/condiciones','/fr','/fr/copiloto-vector','/fr/soporte','/fr/versiones','/fr/privacidad','/fr/condiciones','/robots.txt','/sitemap.xml','/icon.svg','/login','/api/auth/me','/api/acars/status']) {
  const response=await fetch(base+path,{redirect:'manual'}); const text=await response.text();
  const ok = path.startsWith('/api/') ? [200,401,403].includes(response.status) : response.status===200;
  results.push({path,status:response.status,ok,bytes:text.length});

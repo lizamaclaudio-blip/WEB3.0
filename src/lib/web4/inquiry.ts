@@ -1,4 +1,4 @@
-export type Inquiry = { kind: "interest" | "contact"; email: string; name: string; message: string; consent: true; locale: "es" | "en" };
+export type Inquiry = { kind: "interest" | "contact"; email: string; name: string; message: string; consent: true; locale: "es" | "en" | "fr" };
 export type InquiryValidation = { ok: true; value: Inquiry } | { ok: false; code: "INVALID_INPUT" | "CONSENT_REQUIRED" | "SPAM" };
 
 export function validateInquiry(input: unknown): InquiryValidation {
@@ -7,7 +7,7 @@ export function validateInquiry(input: unknown): InquiryValidation {
   if (data.website) return { ok: false, code: "SPAM" };
   if (data.consent !== true) return { ok: false, code: "CONSENT_REQUIRED" };
   if (data.kind !== "interest" && data.kind !== "contact") return { ok: false, code: "INVALID_INPUT" };
-  if (data.locale !== "es" && data.locale !== "en") return { ok: false, code: "INVALID_INPUT" };
+  if (data.locale !== "es" && data.locale !== "en" && data.locale !== "fr") return { ok: false, code: "INVALID_INPUT" };
   if (typeof data.email !== "string" || typeof data.name !== "string" || typeof data.message !== "string") return { ok: false, code: "INVALID_INPUT" };
   const email = data.email.trim().toLowerCase();
   const name = data.name.trim();

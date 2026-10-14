@@ -2,25 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Glyph } from "./Glyph";
 
-import { localeHref, type Language } from "./locale";
+import { languageNames, languages, localeHref, localized, unlocalizedPath, type Language } from "./locale";
 
 export function WebHeader({ language = "es" }: { language?: Language }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => { document.documentElement.lang = language; }, [language]);
   function closeMenu() {
     setOpen(false);
     if (open) menuButton.current?.focus();
   }
-  const en = language === "en";
-  const counterpart = en ? pathname.replace(/^\/en/, "") || "/" : `/en${pathname === "/" ? "" : pathname}`;
+  const t = <T,>(es: T, en: T, fr: T) => localized(language, es, en, fr);
   const links = [
     ["Copiloto Vector", "/copiloto-vector"],
-    [en ? "Availability" : "Disponibilidad", "/versiones"],
-    [en ? "Support" : "Soporte", "/soporte"],
+    [t("Disponibilidad", "Availability", "Disponibilité"), "/versiones"],
+    [t("Soporte", "Support", "Assistance"), "/soporte"],
   ];
   return <header className="pw4-header" lang={language} onKeyDown={event => {
     if (open && event.key === "Escape") {
@@ -28,30 +28,32 @@ export function WebHeader({ language = "es" }: { language?: Language }) {
       closeMenu();
     }
   }}>
-    <a className="pw4-skip" href="#main-content">{en ? "Skip to content" : "Saltar al contenido"}</a>
+    <a className="pw4-skip" href="#main-content">{t("Saltar al contenido", "Skip to content", "Aller au contenu")}</a>
     <div className="pw4-wrap pw4-nav">
       <Link href={localeHref(language)} className="pw4-brand" aria-label="Copiloto Vector"><Glyph name="mountain" size={31} /><span>COPILOTO <strong>VECTOR</strong><small>BY PATAGONIA PROJECT</small></span></Link>
-      <button ref={menuButton} className="pw4-menu-button" type="button" aria-expanded={open} aria-controls="pw4-navigation" onClick={() => setOpen(!open)}>{open ? (en ? "Close" : "Cerrar") : (en ? "Menu" : "Menú")} <span aria-hidden="true">{open ? "−" : "+"}</span></button>
-      <nav id="pw4-navigation" className={open ? "pw4-links is-open" : "pw4-links"} aria-label={en ? "Main navigation" : "Navegación principal"}>
+      <button ref={menuButton} className="pw4-menu-button" type="button" aria-expanded={open} aria-controls="pw4-navigation" onClick={() => setOpen(!open)}>{open ? t("Cerrar", "Close", "Fermer") : t("Menú", "Menu", "Menu")} <span aria-hidden="true">{open ? "−" : "+"}</span></button>
+      <nav id="pw4-navigation" className={open ? "pw4-links is-open" : "pw4-links"} aria-label={t("Navegación principal", "Main navigation", "Navigation principale")}>
         {links.map(([label, href]) => <Link key={href} href={localeHref(language, href)} aria-current={pathname === localeHref(language, href) ? "page" : undefined} onClick={closeMenu}>{label}</Link>)}
-        <Link href={counterpart} className="pw4-language" hrefLang={en ? "es" : "en"} onClick={closeMenu}>{en ? "ES" : "EN"}<span aria-hidden="true"> ↗</span></Link>
-        <Link href={localeHref(language, "/soporte#novedades")} className="pw4-pilot" onClick={closeMenu}>{en ? "Stay informed" : "Recibir novedades"}<Glyph name="arrow" size={17} /></Link>
+        <span className="pw4-languages" role="group" aria-label={t("Idioma", "Language", "Langue")}>
+          {languages.map(item => <Link key={item} href={localeHref(item, unlocalizedPath(pathname))} className="pw4-language" hrefLang={item} lang={item} title={languageNames[item]} aria-label={languageNames[item]} aria-current={language === item ? "page" : undefined} onClick={closeMenu}>{item.toUpperCase()}</Link>)}
+        </span>
+        <Link href={localeHref(language, "/soporte#novedades")} className="pw4-pilot" onClick={closeMenu}>{t("Recibir novedades", "Stay informed", "Recevoir les actualités")}<Glyph name="arrow" size={17} /></Link>
       </nav>
     </div>
   </header>;
 }
 
 export function WebFooter({ language = "es" }: { language?: Language }) {
-  const en = language === "en";
+  const t = <T,>(es: T, en: T, fr: T) => localized(language, es, en, fr);
   return <footer className="pw4-footer" lang={language}><div className="pw4-wrap">
-    <div className="pw4-footer-top"><Link href={localeHref(language)} className="pw4-brand"><Glyph name="mountain" size={35} /><span>COPILOTO <strong>VECTOR</strong><small>{en ? "FROM THE SOUTH. TOWARDS WHAT'S NEXT." : "DESDE EL SUR. HACIA LO QUE VIENE."}</small></span></Link><p>{en ? "A passion for flight. A new way to accompany it." : "Una pasión por volar. Una nueva forma de acompañarte."}</p></div>
+    <div className="pw4-footer-top"><Link href={localeHref(language)} className="pw4-brand"><Glyph name="mountain" size={35} /><span>COPILOTO <strong>VECTOR</strong><small>{t("DESDE EL SUR. HACIA LO QUE VIENE.", "FROM THE SOUTH. TOWARDS WHAT'S NEXT.", "DEPUIS LE SUD. VERS L’AVENIR.")}</small></span></Link><p>{t("Una pasión por volar. Una nueva forma de acompañarte.", "A passion for flight. A new way to accompany it.", "La passion du vol. Une nouvelle façon de vous accompagner.")}</p></div>
     <div className="pw4-footer-links">
-      <div><h3>COPILOTO VECTOR</h3><Link href={localeHref(language, "/copiloto-vector")}>{en ? "Explore the product" : "Conoce el producto"}</Link><Link href={localeHref(language, "/copiloto-vector#modulos")}>{en ? "Six modules" : "Seis módulos"}</Link><Link href={localeHref(language, "/versiones")}>{en ? "Versions & availability" : "Versiones y disponibilidad"}</Link></div>
-      <div><h3>{en ? "EXPLORE" : "EXPLORAR"}</h3><Link href={localeHref(language, "/copiloto-vector#galeria")}>{en ? "Real screenshots" : "Capturas reales"}</Link><Link href={localeHref(language, "/copiloto-vector#compatibilidad")}>{en ? "Compatibility" : "Compatibilidad"}</Link><Link href={localeHref(language, "/copiloto-vector#preguntas")}>{en ? "Frequently asked questions" : "Preguntas frecuentes"}</Link></div>
-      <div><h3>{en ? "INFORMATION" : "INFORMACIÓN"}</h3><Link href={localeHref(language, "/soporte")}>{en ? "Support & contact" : "Soporte y contacto"}</Link><Link href={localeHref(language, "/privacidad")}>{en ? "Privacy" : "Privacidad"}</Link><Link href={localeHref(language, "/condiciones")}>{en ? "Terms" : "Condiciones"}</Link></div>
-      <div className="pw4-footer-state"><span className="pw4-dot" />{en ? "PRODUCT IN DEVELOPMENT" : "PRODUCTO EN DESARROLLO"}<p>{en ? "Flight simulation software. Not for real-world flight operations." : "Software para simulación de vuelo. No apto para operaciones aéreas reales."}</p></div>
+      <div><h3>COPILOTO VECTOR</h3><Link href={localeHref(language, "/copiloto-vector")}>{t("Conoce el producto", "Explore the product", "Découvrir le produit")}</Link><Link href={localeHref(language, "/copiloto-vector#modulos")}>{t("Seis módulos", "Six modules", "Six modules")}</Link><Link href={localeHref(language, "/versiones")}>{t("Versiones y disponibilidad", "Versions & availability", "Versions et disponibilité")}</Link></div>
+      <div><h3>{t("EXPLORAR", "EXPLORE", "EXPLORER")}</h3><Link href={localeHref(language, "/copiloto-vector#galeria")}>{t("Capturas reales", "Real screenshots", "Captures réelles")}</Link><Link href={localeHref(language, "/copiloto-vector#compatibilidad")}>{t("Compatibilidad", "Compatibility", "Compatibilité")}</Link><Link href={localeHref(language, "/copiloto-vector#preguntas")}>{t("Preguntas frecuentes", "Frequently asked questions", "Questions fréquentes")}</Link></div>
+      <div><h3>{t("INFORMACIÓN", "INFORMATION", "INFORMATIONS")}</h3><Link href={localeHref(language, "/soporte")}>{t("Soporte y contacto", "Support & contact", "Assistance et contact")}</Link><Link href={localeHref(language, "/privacidad")}>{t("Privacidad", "Privacy", "Confidentialité")}</Link><Link href={localeHref(language, "/condiciones")}>{t("Condiciones", "Terms", "Conditions d’utilisation")}</Link></div>
+      <div className="pw4-footer-state"><span className="pw4-dot" />{t("PRODUCTO EN DESARROLLO", "PRODUCT IN DEVELOPMENT", "PRODUIT EN DÉVELOPPEMENT")}<p>{t("Software para simulación de vuelo. No apto para operaciones aéreas reales.", "Flight simulation software. Not for real-world flight operations.", "Logiciel de simulation de vol. Non destiné aux opérations aériennes réelles.")}</p></div>
     </div>
-    <div className="pw4-colophon"><span>© {new Date().getFullYear()} Patagonia Wings</span><span>DESIGNED FOR THE JOURNEY · 41° S / 73° W</span></div>
+    <div className="pw4-colophon"><span>© {new Date().getFullYear()} Patagonia Wings</span><span>{t("DISEÑADO PARA EL VIAJE", "DESIGNED FOR THE JOURNEY", "CONÇU POUR LE VOYAGE")} · 41° S / 73° W</span></div>
   </div></footer>;
 }
 

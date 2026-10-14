@@ -1,7 +1,7 @@
 # Web 4.0 verification — 2026-10-13
 
 ## Delivered scope
-Vector-only public site, bilingual ES/EN: Home, product, availability, support,
+Vector-only public site, trilingual ES/EN/FR: Home, product, availability, support,
 privacy and terms. Six-module keyboard-accessible gallery with a native modal,
 real WPF captures and explicit fixture/illustration labels. Original SVG geometry,
 owner-supplied WebP assets, responsive navigation, reduced-motion support,
@@ -16,18 +16,19 @@ No production deployment, production branch change, payment or database migratio
 - ESLint for all new/modified Web4 TS/TSX/test/script files: passes.
 - Global `npm run lint`: fails on 7 pre-existing `no-explicit-any` errors in
   `src/app/api/simbrief/ofp/latest/route.ts`; 39 legacy warnings. Left unchanged.
-- `npm run test:web4`: 4 tests pass, covering validation, consent, spam,
+- `npm run test:web4`: 6 tests pass, covering validation, consent, spam,
   payload limits, internal/public Host distinction, cross-origin denial,
-  storage-confirmed responses, failure handling and hashed identifiers.
+  storage-confirmed responses, failure handling, hashed identifiers, French
+  inquiries, locale navigation and reciprocal sitemap alternates for 18 pages.
   Storage is mocked in these tests; this is not a live Supabase certification.
 - Existing read-only validators: dispatch time calculation, SimBrief flight
   number prefill and ACARS finalize pass.
 - Existing aircraft capacity validator: cannot run directly in Node because its
   `@/lib` import alias is unresolved. DB-writing tests were not executed.
-- `npm run smoke:web4`: 19 checks pass. Twelve public pages and metadata respond
+- `npm run smoke:web4`: 25 checks pass. Eighteen public pages and metadata respond
   200; preserved auth/ACARS reject an unauthenticated request with 401. New inquiry
   endpoint returns 503 when storage is not configured, as required.
-- Browser: all 12 public routes checked at 1920 and 375 px; Home/product/support
+- Initial ES/EN browser review: all 12 public routes checked at 1920 and 375 px; Home/product/support
   also checked at 1440, 768 and 390 px. No horizontal overflow or broken loaded
   images. Mobile menu/language navigation, gallery tabs/arrow-key navigation,
   modal/Escape and contact type switching verified. No console warnings/errors
@@ -44,11 +45,11 @@ Deployment `dpl_DqpFst1owKXqa8kKeu1KZiF8zRPD` was confirmed READY with target=nu
 (Preview), built from commit `81a0b7965b2e58d7aa96eddac957ae7ff5928be1`:
 https://web-30-9gtyhi4h8-lizamaclaudio-blips-projects.vercel.app
 Production/domain/DNS and protection are unchanged.
-Remote browser verification is blocked by automatic approval review: it rejected
-both the authentication-bypass fetch tool and navigation to Vercel authentication.
-No bypass was used. Local browser verification and Vercel build status are separate.
-The user authorized review and chose to complete the Google/Vercel login manually.
-That sign-in is left untouched while local verification continues.
+Earlier automatic approval review rejected both the authentication-bypass fetch
+tool and navigation to Vercel authentication. No bypass was used. The user chose
+to complete Google/Vercel login manually; the existing Preview is now accessible
+in their browser. Account permissions and production settings were not changed.
+Deployment state and actual browser verification are recorded separately.
 
 ## Follow-up local review
 - Reproduced and fixed keyboard focus loss when activating the current page in
@@ -60,6 +61,21 @@ That sign-in is left untouched while local verification continues.
 - Browser checks at 390 px confirm current-page activation and Escape both close
   the menu with focus on its button, no overflow and no console warnings/errors.
   Screenshot: `artifacts/web4-review/mobile-keyboard-review.jpg`.
+
+## Three-language rollout
+- Spanish, English and French selected explicitly by the user. All six public
+  page types, navigation, footer, gallery controls, captions, forms and legal
+  text have French translations. Original WPF screenshots remain unchanged.
+- ES / EN / FR links keep the current public page; French uses `/fr` routes.
+  Server-rendered content sections carry their language, and the header syncs
+  the document language after hydration and client navigation.
+- Canonical URLs, three-language hreflang, `fr_FR` Open Graph and sitemap are
+  updated. Preview indexing remains disabled. The inactive inquiry service and
+  unapplied SQL draft accept French; no live database migration was executed.
+- Build/TypeScript, targeted ESLint, 6 tests and 25 local HTTP checks pass.
+  All six French pages also pass browser content/metadata/overflow/image checks
+  at 1280 px. Further Preview responsive evidence and captures are saved in
+  `artifacts/web4-review/` alongside `french-local-checks.json`.
 
 Supabase env inspection returned 403 and no management connector was available.
 New API/RPC adapter and isolated SQL draft are prepared, but live persistence,

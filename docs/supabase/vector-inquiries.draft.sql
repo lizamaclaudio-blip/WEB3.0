@@ -8,7 +8,7 @@ create table public.vector_inquiries (
   email text not null check (length(email) between 3 and 254),
   name text not null default '' check (length(name) <= 100),
   message text not null default '' check (length(message) <= 2000),
-  locale text not null check (locale in ('es','en')),
+  locale text not null check (locale in ('es','en','fr')),
   consent_version text not null,
   created_at timestamptz not null default now()
 );
@@ -27,7 +27,7 @@ create function public.vector_submit_inquiry(
 ) returns text language plpgsql security definer set search_path = pg_catalog, public as $$
 declare k text; n integer; w timestamptz := date_trunc('hour', now());
 begin
- if p_kind not in ('interest','contact') or p_locale not in ('es','en')
+ if p_kind not in ('interest','contact') or p_locale not in ('es','en','fr')
  or length(p_email) > 254 or p_email !~ '^[^[:space:]@<>]+@[^[:space:]@<>]+\.[^[:space:]@<>]+$'
  or length(p_name) > 100 or length(p_message) > 2000
  or (p_kind = 'contact' and length(p_message) < 10)

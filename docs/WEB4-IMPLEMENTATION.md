@@ -19,7 +19,7 @@ Vercel connector can read the project and deployment, but listing environment va
 
 ## Design system
 
-Petroleum blue `#071A29`, surfaces `#0D273A`, jade `#12D8B1`, cyan `#29C8EB`, text `#EAF5FC`, restrained amber `#F4BD59`. Cinematic aircraft hero, editorial typography, fine instrument markings, generous spacing, real product captures and original SVG navigation graphics. Marketing CSS is namespaced to avoid changing operational dashboards. CSS transitions respect reduced motion. Public marketing supports Spanish and English; pilot services retain their existing language and contracts.
+Petroleum blue `#071A29`, surfaces `#0D273A`, jade `#12D8B1`, cyan `#29C8EB`, text `#EAF5FC`, restrained amber `#F4BD59`. Cinematic aircraft hero, editorial typography, fine instrument markings, generous spacing, real product captures and original SVG navigation graphics. Marketing CSS is namespaced to avoid changing operational dashboards. CSS transitions respect reduced motion. Public marketing supports Spanish, English and French; pilot services retain their existing language and contracts.
 
 ## Commercial boundaries
 
@@ -27,6 +27,6 @@ Product is a development beta, not sold or licensed by this website. No purchase
 
 ## Revised public scope
 The owner subsequently paused the virtual airline and requested Vector only.
-The public Home/header/footer and sitemap now expose only Vector pages in ES/EN.
+The public Home/header/footer and sitemap now expose only Vector pages in ES/EN/FR.
 Legacy pilot/auth/ACARS routes and data are preserved, unlinked from public product
 navigation. No production deployment or shutdown has been performed.
