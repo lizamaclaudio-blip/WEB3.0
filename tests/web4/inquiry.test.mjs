@@ -14,6 +14,7 @@ const storageModule = await loadModule('../../src/lib/web4/inquiry-storage.ts', 
 const newsletterModule = await loadModule('../../src/lib/web4/newsletter.ts', {'./inquiry-storage':storageModule});
 const references = {'@/lib/web4/inquiry':inquiryModule,'@/lib/web4/inquiry-http':httpModule,'@/lib/web4/inquiry-storage':storageModule,'@/lib/web4/newsletter':newsletterModule};
 const { validateInquiry, inquiryConfigured, newsletterConsentVersion } = await import(inquiryModule);
+const { inquiryRpc } = await import(storageModule);
 const { hashUnsubscribeToken, issueUnsubscribeToken, validUnsubscribeToken } = await import(newsletterModule);
 const { POST } = await import(await loadModule('../../src/app/api/vector/inquiry/route.ts', references));
 const { POST: unsubscribe } = await import(await loadModule('../../src/app/api/vector/unsubscribe/route.ts', references));
@@ -45,7 +46,37 @@ test('forms fail closed without explicit secure configuration', () => {
  assert.equal(inquiryConfigured({VECTOR_FORMS_ENABLED:'true', SUPABASE_URL:'https://example.test',SUPABASE_SERVICE_ROLE_KEY:'test',VECTOR_FORM_HASH_SECRET:'short'}),false);
  const configured = {VECTOR_FORMS_ENABLED:'true',SUPABASE_URL:'https://storage.example.test',SUPABASE_SERVICE_ROLE_KEY:'test',VECTOR_FORM_HASH_SECRET:'test-only-32-character-hmac-secret'};
  assert.equal(inquiryConfigured(configured),true);
+ assert.equal(inquiryConfigured({...configured,SUPABASE_SERVICE_ROLE_KEY:undefined,SUPABASE_SECRET_KEY:'sb_secret_test-only-key'}),true);
+ assert.equal(inquiryConfigured({...configured,SUPABASE_SECRET_KEY:''}),true);
+ assert.equal(inquiryConfigured({...configured,SUPABASE_SERVICE_ROLE_KEY:undefined,SUPABASE_SECRET_KEY:undefined}),false);
  for (const url of ['not-a-url','http://storage.example.test','https://user:secret@storage.example.test','https://storage.example.test/path','https://storage.example.test/?secret=1']) assert.equal(inquiryConfigured({...configured,SUPABASE_URL:url}),false);
+});
+test('RPC uses opaque secret API keys without bearer auth and preserves legacy JWT headers', async () => {
+ const originalFetch = globalThis.fetch;
+ const configured = {VECTOR_FORMS_ENABLED:'true',SUPABASE_URL:'https://storage.example.test',VECTOR_FORM_HASH_SECRET:'test-only-32-character-hmac-secret'};
+ const legacy = 'eyJhbGciOiJIUzI1NiJ9.test-only.signature';
+ const modern = 'sb_secret_test-only-key';
+ try {
+  for (const [keys,key,bearer] of [
+   [{SUPABASE_SERVICE_ROLE_KEY:legacy},legacy,true],
+   [{SUPABASE_SECRET_KEY:modern},modern,false],
+   [{SUPABASE_SECRET_KEY:modern,SUPABASE_SERVICE_ROLE_KEY:legacy},modern,false],
+   [{SUPABASE_SECRET_KEY:'',SUPABASE_SERVICE_ROLE_KEY:legacy},legacy,true],
+   [{SUPABASE_SERVICE_ROLE_KEY:modern},modern,false],
+  ]) {
+   globalThis.fetch = async (url,options) => {
+    assert.equal(new URL(url).pathname,'/rest/v1/rpc/vector_submit_inquiry');
+    const headers = new Headers(options.headers);
+    assert.equal(headers.get('apikey'),key);
+    assert.equal(headers.get('authorization'),bearer ? `Bearer ${key}` : null);
+    assert.equal(headers.get('content-type'),'application/json');
+    assert.equal(options.cache,'no-store');
+    assert.deepEqual(JSON.parse(options.body),{p_kind:'interest'});
+    return Response.json('accepted');
+   };
+   assert.equal(await inquiryRpc('vector_submit_inquiry',{p_kind:'interest'},{...configured,...keys}),'accepted');
+  }
+ } finally {globalThis.fetch=originalFetch;}
 });
 test('API rejects cross-origin, malformed, overlarge and unconsented requests before storage', async () => {
  assert.equal((await POST(request(valid,{origin:'https://attacker.test'}))).status,403);

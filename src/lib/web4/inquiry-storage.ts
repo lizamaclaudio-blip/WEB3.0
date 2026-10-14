@@ -15,9 +15,13 @@ export function inquiryAddressHash(request: Request, env: InquiryEnvironment = p
 export async function inquiryRpc(name: InquiryRpcName, parameters: Record<string, unknown>, env: InquiryEnvironment = process.env): Promise<unknown> {
   if (!inquiryConfigured(env)) throw new Error("Inquiry storage is unavailable");
   const endpoint = new URL(`/rest/v1/rpc/${name}`, env.SUPABASE_URL!);
+  const serverKey = (env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY)!;
+  const headers: Record<string, string> = { "Content-Type": "application/json", apikey: serverKey };
+  // Modern secret keys are opaque API keys, not bearer JWTs.
+  if (!serverKey.startsWith("sb_secret_")) headers.Authorization = `Bearer ${serverKey}`;
   const response = await fetch(endpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/json", apikey: env.SUPABASE_SERVICE_ROLE_KEY!, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY!}` },
+    headers,
     body: JSON.stringify(parameters), signal: AbortSignal.timeout(8000), cache: "no-store",
   });
   if (!response.ok) throw new Error("Inquiry storage rejected the request");

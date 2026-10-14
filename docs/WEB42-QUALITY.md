@@ -41,6 +41,9 @@ relativa y la validación real por aeronave sigue pendiente.
 
 ## Formularios
 
+Estado histórico de la revisión inicial. La conexión, instalación y pruebas
+reales posteriores del 14/10/2026 se documentan en [WEB4-FORMS.md](WEB4-FORMS.md).
+
 Durante esta revisión el formulario mantiene el bloqueo seguro: no hay acceso
 Supabase verificado en esta sesión. La API de configuración de Vercel devuelve
 403; su panel web sí es accesible. Las pruebas de almacenamiento son simuladas,

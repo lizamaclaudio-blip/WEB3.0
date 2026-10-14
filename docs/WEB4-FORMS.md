@@ -1,21 +1,32 @@
 # Vector inquiry service
 
 The three-language form, bounded JSON API and Supabase RPC adapter are implemented.
-Real persistence is **not verified or activated**. Previously, Vercel env access
-returned 403 and no Supabase management connection was available. The draft SQL
-remains outside automatic migrations and never runs during a build or deployment.
-No production migration, environment change or email send has been performed.
+On 2026-10-14 the Supabase connection became available. The initial isolated
+schema was applied to the user-specified project `donguccheqjqyzudowuy` under
+migration `vector_private_inquiry_service`, after confirming all target names
+were absent. Real SQL persistence, consent, deduplication, limits and unsubscribe
+tests passed inside a rolled-back transaction. Existing airline tables were
+preserved. The initial SQL never runs during a build or deployment.
 
-Activation requires a verified operational privacy/support contact, an agreed
+Vercel configuration is limited to Preview branch `codex/patagonia-wings-web4`.
+The user entered a dedicated server key directly into Vercel; it was not read,
+printed or committed. The browser-to-API-to-row check is recorded in the delivery
+evidence after the new Preview build. No production website release, production
+environment variable change, DNS change, payment activation or email send.
+
+Public production collection requires a verified operational privacy/support contact, an agreed
 retention/deletion policy, target-project schema/RLS/grants audit and successful
 non-production persistence tests. A production migration requires the user's
 specific final authorization. Apply the draft only to a confirmed empty test
 installation first; if tables/functions already exist, review a separate upgrade
 migration instead of dropping data or blindly rerunning this create-only script.
-Then provision the server-only preview variables:
-`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
+Server-only Preview variables:
+`SUPABASE_URL`, `SUPABASE_SECRET_KEY` (legacy `SUPABASE_SERVICE_ROLE_KEY` fallback),
 `VECTOR_FORM_HASH_SECRET` (random, at least 32 characters),
 `VECTOR_FORMS_ENABLED=true`. Never reuse production secrets in a test environment.
+Modern `sb_secret_` keys are sent only in `apikey`; legacy JWT keys retain their
+Bearer header. Neither key is exposed through a `NEXT_PUBLIC_` variable.
+Preview forms identify themselves as tests and request fictional data.
 No new production environment variables have been changed.
 
 `POST /api/vector/inquiry` validates same-host Origin, exact JSON content type,
@@ -53,12 +64,28 @@ its remaining tokens. Reused/expired tokens return 410, unconfigured storage 503
 and a separate durable 20/hour IP bucket returns 429. No email address is accepted
 by the public opt-out API, preventing email-based enumeration or cancellation.
 
-Before activation, verify anon/authenticated cannot read/write all four tables or
-execute any of the three RPCs. Verify server submission, concurrent limits,
+Verified: anon/authenticated have no effective SELECT/INSERT/UPDATE/DELETE
+privilege on the four RLS-enabled tables and cannot execute any of the three
+RPCs; service_role can execute them. No public table policies are installed,
+intentionally denying direct client access. Security advisors report this
+deny-by-default design as informational, not an exposure requiring a public policy.
+Verify server submission, concurrent limits,
 deduplication, pending-only opt-in, token issuance only for an independently
 verified active test record, one-time/expired tokens, failures and transactional
-rollback. Local tests use mocked HTTP storage and do **not** establish these real
-database guarantees. No database SQL execution or RLS integration test occurred.
+rollback. `docs/supabase/vector-inquiries.integration.sql` now verifies the actual
+database RPCs: contact persistence without implicit opt-in, consent timestamps,
+pending-only deduplication, three-per-email/five-per-IP limits, validation with
+no side effects, token issuance restrictions, expired/single-use tokens and
+the unsubscribe limit. It returned `integration_outcome: passed`; subsequent
+counts of all four tables were zero. Local HTTP mocks remain separate evidence.
+
+Pre-existing security findings are outside this additive forms migration:
+`pw3_settings` and `pw3_airline_hubs` lack RLS; `pw_v_airline_hubs` and
+`pw_v_public_stats` use definer views. Existing mutable function search paths and
+the public `unaccent` extension also remain. Review their original access model
+before any remediation; enabling RLS blindly could break the retained airline.
+See [Supabase RLS remediation](https://supabase.com/docs/guides/database/database-linter?lint=0013_rls_disabled_in_public)
+and [view remediation](https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view).
 
 There is no public admin UI. An authorized operator must verify the requester
 before access/correction/deletion. Resolve their normalized email to the existing

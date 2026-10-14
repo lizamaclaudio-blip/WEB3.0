@@ -21,7 +21,8 @@ export function validateInquiry(input: unknown): InquiryValidation {
 }
 
 export function inquiryConfigured(env: Record<string, string | undefined>): boolean {
-  if (env.VECTOR_FORMS_ENABLED !== "true" || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY || !env.VECTOR_FORM_HASH_SECRET || env.VECTOR_FORM_HASH_SECRET.length < 32) return false;
+  const serverKey = env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY;
+  if (env.VECTOR_FORMS_ENABLED !== "true" || !env.SUPABASE_URL || !serverKey || !env.VECTOR_FORM_HASH_SECRET || env.VECTOR_FORM_HASH_SECRET.length < 32) return false;
   try {
     const url = new URL(env.SUPABASE_URL);
     return url.protocol === "https:" && !url.username && !url.password && url.pathname === "/" && !url.search && !url.hash;

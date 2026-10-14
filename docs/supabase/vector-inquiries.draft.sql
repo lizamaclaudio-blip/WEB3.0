@@ -1,5 +1,5 @@
--- DRAFT: do not apply before auditing the target project's existing RLS, grants,
--- schema, verified operational contact and retention process. Never run at build.
+-- Initial create-only schema, applied on 2026-10-14 after the target-name audit.
+-- Never rerun on an existing installation or automatically during a build.
 -- Additive, isolated from all existing pilot/auth/ACARS tables.
 begin;
 create table public.vector_inquiries (
@@ -79,7 +79,7 @@ begin
    on conflict(bucket_key) do update set
     attempts = case when vector_inquiry_limits.window_start < w then 1 else vector_inquiry_limits.attempts+1 end,
     window_start = w returning attempts into n;
-   if n > case when left(k,3) = 'ip:' then 5 else 3 end then return 'rate_limited'; end if;
+   if n > (case when left(k,3) = 'ip:' then 5 else 3 end) then return 'rate_limited'; end if;
  end loop;
  delete from public.vector_inquiry_limits where window_start < now() - interval '24 hours';
  insert into public.vector_inquiries(kind,email,email_hash,name,message,locale,consent_version,
