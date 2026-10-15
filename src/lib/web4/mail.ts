@@ -1,3 +1,4 @@
+import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { inquiryConfigured } from "./inquiry";
 import type { InquiryEnvironment } from "./inquiry-storage";

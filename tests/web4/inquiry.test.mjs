@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import ts from 'typescript';
 const dataModule = source => 'data:text/javascript;base64,' + Buffer.from(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText).toString('base64');
 async function loadModule(path, replacements = {}) {
- let source = await readFile(new URL(path, import.meta.url), 'utf8');
+ let source = (await readFile(new URL(path, import.meta.url), 'utf8')).replaceAll('import "server-only";', '');
  for (const [reference, replacement] of Object.entries(replacements)) source = source.replaceAll(`"${reference}"`, `"${replacement}"`);
  return dataModule(source);
 }

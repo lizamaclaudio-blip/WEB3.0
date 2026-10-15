@@ -1,4 +1,5 @@
 import type { Language } from "./locale";
+import { developmentMilestones, developmentStatus } from "./development-milestones";
 
 export type FeatureStatus = "verified" | "validation" | "development" | "planned";
 export type Copy = Record<Language, string>;
@@ -10,6 +11,16 @@ export const statusLabels: Record<FeatureStatus, Copy> = {
   planned: copy("Planificada", "Planned", "Prévu"),
 };
 export const capabilities: { id: string; status: FeatureStatus; title: Copy; detail: Copy }[] = [
+  ...developmentMilestones.map(area => ({
+    id: area.id,
+    status: area.status === "future" ? "planned" as const : "validation" as const,
+    title: copy(area.name, area.name, area.name),
+    detail: copy(
+      `${area.milestone} · ${area.status === "future" ? developmentStatus.future.es : developmentStatus.implementedQa.es}. ${area.detail.es} ${area.limitation.es}`,
+      `${area.milestone} · ${area.status === "future" ? developmentStatus.future.en : developmentStatus.implementedQa.en}. ${area.detail.en} ${area.limitation.en}`,
+      `${area.milestone} · ${area.status === "future" ? developmentStatus.future.fr : developmentStatus.implementedQa.fr}. ${area.detail.fr} ${area.limitation.fr}`,
+    ),
+  })),
   { id: "session", status: "validation", title: copy("Inicio y continuidad del vuelo", "Flight start and continuity", "Début et continuité du vol"), detail: copy("M28 coordina el inicio de sesión y conserva la operación durante reconexiones. La asociación del OFP considera posición y antigüedad; no compara todavía la aeronave del plan. Verificado en QA aislado, pendiente de validación real completa.", "M28 coordinates session start and preserves the operation through reconnections. OFP association considers position and age; it does not yet compare the planned aircraft. Verified in isolated QA; complete real-flight validation is pending.", "M28 coordonne le début de session et préserve l’opération lors des reconnexions. L’association de l’OFP tient compte de la position et de son ancienneté, sans encore comparer l’aéronef prévu. Vérifié en QA isolée ; validation complète en vol réel à venir.") },
   { id: "instruments", status: "verified", title: copy("Monitor e instrumentos", "Monitor and instruments", "Suivi et instruments"), detail: copy("Horizonte, IAS, altitud, HSI, motores y sistemas observados mediante SimConnect. Verificado en sesiones locales del King Air 350.", "Attitude, airspeed, altitude, HSI, engines and systems observed through SimConnect. Verified in local King Air 350 sessions.", "Horizon, vitesse, altitude, HSI, moteurs et systèmes observés via SimConnect. Vérifiés lors de sessions locales sur King Air 350.") },
   { id: "fuel", status: "verified", title: copy("Combustible por estanque", "Fuel by tank", "Carburant par réservoir"), detail: copy("Lecturas reales y distinción principal/auxiliar verificadas en la configuración observada del B350; no se presume compatibilidad universal.", "Real readings and main/auxiliary identification verified on the observed B350 configuration; universal support is not assumed.", "Mesures réelles et identification principal/auxiliaire vérifiées sur la configuration B350 observée, sans présumer une compatibilité universelle.") },

@@ -5,7 +5,7 @@ import ts from 'typescript';
 
 const dataModule = source => 'data:text/javascript;base64,' + Buffer.from(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText).toString('base64');
 async function loadModule(path, replacements = {}) {
-  let source = await readFile(new URL(path, import.meta.url), 'utf8');
+  let source = (await readFile(new URL(path, import.meta.url), 'utf8')).replaceAll('import "server-only";', '');
   for (const [reference, replacement] of Object.entries(replacements)) source = source.replaceAll(`"${reference}"`, `"${replacement}"`);
   return dataModule(source);
 }
@@ -34,12 +34,16 @@ const confirmModule = await loadModule('../../src/app/api/vector/newsletter/conf
 const workerModule = await loadModule('../../src/app/api/vector/mail/dispatch/route.ts', {
   '@/lib/web4/mail-dispatch': dispatchModule, '@/lib/web4/mail': mailModule, '@/lib/web4/inquiry-http': httpModule,
 });
+const verifyModule = await loadModule('../../src/app/api/vector/mail/verify/route.ts', {
+  '@/lib/web4/mail-smtp': smtpModule, '@/lib/web4/mail': mailModule, '@/lib/web4/inquiry-http': httpModule,
+});
 const { mailConfiguration, mailRecipientAllowed, mailActionToken, mailActionLink, mailWorkerAuthorized } = await import(mailModule);
 const { renderMail } = await import(templatesModule);
-const { smtpFailure, sendSmtp } = await import(smtpModule);
+const { smtpFailure, sendSmtp, verifySmtp } = await import(smtpModule);
 const { dispatchMail } = await import(dispatchModule);
 const { POST: confirm } = await import(confirmModule);
 const { POST: worker } = await import(workerModule);
+const { POST: verifyWorker } = await import(verifyModule);
 const { hashUnsubscribeToken } = await import(newsletterModule);
 const { subscribeNewsletterFragment } = await import(await loadModule('../../src/lib/web4/newsletter-fragment.ts'));
 const env = {
@@ -170,16 +174,83 @@ test('SMTP requires verified TLS, restricts envelope to one recipient and does n
   } finally { delete globalThis.__vectorSmtpTest; }
 });
 
+test('rotation preflight verifies TLS and authentication without sending mail or returning provider details', async () => {
+  let closed = 0; let verified = 0;
+  globalThis.__vectorSmtpTest = options => {
+    assert.equal(options.secure, options.port === 465); assert.equal(options.requireTLS, true);
+    assert.equal(options.tls.rejectUnauthorized, true); assert.equal(options.tls.minVersion, 'TLSv1.2');
+    assert.equal(options.logger, false); assert.equal(options.debug, false);
+    return { verify: async () => { verified++; return true; }, sendMail: () => { throw new Error('Preflight must never send'); }, close: () => { closed++; } };
+  };
+  try {
+    for (const port of [465, 587]) assert.deepEqual(await verifySmtp({ ...configuration, port }), { verified: true, errorCode: null });
+    assert.equal(verified, 2); assert.equal(closed, 2);
+    for (const [error, errorCode] of [
+      [{ code: 'EAUTH', message: 'private-password' }, 'SMTP_AUTHENTICATION'],
+      [{ code: 'CERT_HAS_EXPIRED', message: 'private-smtp-host' }, 'SMTP_TLS_VERIFICATION'],
+      [{ code: 'ERR_TLS_CERT_ALTNAME_INVALID' }, 'SMTP_TLS_VERIFICATION'],
+      [{ code: 'ETIMEDOUT' }, 'SMTP_VERIFICATION_TIMEOUT'],
+      [{ code: 'UNEXPECTED_PRIVATE_DETAIL' }, 'SMTP_VERIFICATION_UNAVAILABLE'],
+    ]) {
+      globalThis.__vectorSmtpTest = () => ({ verify: async () => { throw error; }, close: () => { closed++; } });
+      const result = await verifySmtp(configuration);
+      assert.deepEqual(result, { verified: false, errorCode }); assert.equal(JSON.stringify(result).includes('private'), false);
+      assert.equal(JSON.stringify(result).includes('UNEXPECTED_PRIVATE_DETAIL'), false);
+    }
+  } finally { delete globalThis.__vectorSmtpTest; }
+});
+
+test('SMTP preflight and delivery stop at the hard deadline and close their transports', async context => {
+  context.mock.timers.enable({ apis: ['setTimeout'] });
+  let closed = 0; let sent = 0;
+  globalThis.__vectorSmtpTest = () => ({ verify: () => new Promise(() => {}), sendMail: () => { sent++; return new Promise(() => {}); }, close: () => { closed++; } });
+  try {
+    const pending = verifySmtp(configuration);
+    context.mock.timers.tick(12000);
+    assert.deepEqual(await pending, { verified: false, errorCode: 'SMTP_VERIFICATION_TIMEOUT' });
+    assert.equal(sent, 0); assert.ok(closed >= 1);
+    const delivery = sendSmtp(renderMail(job, configuration), configuration);
+    context.mock.timers.tick(12000);
+    assert.deepEqual(await delivery, { result: 'delivery_unknown', providerId: null, errorCode: 'SMTP_DELIVERY_UNKNOWN' });
+    assert.equal(sent, 1); assert.ok(closed >= 2);
+  } finally { delete globalThis.__vectorSmtpTest; context.mock.timers.reset(); }
+});
+
+test('private SMTP verification requires worker authorization and works while delivery stays disabled', async () => {
+  const saved = Object.fromEntries(Object.keys(env).map(key => [key, process.env[key]]));
+  const originalFetch = globalThis.fetch; let transports = 0;
+  Object.assign(process.env, env, { VECTOR_MAIL_ENABLED: 'false' });
+  globalThis.fetch = async () => { throw new Error('Preflight must not read or mutate the queue'); };
+  globalThis.__vectorSmtpTest = () => { transports++; return { verify: async () => true, sendMail: () => { throw new Error('Preflight must not send'); }, close() {} }; };
+  const workerRequest = authorized => new Request('https://site.com/api/vector/mail/verify', { method: 'POST', headers: authorized ? { authorization: `Bearer ${env.VECTOR_MAIL_WORKER_SECRET}` } : {} });
+  try {
+    assert.equal((await verifyWorker(workerRequest(false))).status, 401); assert.equal(transports, 0);
+    const verified = await verifyWorker(workerRequest(true));
+    assert.equal(verified.status, 200); assert.deepEqual(await verified.json(), { ok: true, code: 'SMTP_VERIFIED' });
+    assert.equal(verified.headers.get('cache-control'), 'no-store'); assert.equal(transports, 1);
+    assert.equal(process.env.VECTOR_MAIL_ENABLED, 'false');
+    process.env.VECTOR_SMTP_PASSWORD = '';
+    assert.equal((await verifyWorker(workerRequest(true))).status, 503); assert.equal(transports, 1);
+    process.env.VECTOR_SMTP_PASSWORD = env.VECTOR_SMTP_PASSWORD;
+    globalThis.__vectorSmtpTest = () => ({ verify: async () => { throw { code: 'EAUTH', message: 'private-credential' }; }, close() {} });
+    const failure = await verifyWorker(workerRequest(true)); assert.equal(failure.status, 503);
+    assert.deepEqual(await failure.json(), { ok: false, code: 'SMTP_AUTHENTICATION' });
+  } finally {
+    globalThis.fetch = originalFetch; delete globalThis.__vectorSmtpTest;
+    for (const [key, value] of Object.entries(saved)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; }
+  }
+});
+
 test('durable dispatcher records sending boundary, keeps retries stable and suppresses QA/unapproved delivery', async () => {
   assert.deepEqual(await dispatchMail({}, { rpc: async () => { throw new Error('Must not claim'); }, send: async () => { throw new Error('Must not send'); } }), { enabled: false, claimed: 0, sent: 0, retry: 0, unknown: 0, failed: 0, suppressed: 0 });
   const deliveries = []; const finishes = []; const tokens = []; const sequence = [];
-  let claimed = false;
-  const rpc = async (name, parameters) => {
+  const queue = [job, { ...job, id: '4f343ebc-cc5b-4359-97e3-2b8bfe6f40a9', kind: 'newsletter_confirm' }, { ...job, id: '5f343ebc-cc5b-4359-97e3-2b8bfe6f40a9', email: 'qa@example.test', kind: 'internal_contact' }, { ...job, id: '6f343ebc-cc5b-4359-97e3-2b8bfe6f40a9', email: 'stranger@mail-provider.com', kind: 'internal_contact' }];
+  const rpc = async (name, parameters, suppliedEnv, options) => {
+    assert.equal(suppliedEnv, env); assert.equal(options.timeoutMs, 5000);
     sequence.push(name);
     if (name === 'vector_claim_mail') {
-      assert.equal(parameters.p_limit, 4);
-      if (claimed) return []; claimed = true;
-      return [job, { ...job, id: '4f343ebc-cc5b-4359-97e3-2b8bfe6f40a9', kind: 'newsletter_confirm' }, { ...job, id: '5f343ebc-cc5b-4359-97e3-2b8bfe6f40a9', email: 'qa@example.test', kind: 'internal_contact' }, { ...job, id: '6f343ebc-cc5b-4359-97e3-2b8bfe6f40a9', email: 'stranger@mail-provider.com', kind: 'internal_contact' }];
+      assert.equal(parameters.p_limit, 1);
+      return queue.length ? [queue.shift()] : [];
     }
     if (name === 'vector_register_mail_token') { tokens.push(parameters); return 'registered'; }
     if (name === 'vector_start_mail') return 'sending';
@@ -194,18 +265,64 @@ test('durable dispatcher records sending boundary, keeps retries stable and supp
   assert.equal(finishes.filter(finish => finish.p_result === 'sent').length, 2);
   const second = await dispatchMail(env, { rpc, send }); assert.equal(second.claimed, 0); assert.equal(deliveries.length, 2);
   const retryMessages = [];
-  const one = async (name, parameters) => name === 'vector_claim_mail' ? [{ ...job, kind: 'newsletter_confirm' }] : name === 'vector_register_mail_token' ? 'registered' : name === 'vector_start_mail' ? 'sending' : (finishes.push(parameters), 'recorded');
-  for (let count = 0; count < 2; count++) await dispatchMail(env, { rpc: one, send: async message => { retryMessages.push(message); return { result: 'retry', providerId: null, errorCode: 'SMTP_TEMPORARY_REJECTION' }; } });
+  for (let count = 0; count < 2; count++) {
+    let claimed = false;
+    const one = async (name, parameters) => name === 'vector_claim_mail' ? (claimed ? [] : (claimed = true, [{ ...job, kind: 'newsletter_confirm', attempts: count + 1 }])) : name === 'vector_register_mail_token' ? 'registered' : name === 'vector_start_mail' ? 'sending' : (finishes.push(parameters), 'recorded');
+    await dispatchMail(env, { rpc: one, send: async message => { retryMessages.push(message); return { result: 'retry', providerId: null, errorCode: 'SMTP_TEMPORARY_REJECTION' }; } });
+  }
   assert.deepEqual(retryMessages[0], retryMessages[1]);
 });
 
 test('SMTP ambiguity never retries automatically and finish failure cannot erase the stored request', async () => {
   const finishes = [];
-  const rpc = async (name, parameters) => name === 'vector_claim_mail' ? [job] : name === 'vector_start_mail' ? 'sending' : (finishes.push(parameters), 'recorded');
+  let claimed = false;
+  const rpc = async (name, parameters) => name === 'vector_claim_mail' ? (claimed ? [] : (claimed = true, [job])) : name === 'vector_start_mail' ? 'sending' : (finishes.push(parameters), 'recorded');
   const summary = await dispatchMail(env, { rpc, send: async () => { throw new Error('Private SMTP response'); } });
   assert.equal(summary.unknown, 1); assert.equal(finishes[0].p_result, 'delivery_unknown');
   assert.equal(JSON.stringify(finishes).includes('Private'), false);
   await assert.rejects(dispatchMail(env, { rpc: async (name) => name === 'vector_claim_mail' ? [job] : name === 'vector_start_mail' ? 'sending' : Promise.reject(new Error('DB unavailable')), send: async () => ({ result: 'sent', providerId: 'trace', errorCode: null }) }));
+});
+
+test('dispatcher reserves final persistence time and never leases unused jobs near its deadline', async () => {
+  let elapsed = 0; let claims = 0; let finishes = 0; let deliveries = 0;
+  const rpc = async (name, parameters, suppliedEnv, options) => {
+    assert.equal(options.timeoutMs, 5000); elapsed += options.timeoutMs;
+    if (name === 'vector_claim_mail') { claims++; assert.equal(parameters.p_limit, 1); return [{ ...job, kind: 'newsletter_confirm' }]; }
+    if (name === 'vector_register_mail_token') return 'registered';
+    if (name === 'vector_start_mail') return 'sending';
+    if (name === 'vector_finish_mail') { finishes++; return 'recorded'; }
+    throw new Error('Unexpected RPC');
+  };
+  const summary = await dispatchMail(env, { now: () => elapsed, rpc, send: async () => {
+    deliveries++; elapsed += 12000; return { result: 'retry', providerId: null, errorCode: 'SMTP_TEMPORARY_REJECTION' };
+  } });
+  assert.equal(claims, 1); assert.equal(deliveries, 1); assert.equal(finishes, 1);
+  assert.equal(summary.claimed, 1); assert.equal(summary.retry, 1); assert.equal(elapsed, 32000);
+  assert.ok(elapsed < 45000);
+
+  const queue = Array.from({ length: 5 }, (_, i) => ({ ...job, id: `${i + 1}f343ebc-cc5b-4359-97e3-2b8bfe6f40a9` }));
+  const fast = await dispatchMail(env, { now: () => 0, rpc: async name => name === 'vector_claim_mail' ? [queue.shift()] : name === 'vector_start_mail' ? 'sending' : 'recorded', send: async () => ({ result: 'sent', providerId: 'trace', errorCode: null }) });
+  assert.equal(fast.claimed, 4); assert.equal(fast.sent, 4); assert.equal(queue.length, 1);
+});
+
+test('mail queue rejects repeated or oversized claims before a second SMTP transaction', async () => {
+  let delivered = 0;
+  await assert.rejects(dispatchMail(env, { rpc: async name => name === 'vector_claim_mail' ? [job] : name === 'vector_start_mail' ? 'sending' : 'recorded', send: async () => { delivered++; return { result: 'sent', providerId: 'trace', errorCode: null }; } }), /already claimed/);
+  assert.equal(delivered, 1);
+  await assert.rejects(dispatchMail(env, { rpc: async () => [job, job], send: async () => { throw new Error('Must not send'); } }), /Invalid mail queue/);
+});
+
+test('storage cancels bounded mail RPCs while preserving the existing eight-second form timeout', async () => {
+  const { inquiryRpc } = await import(storageModule);
+  const originalFetch = globalThis.fetch; const originalTimeout = AbortSignal.timeout; const durations = [];
+  AbortSignal.timeout = value => { durations.push(value); return originalTimeout(value); };
+  globalThis.fetch = async (url, options) => { assert.equal(options.cache, 'no-store'); assert.ok(options.signal instanceof AbortSignal); return Response.json('recorded'); };
+  try {
+    assert.equal(await inquiryRpc('vector_finish_mail', {}, env, { timeoutMs: 5000 }), 'recorded');
+    assert.equal(await inquiryRpc('vector_submit_inquiry', {}, env), 'recorded');
+    assert.deepEqual(durations, [5000, 8000]);
+    for (const timeoutMs of [0, -1, 8001, Number.NaN, 1.5]) await assert.rejects(inquiryRpc('vector_finish_mail', {}, env, { timeoutMs }), /Invalid inquiry storage timeout/);
+  } finally { globalThis.fetch = originalFetch; AbortSignal.timeout = originalTimeout; }
 });
 
 test('confirmation is an explicit bounded same-origin POST, hashes tokens and reports verified DB results only', async () => {

@@ -11,11 +11,13 @@ for (const name of ['monitor','ofp','passengers','airport','copilot','clock']) a
 await check('/api/vector/unsubscribe', 405);
 await check('/api/vector/newsletter/confirm', 405);
 await check('/api/vector/mail/dispatch', 405);
+await check('/api/vector/mail/verify', 405);
 for (const [path,body,status] of [
   ['/api/vector/inquiry',{kind:'interest',email:'qa@example.test',name:'',message:'',locale:'fr',consent:true,newsletterConsent:false,website:''},503],
   ['/api/vector/unsubscribe',{token:'A'.repeat(43)},503],
   ['/api/vector/newsletter/confirm',{token:'A'.repeat(43)},503],
   ['/api/vector/mail/dispatch',{},401],
+  ['/api/vector/mail/verify',{},401],
 ]) {
   const response = await fetch(base + path, {method:'POST',headers:{origin:base,'content-type':'application/json'},body:JSON.stringify(body)});
   results.push({path,method:'POST',status:response.status,expected:status,ok:response.status===status});

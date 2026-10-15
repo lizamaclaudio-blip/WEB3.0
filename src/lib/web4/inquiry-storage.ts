@@ -13,8 +13,10 @@ export function inquiryAddressHash(request: Request, env: InquiryEnvironment = p
 }
 
 // Server-only adapter: never import this file into a Client Component.
-export async function inquiryRpc(name: InquiryRpcName, parameters: Record<string, unknown>, env: InquiryEnvironment = process.env): Promise<unknown> {
+export async function inquiryRpc(name: InquiryRpcName, parameters: Record<string, unknown>, env: InquiryEnvironment = process.env, options: { timeoutMs?: number } = {}): Promise<unknown> {
   if (!inquiryConfigured(env)) throw new Error("Inquiry storage is unavailable");
+  const timeoutMs = options.timeoutMs ?? 8000;
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 8000) throw new Error("Invalid inquiry storage timeout");
   const endpoint = new URL(`/rest/v1/rpc/${name}`, env.SUPABASE_URL!);
   const serverKey = (env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY)!;
   const headers: Record<string, string> = { "Content-Type": "application/json", apikey: serverKey };
@@ -23,7 +25,7 @@ export async function inquiryRpc(name: InquiryRpcName, parameters: Record<string
   const response = await fetch(endpoint, {
     method: "POST",
     headers,
-    body: JSON.stringify(parameters), signal: AbortSignal.timeout(8000), cache: "no-store",
+    body: JSON.stringify(parameters), signal: AbortSignal.timeout(timeoutMs), cache: "no-store",
   });
   if (!response.ok) throw new Error("Inquiry storage rejected the request");
   return response.json() as Promise<unknown>;

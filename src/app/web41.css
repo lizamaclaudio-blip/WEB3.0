@@ -93,3 +93,14 @@
 @media(max-width:1100px){.pv43-edition-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:18px}.pv43-edition-local,.pv43-edition-future article{padding:25px}.pv43-edition-card{padding:28px}.pv43-edition-modules{grid-template-columns:1fr 1fr;gap:12px}.pv43-edition-future{grid-template-columns:1fr}}
 @media(max-width:760px){.pv43-complete .pw4-section-header{display:block}.pv43-complete .pw4-section-header>p{max-width:620px}.pv43-edition-grid{grid-template-columns:1fr;gap:22px}.pv43-edition-future{grid-template-columns:1fr 1fr}.pv43-edition-card{padding:30px}.pv43-edition-price>strong{font-size:31px}.pv43-edition-wordmark strong{font-size:34px}}
 @media(max-width:480px){.pv43-complete-label{font-size:8px;padding:4px 6px;margin-left:4px}.pv43-edition-local,.pv43-edition-future article,.pv43-edition-card{padding:24px}.pv43-edition-area-head{align-items:flex-start;gap:12px}.pv43-edition-state{font-size:9px}.pv43-edition-local h3{font-size:24px}.pv43-edition-future{grid-template-columns:1fr;gap:14px}.pv43-edition-modules{gap:13px 14px}.pv43-edition-modules li{font-size:10px}.pv43-edition-wordmark{gap:14px}.pv43-edition-wordmark>span{font-size:9px}.pv43-edition-wordmark strong{font-size:30px}.pv43-edition-price{margin-top:26px}.pv43-edition-card>.pw4-button{font-size:11px;min-height:51px}}
+
+/* QA implementation and live validation remain separate from commercial release. */
+.pv44-release{max-width:1120px;margin-inline:auto}.pv44-release>p{max-width:850px}
+.pv44-validation-pending{font-size:11px!important;line-height:1.7!important;letter-spacing:.025em;color:#e5c391!important;margin:16px 0 0!important}
+.pv44-validation-note{font-size:12px;line-height:1.8;color:#adc9d7;margin-top:20px!important}
+.pv44-milestones{scroll-margin-top:100px;margin:44px 0}.pv44-milestone-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:24px}
+.pv44-milestone{min-width:0;padding:25px;border:1px solid #284a5b;border-radius:7px;background:linear-gradient(145deg,#102d3e,#0b2230)}
+.pv44-milestone-id{font-size:11px!important;line-height:1.7!important;letter-spacing:.025em;color:#7ee3c8!important;margin:0!important}
+.pv44-milestone-future .pv44-milestone-id{color:#e5c391!important}.pv44-milestone h3{font-size:20px;line-height:1.35;letter-spacing:-.025em;margin:16px 0 0}
+.pv44-milestone>p:not(.pv44-milestone-id):not(.pv44-validation-pending){font-size:13px;line-height:1.85;margin-top:18px}.pv44-milestone-limit{padding-top:16px;border-top:1px solid #284a5b;color:#aac3d0!important}
+@media(max-width:640px){.pv44-milestone-grid{grid-template-columns:1fr}.pv44-milestone{padding:24px}.pv44-milestone h3{font-size:20px}.pv44-milestones{margin-block:32px}}
