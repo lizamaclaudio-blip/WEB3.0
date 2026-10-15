@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { completeEdition, completeEditionCopy } from "./complete-edition";
-import { developmentMilestones, developmentStatus } from "./development-milestones";
+import { developmentMilestones, developmentStatus, futureOnlinePlatform } from "./development-milestones";
 import { Glyph } from "./Glyph";
 import { localeHref, type Language } from "./locale";
 import { modules } from "./modules";
@@ -22,12 +22,13 @@ export function CompleteEdition({ language }: { language: Language }) {
           </article>
           <div className="pv43-edition-future">
             {developmentMilestones.map(area => <article key={area.id}>
-              <p className={"pv43-edition-state" + (area.status === "future" ? " pv43-edition-state-planned" : "")}>{area.milestone} · {area.status === "future" ? developmentStatus.future[language] : developmentStatus.implementedQa[language]}</p>
+              <p className="pv43-edition-state">{area.milestone} · {developmentStatus.implementedQa[language]}</p>
               <h3>{area.name}</h3><p>{area.summary[language]}</p>
               {area.liveValidation === "pending" && <p className="pv44-validation-pending">{developmentStatus.livePending[language]}</p>}
             </article>)}
           </div>
           <p className="pv44-validation-note">{copy.validationNote}</p>
+          <p className="pv44-validation-note">{futureOnlinePlatform.name} · {developmentStatus.future[language]}. {futureOnlinePlatform.summary[language]} {futureOnlinePlatform.limitation[language]}</p>
         </div>
         <aside className="pv43-edition-card" aria-label={completeEdition.name}>
           <div className="pv43-edition-wordmark"><Glyph name="mountain" size={31} /><span>COPILOTO VECTOR<strong>COMPLETE</strong></span></div>

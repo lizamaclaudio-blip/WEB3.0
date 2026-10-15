@@ -1,5 +1,5 @@
 import { completeEditionCopy } from "./complete-edition";
-import { developmentMilestones, developmentStatus } from "./development-milestones";
+import { developmentMilestones, developmentStatus, futureOnlinePlatform } from "./development-milestones";
 import { Action } from "./Marketing";
 import { localeHref, localized, type Language } from "./locale";
 
@@ -11,15 +11,21 @@ export function ReleaseStatus({ language }: { language: Language }) {
     <p>{t("Copiloto Vector es una aplicación Windows x64 en desarrollo activo. La galería muestra sesiones WPF locales reales, con el origen de los datos identificado. Una implementación en QA no representa una versión comercial publicada.", "Copiloto Vector is a Windows x64 application under active development. The gallery shows actual local WPF sessions with the data source labelled. QA implementation does not represent a released commercial version.", "Copiloto Vector est une application Windows x64 en cours de développement. La galerie présente de véritables sessions WPF locales dont les sources de données sont identifiées. Une implémentation en QA ne constitue pas une version commerciale publiée.")}</p>
 
     <section id="hitos" className="pv44-milestones" aria-labelledby="milestones-heading">
-      <h2 id="milestones-heading">{t("Hitos M31–M33", "M31–M33 milestones", "Jalons M31–M33")}</h2>
+      <h2 id="milestones-heading">{t("Hitos M31–M34", "M31–M34 milestones", "Jalons M31–M34")}</h2>
       <p>{developmentStatus.scopeNote[language]}</p>
       <div className="pv44-milestone-grid">
-        {developmentMilestones.map(area => <article key={area.id} className={"pv44-milestone" + (area.status === "future" ? " pv44-milestone-future" : "")}>
-          <p className="pv44-milestone-id">{area.milestone} · {area.status === "future" ? developmentStatus.future[language] : developmentStatus.implementedQa[language]}</p>
+        {developmentMilestones.map(area => <article key={area.id} className="pv44-milestone">
+          <p className="pv44-milestone-id">{area.milestone} · {developmentStatus.implementedQa[language]}</p>
           <h3>{area.name}</h3>
           {area.liveValidation === "pending" && <p className="pv44-validation-pending">{developmentStatus.livePending[language]}</p>}
           <p>{area.detail[language]}</p><p className="pv44-milestone-limit">{area.limitation[language]}</p>
         </article>)}
+        <aside className="pv44-milestone pv44-milestone-future" aria-labelledby="career-online-heading">
+          <p className="pv44-milestone-id">{developmentStatus.future[language]}</p>
+          <h3 id="career-online-heading">{futureOnlinePlatform.name}</h3>
+          <p>{futureOnlinePlatform.summary[language]} {futureOnlinePlatform.detail[language]}</p>
+          <p className="pv44-milestone-limit">{futureOnlinePlatform.limitation[language]}</p>
+        </aside>
       </div>
     </section>
 

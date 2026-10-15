@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:web4": "node --test tests/web4/inquiry.test.mjs tests/web4/locale.test.mjs tests/web4/gallery.test.mjs tests/web4/mail.test.mjs",
+    "test:web4": "node --test tests/web4/inquiry.test.mjs tests/web4/locale.test.mjs tests/web4/gallery.test.mjs tests/web4/mail.test.mjs tests/web4/mail-runner.test.mjs",
     "smoke:web4": "node scripts/web4-smoke.mjs",
     "pw3:download-airports": "node scripts/pw3/download-ourairports.mjs",
     "pw3:import-airports": "node scripts/pw3/import-ourairports.mjs",

@@ -11,7 +11,7 @@ const { default: sitemap } = await loadRoute('../../src/app/sitemap.ts');
 const { default: robots } = await loadRoute('../../src/app/robots.ts');
 const { completeEdition, completeEditionCopy } = await import(moduleUrl(await readFile(new URL('../../src/components/web4/complete-edition.ts', import.meta.url), 'utf8')));
 const milestonesModule = moduleUrl(await readFile(new URL('../../src/components/web4/development-milestones.ts', import.meta.url), 'utf8'));
-const { developmentMilestones, developmentStatus } = await import(milestonesModule);
+const { developmentMilestones, developmentStatus, futureOnlinePlatform } = await import(milestonesModule);
 const { capabilities } = await import(moduleUrl((await readFile(new URL('../../src/components/web4/capabilities.ts', import.meta.url), 'utf8')).replace('./development-milestones', milestonesModule)));
 
 test('switching ES, EN and FR keeps the same public page without repeated locale prefixes', () => {
@@ -53,8 +53,8 @@ test('COMPLETE presents one future licence in all languages without an active co
   assert.equal(completeEdition.status, 'planned');
   assert.equal(completeEdition.checkoutEnabled, false);
   assert.equal(completeEdition.price, null);
-  assert.deepEqual(completeEdition.areas.filter(area => area.status === 'implemented_qa').map(area => area.id), ['academy', 'performance', 'aircraft-studio']);
-  assert.deepEqual(completeEdition.areas.filter(area => area.status === 'future').map(area => area.id), ['career']);
+  assert.deepEqual(completeEdition.areas.filter(area => area.status === 'implemented_qa').map(area => area.id), ['academy', 'performance', 'aircraft-studio', 'career', 'acars']);
+  assert.ok(!completeEdition.areas.some(area => area.id === 'career-online'));
   assert.deepEqual(Object.keys(completeEditionCopy), languages);
   const expected = {
     es: ['Una licencia', 'implementadas en QA', 'Por anunciar', 'validación real sigue pendiente'],
@@ -65,7 +65,9 @@ test('COMPLETE presents one future licence in all languages without an active co
     const copy = completeEditionCopy[language];
     for (const value of Object.values(copy)) assert.ok(typeof value === 'string' && value.length > 0);
     for (const phrase of expected[language]) assert.ok(Object.values(copy).some(value => value.includes(phrase)), language + ': ' + phrase);
-    assert.match(copy.introduction, /Academy.*Performance.*Aircraft Studio/);
+    assert.match(copy.introduction, /Academy.*Performance.*Aircraft Studio.*Career Local.*ACARS Local/);
+    assert.match(copy.licenceSummary, /Career Local.*ACARS Local/);
+    assert.match(copy.introduction, /no están disponibles comercialmente|not commercially available|ne sont pas disponibles commercialement/);
     assert.match(copy.waitlistNote, /consentimiento|consent|consentement/);
     assert.doesNotMatch(Object.values(copy).join(' '), /\b(?:USD|EUR|CLP|lifetime|perpetua|perpétuelle)\b|[$€]/i);
     assert.ok(localeHref(language, '/soporte#novedades').endsWith('/soporte#novedades'));
@@ -73,24 +75,16 @@ test('COMPLETE presents one future licence in all languages without an active co
 });
 
 test('QA implementation never becomes live verification or a commercial release across ES/EN/FR', () => {
-  assert.equal(new Set(developmentMilestones.map(area => area.id)).size, 4);
+  assert.deepEqual(developmentMilestones.map(area => [area.id, area.milestone]), [['academy', 'M31'], ['performance', 'M31'], ['aircraft-studio', 'M32'], ['career', 'M33'], ['acars', 'M34']]);
   for (const area of developmentMilestones) {
     const editionArea = completeEdition.areas.find(item => item.id === area.id);
     const feature = capabilities.find(item => item.id === area.id);
     assert.equal(editionArea?.status, area.status, area.id);
     assert.ok(feature, area.id);
-    if (area.id === 'career') {
-      assert.equal(area.milestone, 'M33');
-      assert.equal(area.status, 'future');
-      assert.equal(area.evidence, null);
-      assert.equal(area.liveValidation, 'not_applicable');
-      assert.equal(feature.status, 'planned');
-    } else {
-      assert.equal(area.status, 'implemented_qa');
-      assert.equal(area.liveValidation, 'pending');
-      assert.equal(feature.status, 'validation');
-      assert.match(area.evidence, /^M3[12]-[a-z-]+\.md$/);
-    }
+    assert.equal(area.status, 'implemented_qa');
+    assert.equal(area.liveValidation, 'pending');
+    assert.equal(feature.status, 'validation');
+    assert.match(area.evidence, /^M3[1-4]-[a-z-]+\.md$/);
     for (const language of languages) {
       assert.ok(area.summary[language]?.trim());
       assert.ok(area.detail[language]?.trim());
@@ -102,6 +96,43 @@ test('QA implementation never becomes live verification or a commercial release 
         assert.match(area.detail[language], /sin MSFS|without live MSFS|sans MSFS/);
       }
     }
+  }
+});
+
+test('CAREER and ACARS local claims preserve offline, idempotent and real-validation limits', () => {
+  const career = developmentMilestones.find(area => area.id === 'career');
+  const acars = developmentMilestones.find(area => area.id === 'acars');
+  assert.equal(career.name, 'VECTOR CAREER LOCAL');
+  assert.equal(acars.name, 'VECTOR ACARS LOCAL');
+  for (const language of languages) {
+    assert.match(career.summary[language], /piloto|pilot|pilote/i);
+    assert.match(career.detail[language], /PIREP/);
+    assert.match(career.detail[language], /sin duplicados|without duplicates|sans doublons/);
+    assert.match(career.limitation[language], /créditos virtuales|virtual credits|crédits virtuels/);
+    assert.match(acars.detail[language], /DIARIO|LOGBOOK|JOURNAL/);
+    assert.match(acars.detail[language], /offline|hors ligne/);
+    assert.match(acars.summary[language], /exportación e importación|export\/import/);
+    assert.match(acars.limitation[language], /Ningún PIREP se envía fuera|No PIREP leaves|Aucun PIREP ne quitte/);
+    for (const area of [career, acars]) {
+      assert.match(area.limitation[language], /MSFS real|Live MSFS validation pending|MSFS réel/);
+      assert.match(area.limitation[language], /no disponible comercialmente|not commercially available|non disponible commercialement/);
+    }
+  }
+});
+
+test('future CAREER ONLINE and multi-user airlines remain separate from the local single-licence scope', () => {
+  const feature = capabilities.find(item => item.id === futureOnlinePlatform.id);
+  assert.equal(futureOnlinePlatform.status, 'future');
+  assert.equal(futureOnlinePlatform.evidence, null);
+  assert.equal(futureOnlinePlatform.liveValidation, 'not_applicable');
+  assert.equal(feature.status, 'planned');
+  assert.ok(!developmentMilestones.some(item => item.id === futureOnlinePlatform.id));
+  assert.ok(!completeEdition.areas.some(item => item.id === futureOnlinePlatform.id));
+  for (const language of languages) {
+    assert.match(futureOnlinePlatform.summary[language], /multiusuario|multi-user|multiutilisateurs/);
+    assert.match(futureOnlinePlatform.summary[language], /no implementado|not implemented|pas encore implémenté/);
+    assert.match(futureOnlinePlatform.limitation[language], /Sin fecha ni precio definitivo|No definitive date or price|Sans date ni tarif définitifs/);
+    assert.ok(feature.detail[language].includes(futureOnlinePlatform.detail[language]));
   }
 });
 

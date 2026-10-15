@@ -4,7 +4,7 @@ type Copy = Record<Language, string>;
 const copy = (es: string, en: string, fr: string): Copy => ({ es, en, fr });
 
 // Implementation evidence is independent of commercial release and live validation.
-// Reviewed against docs/M31-academy-performance.md and docs/M32-aircraft-studio.md.
+// Reviewed against the M31–M34 development reports; later reports supersede earlier roadmaps.
 export const developmentStatus = {
   implementedQa: copy("IMPLEMENTADO EN QA", "IMPLEMENTED IN QA", "IMPLÉMENTÉ EN QA"),
   livePending: copy("PENDIENTE DE VALIDACIÓN REAL", "LIVE VALIDATION PENDING", "VALIDATION RÉELLE À EFFECTUER"),
@@ -39,10 +39,26 @@ export const developmentMilestones = [
     limitation: copy("El layout puede ser de referencia, del usuario o documentado por su autor. La posición de cada pasajero es ilustrativa; no representa ocupación real por asiento ni emite comandos GSX.", "Layouts may be references, user-defined or documented by their authors. Individual passenger positions are illustrative; they neither establish real seat occupancy nor issue GSX commands.", "Les plans peuvent être de référence, définis par l’utilisateur ou documentés par leur auteur. La position des passagers est illustrative ; elle ne prouve aucune occupation réelle par siège et n’émet aucune commande GSX."),
   },
   {
-    id: "career", milestone: "M33", status: "future", liveValidation: "not_applicable",
-    name: "VECTOR CAREER", evidence: null,
-    summary: copy("Desarrollo posterior. Funciones y alcance por definir.", "Later development. Features and scope remain to be defined.", "Développement ultérieur. Fonctions et périmètre à définir."),
-    detail: copy("Área prevista para una etapa posterior. No se anuncia como implementada, probada ni disponible.", "An area planned for a later stage. It is not announced as implemented, tested or available.", "Un espace prévu pour une étape ultérieure. Il n’est annoncé ni comme implémenté, ni comme testé, ni comme disponible."),
-    limitation: copy("Sin fecha de lanzamiento ni oferta comercial.", "No release date or commercial offer.", "Sans date de lancement ni offre commerciale."),
+    id: "career", milestone: "M33", status: "implemented_qa", liveValidation: "pending",
+    name: "VECTOR CAREER LOCAL", evidence: "M33-vector-career.md",
+    summary: copy("Piloto, aerolínea virtual personal, flota y misiones; economía y progreso vinculados al DIARIO.", "Pilot, personal virtual airline, fleet and missions; economy and progress linked to the LOGBOOK.", "Pilote, compagnie virtuelle personnelle, flotte et missions ; économie et progression liées au JOURNAL."),
+    detail: copy("Creación de piloto y aerolínea virtual personal, flota, misiones, economía y progreso. Integración con DIARIO, PIREP y recompensas sin duplicados. Implementado y probado virtualmente en QA, sin MSFS real.", "Pilot and personal virtual airline creation, fleet, missions, economy and progress. LOGBOOK integration, PIREPs and rewards without duplicates. Implemented and tested virtually in QA, without live MSFS.", "Création du pilote et de sa compagnie virtuelle personnelle, flotte, missions, économie et progression. Intégration au JOURNAL, PIREP et récompenses sans doublons. Implémenté et testé virtuellement en QA, sans MSFS réel."),
+    limitation: copy("Carrera local con créditos virtuales. Las aprobaciones manuales se identifican; pasajeros y carga no se verifican por misión. Pendiente de validación con MSFS real; no disponible comercialmente.", "Local career with virtual credits. Manual approvals are labelled; passengers and cargo are not verified per mission. Live MSFS validation pending; not commercially available.", "Carrière locale avec crédits virtuels. Les approbations manuelles sont identifiées ; passagers et fret ne sont pas vérifiés par mission. Validation avec MSFS réel à effectuer ; non disponible commercialement."),
+  },
+  {
+    id: "acars", milestone: "M34", status: "implemented_qa", liveValidation: "pending",
+    name: "VECTOR ACARS LOCAL", evidence: "M34-vector-acars.md",
+    summary: copy("Registro de eventos, PIREP y cola local offline, con exportación e importación e integración con CAREER y DIARIO.", "Event recording, PIREPs and a local offline queue, with export/import and CAREER and LOGBOOK integration.", "Enregistrement des événements, PIREP et file locale hors ligne, avec export/import et intégration à CAREER et au JOURNAL."),
+    detail: copy("Registro operacional y PIREP desde los eventos del DIARIO, con procedencia de cada dato. Cola local offline, exportación e importación de informes, integradas con CAREER y DIARIO sin duplicar vuelos ni recompensas. Implementado y probado virtualmente en QA, sin MSFS real.", "Operational recording and PIREPs from LOGBOOK events, with each data source identified. A local offline queue and report export/import integrate with CAREER and LOGBOOK without duplicating flights or rewards. Implemented and tested virtually in QA, without live MSFS.", "Enregistrement opérationnel et PIREP à partir des événements du JOURNAL, avec provenance des données. File locale hors ligne et export/import des rapports intégrés à CAREER et au JOURNAL sans dupliquer vols ni récompenses. Implémenté et testé virtuellement en QA, sans MSFS réel."),
+    limitation: copy("Ningún PIREP se envía fuera del equipo: el transporte actual es offline y nunca simula una sincronización exitosa. La integridad de archivos no es un sistema antifraude. Pendiente de validación con MSFS real; no disponible comercialmente.", "No PIREP leaves the computer: the current transport is offline and never simulates a successful sync. File integrity is not an anti-fraud system. Live MSFS validation pending; not commercially available.", "Aucun PIREP ne quitte l’ordinateur : le transport actuel est hors ligne et ne simule jamais une synchronisation réussie. L’intégrité des fichiers n’est pas un système antifraude. Validation avec MSFS réel à effectuer ; non disponible commercialement."),
   },
 ] as const;
+
+// An online platform is separate from the implemented local career and the planned local licence.
+export const futureOnlinePlatform = {
+  id: "career-online", status: "future", liveValidation: "not_applicable", evidence: null,
+  name: "VECTOR CAREER ONLINE",
+  summary: copy("Plataforma online y aerolíneas multiusuario: desarrollo futuro, todavía no implementado.", "Online platform and multi-user airlines: future development, not implemented yet.", "Plateforme en ligne et compagnies multiutilisateurs : développement futur, pas encore implémenté."),
+  detail: copy("CAREER LOCAL y ACARS LOCAL no ofrecen cuentas online, sincronización con servidor ni aerolíneas multiusuario. Esa futura plataforma todavía no está desarrollada.", "CAREER LOCAL and ACARS LOCAL do not provide online accounts, server synchronization or multi-user airlines. That future platform has not been developed yet.", "CAREER LOCAL et ACARS LOCAL ne proposent ni comptes en ligne, ni synchronisation serveur, ni compagnies multiutilisateurs. Cette future plateforme n’est pas encore développée."),
+  limitation: copy("Sin fecha ni precio definitivo. Su modelo comercial no está definido; no se promete su inclusión en la licencia local.", "No definitive date or price. Its commercial model is undefined; inclusion in the local licence is not promised.", "Sans date ni tarif définitifs. Son modèle commercial reste à définir ; son inclusion dans la licence locale n’est pas promise."),
+} as const;
