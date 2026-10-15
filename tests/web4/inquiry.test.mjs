@@ -12,7 +12,11 @@ const inquiryModule = await loadModule('../../src/lib/web4/inquiry.ts');
 const httpModule = await loadModule('../../src/lib/web4/inquiry-http.ts');
 const storageModule = await loadModule('../../src/lib/web4/inquiry-storage.ts', {'./inquiry':inquiryModule});
 const newsletterModule = await loadModule('../../src/lib/web4/newsletter.ts', {'./inquiry-storage':storageModule});
-const references = {'@/lib/web4/inquiry':inquiryModule,'@/lib/web4/inquiry-http':httpModule,'@/lib/web4/inquiry-storage':storageModule,'@/lib/web4/newsletter':newsletterModule};
+const mailModule = await loadModule('../../src/lib/web4/mail.ts', {'./inquiry':inquiryModule});
+const afterStub = dataModule('export function after(callback) { if (globalThis.__vectorAfterFailure) throw new Error("private scheduling failure"); (globalThis.__vectorAfterCallbacks ||= []).push(callback); }');
+const dispatchStub = dataModule('export async function dispatchMail() { return globalThis.__vectorDispatchTest(); }');
+const mailAfterModule = await loadModule('../../src/lib/web4/mail-after.ts', {'next/server':afterStub,'./mail':mailModule,'./mail-dispatch':dispatchStub});
+const references = {'@/lib/web4/inquiry':inquiryModule,'@/lib/web4/inquiry-http':httpModule,'@/lib/web4/inquiry-storage':storageModule,'@/lib/web4/newsletter':newsletterModule,'@/lib/web4/mail-after':mailAfterModule};
 const { validateInquiry, inquiryConfigured, newsletterConsentVersion } = await import(inquiryModule);
 const { inquiryRpc } = await import(storageModule);
 const { hashUnsubscribeToken, issueUnsubscribeToken, validUnsubscribeToken } = await import(newsletterModule);
@@ -113,6 +117,42 @@ test('storage-confirmed success, limits and failures return honest outcomes; no 
   globalThis.fetch = async () => {throw new Error('offline');}; assert.equal((await POST(request(valid))).status,503);
   delete process.env.VECTOR_FORMS_ENABLED; assert.equal((await POST(request(valid))).status,503);
  } finally { globalThis.fetch=originalFetch; for(const key of keys) { if(previous[key]===undefined) delete process.env[key]; else process.env[key]=previous[key]; } }
+});
+
+test('accepted storage schedules mail after the response only with valid configuration; mail failures preserve success', async () => {
+ const env = {
+  VECTOR_FORMS_ENABLED:'true',SUPABASE_URL:'https://storage.example.test',SUPABASE_SECRET_KEY:'sb_secret_test-only-key',VECTOR_FORM_HASH_SECRET:'forms-test-only-hmac-secret-32-characters',
+  VECTOR_MAIL_ENABLED:'true',VECTOR_SMTP_HOST:'smtp.mail-provider.com',VECTOR_SMTP_PORT:'465',VECTOR_SMTP_USER:'sender@mail-provider.com',VECTOR_SMTP_PASSWORD:'test-only-password',
+  VECTOR_MAIL_FROM:'sender@mail-provider.com',VECTOR_MAIL_INTERNAL_TO:'team@mail-provider.com',VECTOR_MAIL_PUBLIC_ORIGIN:'https://preview.site-provider.com',
+  VECTOR_MAIL_TOKEN_SECRET:'mail-test-only-token-secret-32-characters',VECTOR_MAIL_WORKER_SECRET:'mail-test-only-worker-secret-32-characters',VECTOR_MAIL_PREVIEW_RECIPIENTS:'approved@mail-provider.com',VERCEL_ENV:'preview',
+ };
+ const saved = Object.fromEntries(Object.keys(env).map(key=>[key,process.env[key]]));
+ const originalFetch=globalThis.fetch, originalError=console.error;
+ const logs=[]; let deliveries=0;
+ Object.assign(process.env,env); globalThis.__vectorAfterCallbacks=[];
+ globalThis.__vectorDispatchTest=async()=>{deliveries++;throw new Error('private SMTP credential');};
+ console.error=code=>logs.push(code);
+ try {
+  globalThis.fetch=async()=>Response.json('accepted');
+  const response=await POST(request(valid));
+  assert.equal(response.status,201);assert.deepEqual(await response.json(),{ok:true,code:'ACCEPTED'});
+  assert.equal(deliveries,0);assert.equal(globalThis.__vectorAfterCallbacks.length,1);
+  await globalThis.__vectorAfterCallbacks.pop()();
+  assert.equal(deliveries,1);assert.deepEqual(logs,['VECTOR_MAIL_DISPATCH_FAILED']);
+  for (const result of ['rate_limited','unexpected']) { globalThis.fetch=async()=>Response.json(result);await POST(request(valid));assert.equal(globalThis.__vectorAfterCallbacks.length,0); }
+  globalThis.fetch=async()=>Response.json('accepted');
+  delete process.env.VECTOR_SMTP_PASSWORD;
+  assert.equal((await POST(request(valid))).status,201);assert.equal(globalThis.__vectorAfterCallbacks.length,0);
+  process.env.VECTOR_SMTP_PASSWORD=env.VECTOR_SMTP_PASSWORD;
+  globalThis.__vectorAfterFailure=true;
+  assert.equal((await POST(request(valid))).status,201);assert.equal(globalThis.__vectorAfterCallbacks.length,0);
+  assert.deepEqual(logs,['VECTOR_MAIL_DISPATCH_FAILED','VECTOR_MAIL_SCHEDULING_FAILED']);
+  assert.equal(JSON.stringify(logs).includes('private'),false);
+ } finally {
+  globalThis.fetch=originalFetch;console.error=originalError;
+  delete globalThis.__vectorAfterCallbacks;delete globalThis.__vectorDispatchTest;delete globalThis.__vectorAfterFailure;
+  for(const[key,value]of Object.entries(saved)){if(value===undefined)delete process.env[key];else process.env[key]=value;}
+ }
 });
 
 test('unsubscribe issuance persists only a random token hash and fails closed without registration', async () => {

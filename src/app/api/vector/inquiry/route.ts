@@ -2,9 +2,11 @@ import { createHmac } from "node:crypto";
 import { inquiryConfigured, inquiryConsentVersion, newsletterConsentVersion, validateInquiry } from "@/lib/web4/inquiry";
 import { inquiryReply, readInquiryJson } from "@/lib/web4/inquiry-http";
 import { inquiryAddressHash, inquiryRpc } from "@/lib/web4/inquiry-storage";
+import { scheduleMailAfterResponse } from "@/lib/web4/mail-after";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const body = await readInquiryJson(request);
@@ -23,6 +25,7 @@ export async function POST(request: Request) {
     });
     if (result === "rate_limited") return inquiryReply("RATE_LIMITED", 429);
     if (result !== "accepted") return inquiryReply("SERVICE_UNAVAILABLE", 503);
+    scheduleMailAfterResponse();
     return inquiryReply("ACCEPTED", 201);
   } catch { return inquiryReply("SERVICE_UNAVAILABLE", 503); }
 }

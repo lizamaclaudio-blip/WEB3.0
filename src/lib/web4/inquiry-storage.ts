@@ -2,7 +2,8 @@ import { inquiryConfigured } from "./inquiry";
 import { createHmac } from "node:crypto";
 
 export type InquiryEnvironment = Record<string, string | undefined>;
-type InquiryRpcName = "vector_submit_inquiry" | "vector_register_unsubscribe_token" | "vector_unsubscribe";
+type InquiryRpcName = "vector_submit_inquiry" | "vector_register_unsubscribe_token" | "vector_unsubscribe"
+  | "vector_claim_mail" | "vector_register_mail_token" | "vector_start_mail" | "vector_finish_mail" | "vector_confirm_newsletter";
 
 export function inquiryAddressHash(request: Request, env: InquiryEnvironment = process.env): string {
   if (!inquiryConfigured(env)) throw new Error("Inquiry storage is unavailable");

@@ -1,7 +1,7 @@
 import { writeFile } from 'node:fs/promises';
 const base = 'http://127.0.0.1:3005';
 const results = [];
-const pages = ['', '/copiloto-vector', '/soporte', '/versiones', '/privacidad', '/condiciones'];
+const pages = ['', '/copiloto-vector', '/soporte', '/versiones', '/privacidad', '/condiciones', '/confirmar-novedades', '/cancelar-novedades'];
 const paths = ['','/en','/fr'].flatMap(locale => pages.map(page => locale + (page || (locale ? '' : '/'))));
 for (const path of [...paths, '/robots.txt', '/sitemap.xml', '/icon.svg', '/login']) await check(path, 200);
 for (const path of ['/api/auth/me','/api/acars/status']) await check(path, [401,403]);
@@ -9,9 +9,13 @@ for (const name of ['home','dispatch','monitor','weather','cabin','ground','oper
 for (const name of ['home','dispatch','operations','copilot','settings']) await check('/vector/m29/' + name + '.webp', 200, true);
 for (const name of ['monitor','ofp','passengers','airport','copilot','clock']) await check('/vector/current/icons/' + name + '.webp', 200, true);
 await check('/api/vector/unsubscribe', 405);
+await check('/api/vector/newsletter/confirm', 405);
+await check('/api/vector/mail/dispatch', 405);
 for (const [path,body,status] of [
   ['/api/vector/inquiry',{kind:'interest',email:'qa@example.test',name:'',message:'',locale:'fr',consent:true,newsletterConsent:false,website:''},503],
   ['/api/vector/unsubscribe',{token:'A'.repeat(43)},503],
+  ['/api/vector/newsletter/confirm',{token:'A'.repeat(43)},503],
+  ['/api/vector/mail/dispatch',{},401],
 ]) {
   const response = await fetch(base + path, {method:'POST',headers:{origin:base,'content-type':'application/json'},body:JSON.stringify(body)});
   results.push({path,method:'POST',status:response.status,expected:status,ok:response.status===status});

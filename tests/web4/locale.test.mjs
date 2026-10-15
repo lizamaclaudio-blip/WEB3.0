@@ -9,6 +9,7 @@ const { languages, localeHref, unlocalizedPath } = await import(localeModule);
 const loadRoute = async path => import(moduleUrl((await readFile(new URL(path, import.meta.url), 'utf8')).replace('@/components/web4/locale', localeModule)));
 const { default: sitemap } = await loadRoute('../../src/app/sitemap.ts');
 const { default: robots } = await loadRoute('../../src/app/robots.ts');
+const { completeEdition, completeEditionCopy } = await import(moduleUrl(await readFile(new URL('../../src/components/web4/complete-edition.ts', import.meta.url), 'utf8')));
 
 test('switching ES, EN and FR keeps the same public page without repeated locale prefixes', () => {
   assert.deepEqual(languages, ['es', 'en', 'fr']);
@@ -40,5 +41,29 @@ test('all 18 public locale pages have reciprocal sitemap alternates; previews st
   } finally {
     if (previous === undefined) delete process.env.VERCEL_ENV;
     else process.env.VERCEL_ENV = previous;
+  }
+});
+
+test('COMPLETE presents one future licence in all languages without an active commercial offer', () => {
+  assert.equal(completeEdition.name, 'COPILOTO VECTOR COMPLETE');
+  assert.equal(completeEdition.licenceCount, 1);
+  assert.equal(completeEdition.status, 'planned');
+  assert.equal(completeEdition.checkoutEnabled, false);
+  assert.equal(completeEdition.price, null);
+  assert.deepEqual(completeEdition.areas.filter(area => area.status === 'planned').map(area => area.name), ['Academy', 'Performance']);
+  assert.deepEqual(Object.keys(completeEditionCopy), languages);
+  const expected = {
+    es: ['Una licencia', 'Aún no disponible', 'Por anunciar', 'implementadas y validadas'],
+    en: ['One licence', 'Not yet available', 'To be announced', 'implemented and validated'],
+    fr: ['Une licence', 'Pas encore disponible', 'À annoncer', 'implémentés et validés'],
+  };
+  for (const language of languages) {
+    const copy = completeEditionCopy[language];
+    for (const value of Object.values(copy)) assert.ok(typeof value === 'string' && value.length > 0);
+    for (const phrase of expected[language]) assert.ok(Object.values(copy).some(value => value.includes(phrase)), language + ': ' + phrase);
+    assert.match(copy.introduction, /Academy.*Performance/);
+    assert.match(copy.waitlistNote, /consentimiento|consent|consentement/);
+    assert.doesNotMatch(Object.values(copy).join(' '), /\b(?:USD|EUR|CLP|lifetime|perpetua|perpétuelle)\b|[$€]/i);
+    assert.ok(localeHref(language, '/soporte#novedades').endsWith('/soporte#novedades'));
   }
 });
