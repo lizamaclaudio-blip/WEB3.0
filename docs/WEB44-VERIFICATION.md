@@ -35,6 +35,7 @@ pagos, DNS, contraseñas ni mensajes nuevos a terceros.
 | SQL de confirmación, tokens, cola y terminales, con ROLLBACK | Pasó |
 | SQL adicional de backoff, topes y supervivencia de solicitudes | Pasó |
 | RLS heredado: denegaciones reales y acceso de servicio, con ROLLBACK | 68/68 |
+| Contención tras retirar pg_net: ausencia de HTTP/Vault y acceso privado | 42/42 |
 | Escritorio 1440×1000 / móvil 390×844 | Revisados; sin desbordamiento horizontal |
 
 Las pruebas SMTP son simuladas, incluidos rechazo temporal/permanente,
@@ -60,13 +61,27 @@ al comprobar permisos efectivos de `net`; no se presenta como aprobada.
 
 Supabase crea `pg_net` bajo `supabase_admin`: los REVOKE de `postgres` no pueden
 retirar sus grants PUBLIC. Se confirmó mediante ACL y documentación oficial.
-No se copió ningún token ni contraseña a esa cola. Se preparó una reversión
-acotada, sin CASCADE y con controles de cola/respuestas vacías y ausencia de
-Webhooks. Su ejecución requiere la autorización específica solicitada al titular.
+No se copió ningún token ni contraseña a esa cola. El titular autorizó después
+retirar exclusivamente el `pg_net` recién instalado. La migración
+`20261015231135_web44_scheduler_net_privileges.sql` se aplicó sin CASCADE,
+comprobando antes cola/respuestas vacías y ausencia de Database Webhooks.
 
-**Estado pendiente:** la retirada de `pg_net` y sus 42 controles de contención
-todavía no se han ejecutado. El programador no está operativo. El archivo de
-activación falla deliberadamente hasta resolver la arquitectura y permisos.
+**Estado final comprobado:** `pg_net` y el esquema `net` están ausentes;
+`pg_cron` se conserva; la bandera privada y el job permanecen desactivados. `tick()` solo
+desactiva la bandera y retorna false, sin leer Vault ni realizar HTTP.
+Pasaron los 42 controles de contención con ROLLBACK. Se volvieron a ejecutar
+correctamente las suites de formularios, confirmación/baja/cola y 68 controles
+RLS. Los siete trabajos históricos `sent` y las filas heredadas 1/17 siguen
+intactos. No se enviaron correos ni se modificaron políticas.
+
+El asesor de seguridad conserva los hallazgos heredados documentados en WEB 4.3:
+dos [vistas definer](https://supabase.com/docs/guides/database/database-linter?lint=0010_security_definer_view),
+seis [search paths mutables](https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable)
+y `unaccent` en public. Las tablas privadas mantienen RLS sin políticas públicas
+intencionalmente; no se añadieron hallazgos sobre la contención del scheduler.
+
+El programador no está operativo. El archivo de activación falla
+deliberadamente hasta resolver la arquitectura y permisos.
 Ver [operación y limitación](WEB44-MAIL-SCHEDULER.md).
 
 ## Configuración externa pendiente

@@ -1,5 +1,9 @@
 -- BLOCKED / NOT APPLIED. Intentionally fails before any activation or Vault read.
 -- Hosted pg_net grants cannot enforce the owner-only HTTP queue assumed by WEB44.
+-- Authorized withdrawal applied: 20261015231135_web44_scheduler_net_privileges.sql.
+-- pg_net/net are absent; pg_cron remains installed, with state/job disabled.
+-- Safe-hold suite passed 42/42; original 94-check pg_net suite failed and is retained.
+-- tick() has no Vault/HTTP access. Periodic retries are NOT operational.
 -- See docs/WEB44-MAIL-SCHEDULER.md and the official platform limitation:
 -- https://supabase.com/docs/guides/troubleshooting/revoking-access-to-pg_net-objects-has-no-effect-0bbc16
 do $$

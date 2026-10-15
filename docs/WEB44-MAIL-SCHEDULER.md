@@ -11,18 +11,22 @@ producción ni se cambia el plan.
 ## Estado comprobado y límite de la plataforma
 
 La instalación remota `20261015205828` sí se aplicó después de autorizarla.
-`pg_cron`, `pg_net` y la infraestructura privada están instalados, con ambos
-controles desactivados:
+Después se autorizó y ejecutó la retirada exclusiva de `pg_net` mediante la
+migración `20261015231135_web44_scheduler_net_privileges.sql`. El estado final
+comprobado conserva `pg_cron` y la infraestructura privada, con ambos controles
+desactivados:
 
 - `vector_mail_scheduler.state.enabled = false`.
 - Job `vector-preview-mail-drain`: `active = false`.
-- Cero solicitudes HTTP y cero respuestas; no se enviaron correos.
+- Extensión `pg_net` y esquema `net` ausentes.
+- `tick()` devuelve `false`, desactiva la bandera y no accede a Vault ni HTTP.
+- Antes de retirar la extensión, sus colas estaban vacías; no se enviaron correos.
 - No se aprovisionaron credenciales del scheduler ni se modificó el outbox/RLS.
 
 La [suite original de 94 comprobaciones](supabase/web44-mail-scheduler.pg-net-NOT-SUPPORTED.sql)
 **se ejecutó y falló** al comprobar los permisos de `net`. No son 94 pruebas
-aprobadas. La inspección posterior confirmó que sus objetos y grants pertenecen
-a `supabase_admin`; PUBLIC conserva acceso, heredado por anon, authenticated y
+aprobadas. La inspección posterior confirmó que sus objetos y grants pertenecían
+a `supabase_admin`; PUBLIC conservaba acceso, heredado por anon, authenticated y
 service_role. Los `REVOKE` de la primera migración no cerraron ese acceso.
 
 Supabase documenta que `postgres` no puede revocar esos grants administrados y
@@ -36,26 +40,28 @@ La activación está bloqueada hasta disponer de una solución segura revisada.
 El [archivo de activación](supabase/web44-mail-scheduler.activation.NOT-APPLIED.sql)
 falla deliberadamente antes de realizar cualquier operación.
 
-## Retirada acotada pendiente de autorización
+## Retirada acotada autorizada y aplicada
 
-La migración `20261015210006_web44_scheduler_net_privileges.sql` prepara la
-retirada exclusiva del `pg_net` recién instalado. Comprueba ambas banderas
-desactivadas, cola y respuestas vacías y ausencia de Database Webhooks. Sustituye
-`tick()` por una rutina que desactiva la bandera y nunca transmite; después usa
+La migración `20261015231135_web44_scheduler_net_privileges.sql` ejecutó la
+retirada exclusiva del `pg_net` recién instalado. Comprobó ambas banderas
+desactivadas, cola y respuestas vacías y ausencia de Database Webhooks. Sustituyó
+`tick()` por una rutina que desactiva la bandera y nunca transmite; después usó
 `DROP EXTENSION pg_net` **sin CASCADE**, de modo que una dependencia inesperada
 cancele la transacción. Conserva `pg_cron`, la fila privada, el job inactivo y
 todos los datos de formularios/correo.
 
-**La retirada no se ha ejecutado.** La revisión automática rechazó esa operación
-por requerir autorización específica para desinstalar la extensión; se solicitó
-al titular y está pendiente. No se afirma que `net` haya desaparecido ni que
-sus permisos estén corregidos.
+La retirada se aplicó después de recibir la autorización explícita del titular.
+La revisión automática anterior había detenido esa operación por requerir una
+autorización específica para desinstalar la extensión. La contención final se
+logró retirando la extensión; no se afirma haber corregido los grants
+administrados por Supabase.
 
 La [nueva suite de 42 comprobaciones](supabase/web44-mail-scheduler.access-tests.sql)
-está preparada para verificar la contención **después de la retirada**; todavía
-no se ha ejecutado. Comprueba ausencia de `pg_net`/`net`, controles inactivos,
-rutina sin HTTP/Vault y acceso privado. No sustituye el resultado fallido de la
-suite original ni constituye prueba de reintentos automáticos operativos.
+**se ejecutó y aprobó 42/42** después de la retirada, dentro de una transacción
+que terminó con `ROLLBACK`. Comprobó ausencia de `pg_net`/`net`, controles
+inactivos, rutina sin HTTP/Vault y acceso privado. No sustituye el resultado
+fallido de la suite original ni constituye prueba de reintentos automáticos
+operativos.
 
 ## Condiciones para una solución futura
 
