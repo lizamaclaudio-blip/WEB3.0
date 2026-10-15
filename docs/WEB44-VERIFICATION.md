@@ -94,5 +94,14 @@ Detalles: [correo/DNS/rotación](WEB44-MAIL-AUTH.md),
 ## Entrega
 
 Las capturas de revisión se conservan en `artifacts/web44-review/`, ignoradas
-por Git, sin secretos. El nuevo Preview se verificará contra el commit de esta
-rama; no se promociona ni se asigna al dominio de producción.
+por Git, sin secretos. Preview comprobado **READY**, `target:null`, commit de
+código `48dc0f8078a0f2581e60cb5e5fb3a6114a3e79d1`:
+
+<https://web-30-46n91rlcc-lizamaclaudio-blips-projects.vercel.app/versiones#hitos>
+
+Los formularios del Preview están habilitados en ES/EN/FR con aviso QA, dos
+consentimientos separados y validación obligatoria. Un envío vacío se detiene
+en la validación del navegador, sin crear una solicitud. El POST privado SMTP
+sin bearer retorna HTTP 401 `UNAUTHORIZED` tras la protección de Vercel.
+No se promociona ni se asigna al dominio de producción. Los commits posteriores
+que solo actualizan este informe no alteran el código web verificado.
