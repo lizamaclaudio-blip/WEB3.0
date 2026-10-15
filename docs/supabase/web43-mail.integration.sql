@@ -283,6 +283,70 @@ begin
     if r is distinct from (case when i<=20 then 'invalid_or_expired' else 'rate_limited' end)
     then raise exception 'Confirmation IP rate limit failed at %',i; end if;
   end loop;
+
+  -- A fresh explicit opt-in may recover a pending cycle older than 24 hours.
+  -- This fixture is isolated from sent jobs and never invokes an SMTP worker.
+  em:=b||'-expired-pending@qa-vector.example.org'; eh:=md5(em)||repeat('1',32); ip:=md5(em)||repeat('0',32);
+  r:=public.vector_submit_inquiry('interest',em,'','','en','2026-10-v1',ip,eh,true,'2026-10-news-v1');
+  if r<>'accepted' then raise exception 'Expired-cycle fixture submit failed'; end if;
+  set constraints vector_inquiry_mail_enqueue immediate;
+  set constraints vector_inquiry_mail_enqueue deferred;
+  select id into qa_subscription_id from public.vector_newsletter_subscriptions where email_hash=eh;
+  select id into news from public.vector_mail_outbox where subscription_id=qa_subscription_id and kind='newsletter_confirm';
+  cycle:=clock_timestamp()-interval '25 hours';
+  update public.vector_newsletter_subscriptions set requested_at=cycle where id=qa_subscription_id;
+  update public.vector_mail_outbox set subscription_requested_at=cycle,status='retry',attempts=1,
+    first_attempt_at=cycle,next_attempt_at=clock_timestamp()+interval '2 days' where id=news;
+  t2:=md5(b||'-expired-confirm')||repeat('e',32); expiration:=cycle+interval '24 hours';
+  insert into public.vector_mail_tokens(outbox_id,token_hash,created_at,expires_at)
+  values(news,t2,cycle,expiration);
+  r:=public.vector_confirm_newsletter(t2,ip);
+  if r<>'invalid_or_expired' then raise exception 'Expired pending-cycle token accepted'; end if;
+
+  r:=public.vector_submit_inquiry('interest',em,'','','es','2026-10-v1',ip,eh,false,null);
+  if r<>'accepted' then raise exception 'Non-opt-in expired-cycle inquiry failed'; end if;
+  set constraints vector_inquiry_mail_enqueue immediate;
+  set constraints vector_inquiry_mail_enqueue deferred;
+  if not exists (select 1 from public.vector_newsletter_subscriptions where id=qa_subscription_id and status='pending' and requested_at=cycle)
+    or (select count(*) from public.vector_mail_outbox where subscription_id=qa_subscription_id)<>1
+  then raise exception 'Expired pending cycle renewed without explicit consent'; end if;
+
+  r:=public.vector_submit_inquiry('interest',em,'','','fr','2026-10-v1',ip,eh,true,'2026-10-news-v1');
+  if r<>'accepted' then raise exception 'Explicit expired-cycle renewal failed'; end if;
+  set constraints vector_inquiry_mail_enqueue immediate;
+  set constraints vector_inquiry_mail_enqueue deferred;
+  select requested_at into first_at from public.vector_newsletter_subscriptions where id=qa_subscription_id;
+  if first_at<=cycle or first_at<clock_timestamp()-interval '1 minute'
+    or not exists (select 1 from public.vector_newsletter_subscriptions where id=qa_subscription_id and status='pending'
+      and confirmed_at is null and unsubscribed_at is null)
+    or (select count(*) from public.vector_mail_outbox where subscription_id=qa_subscription_id and kind='newsletter_confirm')<>2
+    or not exists (select 1 from public.vector_mail_outbox where subscription_id=qa_subscription_id
+      and subscription_requested_at=first_at and locale='fr' and status='queued' and attempts=0)
+  then raise exception 'Expired pending cycle did not enqueue one fresh confirmation'; end if;
+  if not exists (select 1 from public.vector_mail_outbox where id=news and status='retry' and attempts=1
+      and subscription_requested_at=cycle and first_attempt_at=cycle)
+    or not exists (select 1 from public.vector_mail_tokens where outbox_id=news and token_hash=t2
+      and expires_at=expiration and used_at is null)
+  then raise exception 'Explicit renewal rewrote historical job/token state'; end if;
+  -- Remove expiry as a confounding factor: the old cycle alone must reject it.
+  update public.vector_mail_tokens set expires_at=clock_timestamp()+interval '1 hour' where outbox_id=news;
+  r:=public.vector_confirm_newsletter(t2,ip);
+  if r<>'invalid_or_expired' then raise exception 'Old-cycle link survived explicit pending renewal'; end if;
+
+  -- Active subscriptions never renew, even when the original request is old.
+  em:=b||'-old-active@qa-vector.example.org'; eh:=md5(em)||repeat('1',32); ip:=md5(em)||repeat('0',32);
+  cycle:=clock_timestamp()-interval '25 hours'; first_at:=cycle+interval '1 hour';
+  insert into public.vector_newsletter_subscriptions(email_hash,email,locale,consent_version,status,requested_at,confirmed_at)
+  values(eh,em,'en','2026-10-news-v1','active',cycle,first_at) returning id into qa_subscription_id;
+  r:=public.vector_submit_inquiry('interest',em,'','','fr','2026-10-v1',ip,eh,true,'2026-10-news-v1');
+  if r<>'accepted' then raise exception 'Old active repeat failed'; end if;
+  set constraints vector_inquiry_mail_enqueue immediate;
+  set constraints vector_inquiry_mail_enqueue deferred;
+  if not exists (select 1 from public.vector_newsletter_subscriptions where id=qa_subscription_id
+      and status='active' and requested_at=cycle and confirmed_at=first_at)
+    or exists (select 1 from public.vector_mail_outbox where subscription_id=qa_subscription_id)
+  then raise exception 'Active repeat renewed consent or enqueued mail'; end if;
+
   if (select count(*) from public.vector_mail_outbox)<baseline+10 then raise exception 'Synthetic durable queue rows missing'; end if;
 
   -- Private tables deny all API roles; only the five worker/server RPCs are granted.

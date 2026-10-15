@@ -41,6 +41,7 @@ const { dispatchMail } = await import(dispatchModule);
 const { POST: confirm } = await import(confirmModule);
 const { POST: worker } = await import(workerModule);
 const { hashUnsubscribeToken } = await import(newsletterModule);
+const { subscribeNewsletterFragment } = await import(await loadModule('../../src/lib/web4/newsletter-fragment.ts'));
 const env = {
   VECTOR_FORMS_ENABLED: 'true', SUPABASE_URL: 'https://storage.example.test', SUPABASE_SECRET_KEY: 'sb_secret_test-key',
   VECTOR_FORM_HASH_SECRET: 'forms-test-only-hmac-secret-32-characters',
@@ -62,6 +63,38 @@ const job = {
 const request = (body, extra = {}) => new Request('https://preview.site-provider.com/api/vector/newsletter/confirm', {
   method: 'POST', headers: { origin: 'https://preview.site-provider.com', 'content-type': 'application/json', ...extra },
   body: typeof body === 'string' ? body : JSON.stringify(body),
+});
+
+test('same-document newsletter links replace old tokens, clean the URL and invalidate late responses without a GET mutation', async () => {
+  const events=new EventTarget(), links=[], historyState={ nextRouter:'preserved' };
+  const location={hash:'#token='+'A'.repeat(43),search:'?ignored=value',pathname:'/confirmar-novedades'};
+  const replacements=[];
+  const browser={location,history:{state:historyState,replaceState(state,title,path){replacements.push({state,title,path});location.hash='';location.search='';}},addEventListener:events.addEventListener.bind(events),removeEventListener:events.removeEventListener.bind(events)};
+  const originalFetch=globalThis.fetch;
+  globalThis.fetch=async()=>{throw new Error('Reading an email link must not issue an API request');};
+  try {
+    const stop=subscribeNewsletterFragment(browser,link=>links.push(link));
+    assert.equal(links.length,1);assert.equal(links[0].token,'A'.repeat(43));assert.equal(links[0].isCurrent(),true);
+    assert.equal(location.hash,'');assert.equal(location.search,'');assert.equal(replacements[0].state,historyState);assert.equal(replacements[0].path,location.pathname);
+    let resolveOld;
+    const oldResponse=new Promise(resolve=>{resolveOld=resolve;});
+    const first=links[0];let result='pending';
+    const settleOld=(async()=>{await oldResponse;if(first.isCurrent())result='old-complete';})();
+    location.hash='#token='+'B'.repeat(43);events.dispatchEvent(new Event('hashchange'));
+    assert.equal(links.length,2);assert.equal(links[1].token,'B'.repeat(43));assert.equal(links[0].isCurrent(),false);assert.equal(links[1].isCurrent(),true);
+    resolveOld();await settleOld;assert.equal(result,'pending');assert.equal(location.hash,'');
+    location.hash='#token=invalid';events.dispatchEvent(new Event('hashchange'));
+    assert.equal(links[2].token,'');assert.equal(links[1].isCurrent(),false);
+    stop();assert.equal(links[2].isCurrent(),false);
+    location.hash='#token='+'C'.repeat(43);events.dispatchEvent(new Event('hashchange'));assert.equal(links.length,3);
+    const replay=[];
+    const firstStop=subscribeNewsletterFragment(browser,link=>replay.push(link));
+    firstStop();
+    const replayStop=subscribeNewsletterFragment(browser,link=>replay.push(link),replay[0].token);
+    assert.equal(replay[1].token,'C'.repeat(43));assert.equal(replay[1].isCurrent(),true);assert.equal(replay[0].isCurrent(),false);
+    events.dispatchEvent(new Event('hashchange'));assert.equal(replay[2].token,'');
+    replayStop();
+  } finally {globalThis.fetch=originalFetch;}
 });
 
 test('mail remains disabled without complete secure SMTP configuration; Preview always requires allowlist', () => {

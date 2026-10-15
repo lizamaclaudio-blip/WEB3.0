@@ -49,6 +49,13 @@ so email scanners cannot confirm or cancel preferences. The browser receives the
 token in a URL fragment, removes it from its address and keeps it only in memory.
 Only SHA-256 token hashes persist. Expired or consumed tokens return 410.
 
+A new explicit opt-in can renew a still-pending subscription once its original
+request is at least 24 hours old. This creates one new confirmation cycle; previous
+links cannot activate that cycle. Repeated requests inside 24 hours remain
+deduplicated, active subscriptions keep their existing consent, and a request
+without the optional opt-in never renews a subscription. Renewal leaves all prior
+mail jobs and token hashes intact and does not retry an ambiguous or sent message.
+
 Queue ownership, short leases and unique job keys prevent concurrent duplicate
 dispatch. A deterministic HMAC token and Message-ID remain stable across retries.
 SMTP has **no guaranteed idempotency**: Message-ID is a trace identifier, not an

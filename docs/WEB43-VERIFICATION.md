@@ -1,7 +1,8 @@
 # WEB 4.3 — security, mail and COMPLETE
 
 Only `codex/patagonia-wings-web4` and the Vercel Preview are changed. No WPF,
-production deployment, payments, DNS or historical-data deletion.
+production deployment, payments or historical-data deletion. The user separately
+authorized exactly five mail DNS records on the real domain; see the DNS report.
 
 ## Supabase: verified against the actual project
 
@@ -25,6 +26,14 @@ metadata/token tables and service-only RPCs, without backfilling historical
 contacts. Real database integration passes with ROLLBACK: consent, single-cycle
 deduplication, leases, fixed token expiry, confirmation, unsubscribe, bounded
 retry and terminal delivery ambiguity. No synthetic records or mail jobs remain.
+
+Migration `20261015034932_renew_expired_pending_newsletter.sql` lets a fresh
+explicit opt-in renew a pending confirmation after 24 hours. Recent pending and
+active subscriptions keep their cycle; old links cannot activate the new cycle.
+The expanded rollback suite passes. Final verification retains only the seven
+approved real SMTP test jobs, all `sent`, with zero leased/sending; the rollback
+fixture leaves zero records. The designated test subscription is cancelled and
+has exactly one welcome job. Legacy counts remain 1/17.
 
 The final advisor has no disabled-RLS errors for these tables or new mail tables.
 No-policy notices are intentional for these private tables. Other historical
@@ -54,8 +63,26 @@ the stored secret. It is never copied into source or local test files.
 Submission and confirmation kick the outbox with Next `after`. A protected POST
 worker is also available for an external scheduler. **Periodic draining is not
 provisioned**; retries wait until another kick or authorized worker invocation.
-See [mail operations](WEB43-MAIL.md). Real SMTP acceptance/inbox/confirmation-flow
-verification is still pending at this commit; unit tests use a mocked transport.
+See [mail operations](WEB43-MAIL.md). Real SMTP and inbox checks now pass:
+
+- Three initial messages were accepted before DNS existed; acceptance was not
+  reported as delivery. The user reported no receipt.
+- The user authorized four MX and one SPF in Vercel. Public/authoritative DNS
+  verify them; website records are preserved. See [DNS evidence](WEB43-MAIL-DNS-PLAN.md).
+- A fresh contact receipt and internal notification were delivered; the user
+  confirmed receipt and the QA messages were observed in App Suite.
+- A fresh explicit test subscription generated a verification message. The old
+  superseded link was rejected. The current link required a deliberate POST,
+  activated the subscription and generated exactly one delivered welcome.
+- The welcome's unsubscribe link required an explicit POST and succeeded. The
+  test subscription ends `unsubscribed`, with confirmation/baja timestamps.
+- A second authorized worker invocation claimed zero jobs: accepted work was
+  not duplicated. Unauthenticated worker POST returns 401; confirmation GET 405.
+
+Only the designated synthetic subscription was reset after the initial undelivered
+test; historical contacts and jobs remain. Provider DKIM activation, SMTP password
+rotation and a periodic scheduler remain external setup. Preview mail remains
+restricted to the approved test mailbox, not opened to arbitrary recipients.
 
 ## Commercial and validation
 
@@ -64,7 +91,7 @@ remain beta; Academy/Performance are planned, price unannounced, one intended
 licence, no checkout. The waitlist reuses the existing form and separate consent.
 
 - Next 16.4.1 production build and TypeScript: passed.
-- 19 web tests: passed; focused ESLint and diff checks: passed.
+- 20 web tests: passed; focused ESLint and diff checks: passed.
 - 62 local HTTP checks: passed, including six new localized action pages,
   method restrictions, unconfigured fail-closed responses and private worker.
 - Dependency patches remove critical/high runtime advisories. One moderate
@@ -72,6 +99,11 @@ licence, no checkout. The waitlist reuses the existing form and separate consent
   upgrade is outside the forms/mail change. Dev-only braces chain remains.
 - Browser review covers desktop/mobile and all three languages; screenshots and
   additional Preview evidence are local artifacts, without credentials.
+- Real QA detected same-document token replacement retaining an old link. The
+  fragment listener now consumes each new link, removes it from the URL and
+  invalidates late responses from earlier actions; an EventTarget regression
+  covers navigation, cleanup, effect replay and zero GET mutation.
 
-This report distinguishes tested persistence, mocked SMTP, real SMTP acceptance
-and inbox delivery. Only the first two have been verified at this commit.
+This report distinguishes persistence, mocked SMTP, real SMTP acceptance and
+observed inbox delivery. All four are verified for the approved Preview workflow;
+this does not establish general inbox placement or production readiness.
