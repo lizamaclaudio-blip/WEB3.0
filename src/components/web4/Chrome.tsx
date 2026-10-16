@@ -38,7 +38,7 @@ export function WebHeader({ language = "es" }: { language?: Language }) {
         <span className="pw4-languages" role="group" aria-label={t("Idioma", "Language", "Langue")}>
           {languages.map(item => <Link key={item} href={localeHref(item, unlocalizedPath(pathname))} className="pw4-language" hrefLang={item} lang={item} title={languageNames[item]} aria-label={languageNames[item]} aria-current={language === item ? "page" : undefined} onClick={closeMenu}>{item.toUpperCase()}</Link>)}
         </span>
-        <Link href={localeHref(language, "/soporte#novedades")} className="pw4-pilot" onClick={closeMenu}>{t("Recibir novedades", "Stay informed", "Recevoir les actualités")}<Glyph name="arrow" size={17} /></Link>
+        <Link href={localeHref(language, "/soporte#novedades")} className="pw4-pilot" onClick={closeMenu}>{t("Quiero ser de los primeros", "Be among the first", "Faire partie des premiers")}<Glyph name="arrow" size={17} /></Link>
       </nav>
     </div>
   </header>;

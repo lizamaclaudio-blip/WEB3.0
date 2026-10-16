@@ -1,0 +1,76 @@
+{
+  "simulatorConnected": false,
+  "syntheticFlight": true,
+  "sourceLanguage": "en",
+  "contentAltered": false,
+  "privatePathsPresent": false,
+  "permission": "Project-owner supplied application captures; selected without personal profile paths",
+  "captures": [
+    {
+      "key": "academy",
+      "sourceFile": "08c-copiloto-academy-1920x1080.png",
+      "captureMode": "Native WPF QA tour",
+      "evidence": "fixture",
+      "width": 1920,
+      "height": 1061,
+      "bytes": 122844,
+      "sourceSha256": "4ad13585352121b7648a21c98b4ed10a43aed05a4045a493b021594d6a1c0ead",
+      "assetSha256": "2b1f88bb72ac332185c35cda97c7b17317a2dfe30e3c40ba9fb211bff8ff2909"
+    },
+    {
+      "key": "performance",
+      "sourceFile": "05b-performance-plan-1920x1080.png",
+      "captureMode": "Native WPF QA tour",
+      "evidence": "fixture",
+      "width": 1920,
+      "height": 1061,
+      "bytes": 101496,
+      "sourceSha256": "8f15e7b496de40d7fb4f9c7136ead06e3d7061b34fa43c3892b5c542c09992ae",
+      "assetSha256": "3e9ffc17611102c310fee8221181e3b65716ed5b07ac0dcf98e5a44755623641"
+    },
+    {
+      "key": "studio",
+      "sourceFile": "03c-carga-layout-studio-1920x1080.png",
+      "captureMode": "Native WPF QA tour",
+      "evidence": "fixture",
+      "width": 1920,
+      "height": 1061,
+      "bytes": 117500,
+      "sourceSha256": "ede07483c298ffce26ec571f0c8e2fc795077288e1ac16943dc70a98e15402fe",
+      "assetSha256": "8c3e75a31758906fbd6831f08ac528c4a1c4b1f5aa56585438f46e0917faeca0"
+    },
+    {
+      "key": "career",
+      "sourceFile": "01k-career-inicio-1920x1080.png",
+      "captureMode": "Native WPF QA tour",
+      "evidence": "fixture",
+      "width": 1920,
+      "height": 1061,
+      "bytes": 97642,
+      "sourceSha256": "ca9417a98e5efb2cee477039d10876b1d4ac6ea81a5cca31e632cdc24dff1b99",
+      "assetSha256": "5e4454c4f77a815b6fe75befbbf66f8a84a6cbc718f31b33ca7b92a14f9cdc67"
+    },
+    {
+      "key": "acars",
+      "sourceFile": "19d-acars-pirep-1920x1080.png",
+      "captureMode": "Native WPF QA tour",
+      "evidence": "fixture",
+      "width": 1600,
+      "height": 829,
+      "bytes": 99316,
+      "sourceSha256": "493edffe1c4e59f284967b3b7edc501e8aeb081e5a6ad588b4f83eda78852c77",
+      "assetSha256": "ffd1edd8505c9fe657f3a32fdfc907cc33d7954c764d35ef4d9343d4542bdc5a"
+    }
+  ],
+  "artwork": {
+    "src": "/vector/web50/hero-aviation.webp",
+    "type": "Original AI conceptual aviation artwork; not a flight or software screenshot",
+    "tool": "OpenAI built-in image generation",
+    "promptDocument": "docs/WEB50-ASSETS.md",
+    "width": 1672,
+    "height": 941,
+    "bytes": 122530,
+    "sourceSha256": "9c552588f102f3ab044aa1aaf7841672ac9c64771b7c139a4e52f81e31be9357",
+    "assetSha256": "7bfcb523d24f7fb2b91c2d56aa5af9121ec24847639a193d34355f3d4843b95f"
+  }
+}

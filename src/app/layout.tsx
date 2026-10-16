@@ -3,6 +3,10 @@ import { Inter, Rajdhani } from "next/font/google";
 import "./globals.css";
 import "./web4.css";
 import "./web41.css";
+import "./web50-home.css";
+import "./web50-demo.css";
+import "./web50-product.css";
+import "./web50.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const rajdhani = Rajdhani({ subsets: ["latin"], weight: ["500", "700"], variable: "--font-rajdhani" });

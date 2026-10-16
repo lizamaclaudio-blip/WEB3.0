@@ -35,6 +35,36 @@ export const galleryGroups: readonly GalleryGroup[] = [
 // it does not certify every feature shown. Keep original source-language text and disclose fixtures visibly.
 export const galleryCaptures: readonly GalleryCapture[] = [
   {
+    key: "academy", group: "preparation", src: "/vector/web50/academy.webp", size: { width: 1920, height: 1061 }, evidence: "fixture", sourceLanguage: "en",
+    title: text("Academy, junto a tu Copiloto", "Academy, alongside your Copilot", "Academy, aux côtés du Copilote"),
+    description: text("Recorrido de aprendizaje integrado en COPILOTO, con instrucciones y checklist de una sesión QA. No muestra el editor completo de Academy ni acredita un vuelo real.", "A learning path integrated into COPILOT, with instructions and a checklist from a QA session. This does not show the full Academy editor or verify a real flight.", "Parcours d’apprentissage intégré au COPILOTE, avec instructions et liste de vérification d’une session QA. Cette vue ne présente pas l’éditeur complet d’Academy et ne valide pas un vol réel."),
+    tags: tags(["Academy integrada", "Validación real pendiente"], ["Integrated Academy", "Live validation pending"], ["Academy intégrée", "Validation réelle à effectuer"]),
+  },
+  {
+    key: "performance", group: "preparation", src: "/vector/web50/performance.webp", size: { width: 1920, height: 1061 }, evidence: "fixture", sourceLanguage: "en",
+    title: text("Más contexto para cada pista", "More context for every runway", "Plus de contexte pour chaque piste"),
+    description: text("Performance reúne viento, atmósfera y referencias manuales de la aeronave. Datos sintéticos de QA; no calcula velocidades certificadas ni valida una operación real.", "Performance brings together wind, atmosphere and manual aircraft references. Synthetic QA data; it does not calculate certified speeds or validate a real operation.", "Performance rassemble vent, atmosphère et références manuelles de l’appareil. Données QA synthétiques ; aucun calcul de vitesses certifiées ni validation d’une opération réelle."),
+    tags: tags(["Performance", "Referencias manuales"], ["Performance", "Manual references"], ["Performance", "Références manuelles"]),
+  },
+  {
+    key: "studio", group: "ground", src: "/vector/web50/studio.webp", size: { width: 1920, height: 1061 }, evidence: "fixture", sourceLanguage: "en",
+    title: text("Tu layout, aplicado a la cabina", "Your layout, applied to the cabin", "Votre aménagement, appliqué à la cabine"),
+    description: text("CARGA Y CABINA utiliza un layout de Aircraft Studio durante una sesión QA. Esta captura muestra el resultado integrado, no los controles del editor. Las posiciones de pasajeros son ilustrativas.", "LOAD & CABIN uses an Aircraft Studio layout during a QA session. This screenshot shows the integrated result, not the editor controls. Passenger positions are illustrative.", "CHARGEMENT ET CABINE utilise un aménagement d’Aircraft Studio pendant une session QA. La capture montre le résultat intégré, pas les commandes de l’éditeur. Les positions des passagers sont illustratives."),
+    tags: tags(["Layout de Studio", "Integración con cabina"], ["Studio layout", "Cabin integration"], ["Aménagement Studio", "Intégration cabine"]),
+  },
+  {
+    key: "career", group: "journal", src: "/vector/web50/career.webp", size: { width: 1920, height: 1061 }, evidence: "fixture", sourceLanguage: "en",
+    title: text("Una historia que continúa: Career Local", "A continuing story: Career Local", "Une histoire qui continue : Career Local"),
+    description: text("Piloto de prueba, aerolínea personal, misiones y progreso del MVP local implementado en QA. No hay plataforma online ni pilotos conectados; validación con MSFS real pendiente.", "A test pilot, personal airline, missions and progress in the local MVP implemented in QA. No online platform or connected pilots; live MSFS validation is pending.", "Pilote de test, compagnie personnelle, missions et progression du MVP local implémenté en QA. Aucune plateforme en ligne ni pilotes connectés ; validation avec MSFS réel à effectuer."),
+    tags: tags(["Career Local", "Implementado en QA"], ["Career Local", "Implemented in QA"], ["Career Local", "Implémenté en QA"]),
+  },
+  {
+    key: "acars", group: "journal", src: "/vector/web50/acars.webp", size: { width: 1600, height: 829 }, evidence: "fixture", sourceLanguage: "en",
+    title: text("ACARS Local: conservar la operación", "ACARS Local: keep the operation", "ACARS Local : conserver les opérations"),
+    description: text("PIREP y eventos de una sesión sintética, integrados con Career y Diario. Registro y cola offline locales implementados en QA; no es un servicio online ni evidencia de MSFS real.", "A synthetic-session PIREP and events, integrated with Career and Logbook. Local recording and offline queue implemented in QA; this is not an online service or live MSFS evidence.", "PIREP et événements d’une session synthétique, intégrés à Career et au Journal. Enregistrement et file hors ligne locaux implémentés en QA ; aucun service en ligne ni preuve de MSFS réel."),
+    tags: tags(["ACARS Local", "PIREP de prueba"], ["ACARS Local", "Test PIREP"], ["ACARS Local", "PIREP de test"]),
+  },
+  {
     key: "home", group: "preparation", src: "/vector/m29/home.webp", size: qaTourSize, evidence: "fixture", sourceLanguage: "en",
     title: text("Tu operación, desde el inicio", "Your operation, from the start", "Vos opérations dès le départ"),
     description: text("Inicio reúne el contexto de la sesión y los accesos a cada etapa del vuelo.", "Home brings together session context and access to each stage of flight.", "L’accueil rassemble le contexte de la session et les accès à chaque étape du vol."),

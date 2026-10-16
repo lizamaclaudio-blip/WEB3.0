@@ -10,19 +10,25 @@ const url = 'data:text/javascript;base64,' + Buffer.from(ts.transpileModule(sour
 const { galleryCaptures, galleryGroups } = await import(url);
 const provenance = JSON.parse(await readFile(new URL('../../public/vector/current/provenance.json', import.meta.url), 'utf8'));
 const newer = JSON.parse(await readFile(new URL('../../public/vector/m29/provenance.json', import.meta.url), 'utf8'));
+const cinematic = JSON.parse(await readFile(new URL('../../public/vector/web50/provenance.json', import.meta.url), 'utf8'));
 
 test('each gallery image has current native WPF provenance, honest evidence and all three translations', async () => {
-  assert.equal(galleryCaptures.length, 14);
+  assert.equal(galleryCaptures.length, 19);
   assert.deepEqual(galleryGroups.map(group => group.id), ['preparation','dispatch','ground','flight','copilot','landing','journal']);
-  assert.equal(new Set(galleryCaptures.map(capture => capture.key)).size, 14);
+  assert.equal(new Set(galleryCaptures.map(capture => capture.key)).size, 19);
   assert.equal(provenance.simulatorConnected, false);
   assert.equal(provenance.syntheticFlight, true);
   assert.equal(newer.simulatorConnected, false);
   assert.equal(newer.syntheticFlight, true);
   assert.equal(newer.contentAltered, false);
   assert.equal(/C:[\\/]|AppData|Users[\\/]|live-journal/i.test(JSON.stringify(newer)), false);
+  assert.equal(cinematic.simulatorConnected, false);
+  assert.equal(cinematic.syntheticFlight, true);
+  assert.equal(cinematic.contentAltered, false);
+  assert.equal(cinematic.privatePathsPresent, false);
+  assert.equal(/C:[\\/]|AppData|Users[\\/]|live-journal/i.test(JSON.stringify(cinematic)), false);
   for (const capture of galleryCaptures) {
-    const manifest = capture.src.startsWith('/vector/m29/') ? newer : provenance;
+    const manifest = capture.src.startsWith('/vector/web50/') ? cinematic : capture.src.startsWith('/vector/m29/') ? newer : provenance;
     const asset = manifest.captures.find(item => item.key === capture.key);
     assert.ok(asset, capture.key);
     assert.equal(asset.evidence, capture.evidence);

@@ -29,6 +29,8 @@ export function ReleaseStatus({ language }: { language: Language }) {
       </div>
     </section>
 
+    <h2>{t("M35 · Licencias e instalador en preparación", "M35 · Licensing and installer in preparation", "M35 · Licences et installateur en préparation")}</h2>
+    <p>{t("La preparación de licencias e instalador no constituye un lanzamiento. Sin descarga pública, activación comercial ni pagos habilitados.", "Licensing and installer preparation is not a release. No public download, commercial activation or payments are enabled.", "La préparation des licences et de l’installateur ne constitue pas un lancement. Aucun téléchargement public, aucune activation commerciale ni aucun paiement ne sont proposés.")}</p>
     <h2>{t("Historial y distribución", "Release history and distribution", "Historique et distribution")}</h2>
     <p>{t("Los hitos describen avances de desarrollo, no lanzamientos comerciales. Todavía no hay versiones comerciales públicas que listar. Las notas de versión y las sumas de verificación del instalador aparecerán cuando exista una versión distribuible.", "Milestones describe development progress, not commercial releases. There are no public commercial releases to list yet. Release notes and verified installer checksums will appear when a distributable version is available.", "Les jalons décrivent les avancées du développement, pas des lancements commerciaux. Aucune version commerciale publique n’est encore proposée. Les notes de version et les sommes de contrôle vérifiées de l’installateur seront publiées lorsqu’une version distribuable sera prête.")}</p>
     <h2>{t("Una licencia COMPLETE", "One COMPLETE licence", "Une licence COMPLETE")}</h2>

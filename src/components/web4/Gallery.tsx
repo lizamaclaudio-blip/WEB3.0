@@ -110,7 +110,7 @@ export function Gallery({ language, initialGroup = "preparation" }: { language: 
       </div>
       <div className="pw41-capture-options" role="group" aria-label={t("Capturas de esta etapa", "Screenshots in this stage", "Captures de cette étape")}>
         {groupItems.map(({ capture, index }, position) => <button key={capture.key} type="button" aria-pressed={index === selected} onClick={() => setSelected(index)}>
-          <span aria-hidden="true">{String(position + 1).padStart(2, "0")}</span>{capture.title[language]}
+          <Image src={capture.src} width={capture.size.width} height={capture.size.height} alt="" sizes="(max-width: 800px) 40vw, 220px" loading="lazy" /><span><small aria-hidden="true">{String(position + 1).padStart(2, "0")}</small>{capture.title[language]}</span>
         </button>)}
       </div>
       <div className="pw41-gallery-footnote">
