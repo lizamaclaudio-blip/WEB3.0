@@ -18,12 +18,30 @@ const dispatchStub = dataModule('export async function dispatchMail() { return g
 const mailAfterModule = await loadModule('../../src/lib/web4/mail-after.ts', {'next/server':afterStub,'./mail':mailModule,'./mail-dispatch':dispatchStub});
 const references = {'@/lib/web4/inquiry':inquiryModule,'@/lib/web4/inquiry-http':httpModule,'@/lib/web4/inquiry-storage':storageModule,'@/lib/web4/newsletter':newsletterModule,'@/lib/web4/mail-after':mailAfterModule};
 const { validateInquiry, inquiryConfigured, newsletterConsentVersion } = await import(inquiryModule);
-const { inquiryRpc } = await import(storageModule);
+const { inquiryRpc,inquiryAddressHash } = await import(storageModule);
 const { hashUnsubscribeToken, issueUnsubscribeToken, validUnsubscribeToken } = await import(newsletterModule);
 const { POST } = await import(await loadModule('../../src/app/api/vector/inquiry/route.ts', references));
 const { POST: unsubscribe } = await import(await loadModule('../../src/app/api/vector/unsubscribe/route.ts', references));
 const valid = { kind:'interest', email:' Person@Example.com ', name:' Test ', message:'', consent:true, locale:'es', website:'' };
 const request = (body, changes = {}) => new Request('http://localhost:3004/api/vector/inquiry', { method:'POST', headers: { origin:'http://localhost:3004', 'content-type':'application/json', ...changes }, body: typeof body === 'string' ? body : JSON.stringify(body) });
+
+test('Workers rate limits distinguish trusted client IPs and ignore spoofed forwarding headers',()=>{
+ const env={VECTOR_FORMS_ENABLED:'true',SUPABASE_URL:'https://synthetic.supabase.co',SUPABASE_SECRET_KEY:'sb_secret_synthetic',VECTOR_FORM_HASH_SECRET:'x'.repeat(32),VECTOR_HOSTING_PLATFORM:'cloudflare',VERCEL:'1'};
+ const first=request({}, {'cf-connecting-ip':'198.51.100.1','x-vercel-forwarded-for':'203.0.113.9'});
+ const spoof=request({}, {'cf-connecting-ip':'198.51.100.1','x-vercel-forwarded-for':'203.0.113.8'});
+ const second=request({}, {'cf-connecting-ip':'198.51.100.2'});
+ assert.equal(inquiryAddressHash(first,env),inquiryAddressHash(spoof,env));
+ assert.notEqual(inquiryAddressHash(first,env),inquiryAddressHash(second,env));
+ assert.equal(inquiryAddressHash(request({}, {'x-forwarded-for':'198.51.100.9'}),env),inquiryAddressHash(request({}, {'x-forwarded-for':'198.51.100.10'}),env));
+});
+
+test('Workers never starts a mail transaction under an insufficient after-response budget',async t=>{
+ const old=process.env.VECTOR_HOSTING_PLATFORM; process.env.VECTOR_HOSTING_PLATFORM='cloudflare';
+ t.after(()=>{if(old===undefined)delete process.env.VECTOR_HOSTING_PLATFORM;else process.env.VECTOR_HOSTING_PLATFORM=old;});
+ const before=globalThis.__vectorAfterCallbacks?.length||0;
+ (await import(mailAfterModule)).scheduleMailAfterResponse();
+ assert.equal(globalThis.__vectorAfterCallbacks?.length||0,before);
+});
 
 test('normalizes valid interest; requires explicit consent and rejects spam', () => {
  assert.deepEqual(validateInquiry(valid), { ok:true, value:{ kind:'interest', email:'person@example.com', name:'Test', message:'', consent:true, newsletterConsent:false, locale:'es' } });

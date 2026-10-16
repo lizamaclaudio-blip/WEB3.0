@@ -1,5 +1,5 @@
 import { writeFile } from 'node:fs/promises';
-const base = 'http://127.0.0.1:3005';
+const base = process.env.VECTOR_SMOKE_ORIGIN || 'http://127.0.0.1:3005';
 const results = [];
 const pages = ['', '/copiloto-vector', '/descubre', '/ediciones', '/roadmap', '/comunidad', '/founders-10', '/novedades', '/comunidad/cuenta', '/comunidad/admin', '/soporte', '/versiones', '/privacidad', '/condiciones', '/confirmar-novedades', '/cancelar-novedades'];
 const paths = ['','/en','/fr'].flatMap(locale => pages.map(page => locale + (page || (locale ? '' : '/'))));
@@ -44,4 +44,4 @@ async function check(path, expected, image=false) {
 const failed = results.filter(item=>!item.ok);
 if (failed.length) process.exitCode=1;
 console.log(JSON.stringify({checks:results.length,passed:results.length-failed.length,failed},null,2));
-await writeFile('artifacts/web4-review/http-checks.json',JSON.stringify(results,null,2));
+await writeFile(process.env.VECTOR_SMOKE_REPORT||'artifacts/web4-review/http-checks.json',JSON.stringify(results,null,2));

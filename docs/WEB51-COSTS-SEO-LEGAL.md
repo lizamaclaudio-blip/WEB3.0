@@ -1,5 +1,10 @@
 # WEB 5.1 — infraestructura, SEO y preparación legal
 
+**Actualización posterior de esta revisión:** no contratar Vercel Pro.
+Consultar [la prueba real de Cloudflare y sus bloqueos](WEB51-CLOUDFLARE-TRIAL.md)
+y [el cierre final](WEB51-FINAL-CLOSURE.md). Workers Free se compiló y ejecutó
+localmente; no se creó cuenta ni se acreditó paridad remota de todas las funciones.
+
 Revisión: **16 de octubre de 2026**, hora de Chile. Documento interno del
 repositorio: no se importa en componentes, APIs públicas ni metadatos. Los
 importes siguientes son de infraestructura, **no precios de VECTOR**. No se
@@ -146,8 +151,10 @@ mensajes ya entregados y el consentimiento de cada propósito.
 
 OpenNext distingue su adaptador Workers del antiguo `next-on-pages`. Declara
 App Router, route handlers, SSR, SSG y `after()` compatibles, pero señala
-limitaciones específicas —incluido Node middleware— y un tamaño comprimido
-de Worker de 3 MiB Free / 10 MiB Paid. La compatibilidad declarada no equivale
+limitaciones específicas —incluido Node middleware—. Su texto sobre 3/10 MiB
+gzip difiere de la documentación actual de Cloudflare, que indica 64 MiB sin
+comprimir para ambos planes; se usó esta última y se midió el paquete real.
+La compatibilidad declarada no equivale
 a haber ejecutado esta aplicación en Workers. [Compatibilidad OpenNext](https://opennext.js.org/cloudflare),
 [guía Cloudflare Next.js](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/).
 
@@ -158,11 +165,11 @@ funcionamiento de nuestro SMTP 465. Hacer una prueba aislada de TLS, tiempos y
 errores antes de decidir. [Next en Pages](https://developers.cloudflare.com/pages/framework-guides/nextjs/),
 [sockets Workers](https://developers.cloudflare.com/workers/runtime-apis/tcp-sockets/).
 
-**Recomendación:** conservar Vercel para esta revisión, pedir autorización de
-Pro antes de publicación comercial y reutilizar Supabase. Workers Paid merece
-una prueba posterior si el ahorro nominal mensual compensa migración, pruebas
-de correo y mantenimiento del adaptador. No migrar una comunidad recién abierta
-solo para ahorrar el precio base del hosting. Ningún plan se cambió aquí.
+**Recomendación actualizada:** conservar el Preview y reutilizar Supabase.
+No contratar Pro por decisión del titular. Ensayar el Worker preparado en una
+cuenta Cloudflare Free cuando exista, resolver correo/Auth y medir CPU antes
+de decidir su viabilidad. Paid desde USD5 es solo una referencia si Free no
+alcanza; no resuelve automáticamente las incompatibilidades. Ningún plan cambió.
 
 ## 4. SEO: estado inicial, preparación y publicación
 

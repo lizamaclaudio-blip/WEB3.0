@@ -1,5 +1,9 @@
 # WEB 5.1 — Community Launch: verificación
 
+**Cierre actualizado:** [estado final, identidad y límites reales](WEB51-FINAL-CLOSURE.md).
+Este documento conserva la evidencia de la base `b9bc48c`; la revisión posterior
+incluye 77 tests y una prueba Workers completa. No equivale a comunidad abierta.
+
 16 de octubre de 2026. Rama exclusiva: `codex/patagonia-wings-web4`.
 Implementación `2daa376`; Preview funcional inicial:
 https://web-30-8a8wbzulb-lizamaclaudio-blips-projects.vercel.app/.

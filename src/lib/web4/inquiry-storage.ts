@@ -8,7 +8,9 @@ type InquiryRpcName = "vector_submit_inquiry" | "vector_register_unsubscribe_tok
 export function inquiryAddressHash(request: Request, env: InquiryEnvironment = process.env): string {
   if (!inquiryConfigured(env)) throw new Error("Inquiry storage is unavailable");
   // Vercel overwrites this header. Elsewhere never trust caller-supplied IPs.
-  const address = env.VERCEL === "1" ? request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() || "unknown" : "local";
+  const address = env.VECTOR_HOSTING_PLATFORM==='cloudflare'
+    ? request.headers.get('cf-connecting-ip')?.trim() || 'unknown'
+    : env.VERCEL === "1" ? request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() || "unknown" : "local";
   return createHmac("sha256", env.VECTOR_FORM_HASH_SECRET!).update(address).digest("hex");
 }
 

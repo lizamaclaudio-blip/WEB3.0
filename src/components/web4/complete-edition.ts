@@ -2,7 +2,7 @@ import type { Language } from "./locale";
 
 // Commercial intent only. QA implementation does not enable a purchasable offer.
 export const completeEdition = {
-  name: "COPILOTO VECTOR COMPLETE",
+  name: "VECTOR COMMANDER",
   status: "planned",
   licenceCount: 1,
   checkoutEnabled: false,

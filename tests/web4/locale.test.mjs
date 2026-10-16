@@ -9,6 +9,7 @@ const { languages, localeHref, unlocalizedPath } = await import(localeModule);
 const routesModule=moduleUrl(await readFile(new URL('../../src/components/web4/public-routes.ts',import.meta.url),'utf8'));
 const publicIdeasStub=moduleUrl('export async function getPublicProposalIds(){return [];}');
 const sitePolicyModule=moduleUrl(await readFile(new URL('../../src/lib/web51/site-policy.ts',import.meta.url),'utf8'));
+const {publicSiteEnabled}=await import(sitePolicyModule);
 const loadRoute = async path => import(moduleUrl((await readFile(new URL(path, import.meta.url), 'utf8')).replace('@/components/web4/locale', localeModule).replace('@/components/web4/public-routes',routesModule).replace('@/lib/web51/public-ideas',publicIdeasStub).replace('@/lib/web51/site-policy',sitePolicyModule)));
 const { default: sitemap } = await loadRoute('../../src/app/sitemap.ts');
 const { default: robots } = await loadRoute('../../src/app/robots.ts');
@@ -26,6 +27,12 @@ test('switching ES, EN and FR keeps the same public page without repeated locale
   }
   assert.equal(unlocalizedPath('/enquiries'), '/enquiries');
   assert.equal(localeHref('fr', '/soporte#novedades'), '/fr/soporte#novedades');
+});
+
+test('Cloudflare trials cannot inherit Vercel production indexing and need their own release stage',()=>{
+ assert.equal(publicSiteEnabled({VECTOR_HOSTING_PLATFORM:'cloudflare',VECTOR_SITE_MODE:'public',VERCEL_ENV:'production'}),false);
+ assert.equal(publicSiteEnabled({VECTOR_HOSTING_PLATFORM:'cloudflare',VECTOR_SITE_MODE:'preview',VECTOR_DEPLOYMENT_STAGE:'production'}),false);
+ assert.equal(publicSiteEnabled({VECTOR_HOSTING_PLATFORM:'cloudflare',VECTOR_SITE_MODE:'public',VECTOR_DEPLOYMENT_STAGE:'production'}),true);
 });
 
 test('all 36 public locale pages have reciprocal sitemap alternates; previews and private routes stay excluded', async () => {
@@ -63,8 +70,8 @@ test('all 36 public locale pages have reciprocal sitemap alternates; previews an
   }
 });
 
-test('COMPLETE presents one future licence in all languages without an active commercial offer', () => {
-  assert.equal(completeEdition.name, 'COPILOTO VECTOR COMPLETE');
+test('COMMANDER presents the complete future edition in all languages without an active commercial offer', () => {
+  assert.equal(completeEdition.name, 'VECTOR COMMANDER');
   assert.equal(completeEdition.licenceCount, 1);
   assert.equal(completeEdition.status, 'planned');
   assert.equal(completeEdition.checkoutEnabled, false);

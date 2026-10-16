@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 import {publicSiteEnabled} from './src/lib/web51/site-policy';
 
 const nextConfig: NextConfig = {
+  // The trial uses existing optimized WebP assets; no paid Images binding.
+  ...(process.env.VECTOR_HOSTING_PLATFORM==='cloudflare'?{
+    images:{unoptimized:true},
+    outputFileTracingIncludes:{'/*':['./node_modules/pg-cloudflare/dist/**/*']},
+  }:{}),
   async headers() {
     const excluded=['/api/:path*',...['','/en','/fr'].flatMap(prefix=>['/comunidad/admin','/comunidad/cuenta','/confirmar-novedades','/cancelar-novedades'].map(path=>prefix+path))];
     const rules=excluded.map(source=>({source,headers:[{key:'X-Robots-Tag',value:'noindex, nofollow'},{key:'Referrer-Policy',value:'no-referrer'}]}));

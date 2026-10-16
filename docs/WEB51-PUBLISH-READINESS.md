@@ -1,5 +1,10 @@
 # WEB 5.1 — preparación para publicación
 
+**Actualización de cierre:** [estado real](WEB51-FINAL-CLOSURE.md),
+[Auth](WEB51-AUTH-READINESS.md), [prueba Cloudflare](WEB51-CLOUDFLARE-TRIAL.md).
+El titular descartó contratar Vercel Pro. Cloudflare se preparó y probó localmente;
+no se declara una migración remota completa ni una publicación Free acreditada.
+
 16 de octubre de 2026, hora de Chile. **El titular decidió conservar el Preview
 por ahora. Producción no desplegada.** No se contrató un plan comercial.
 La entrega sirve para revisar el prelanzamiento; todavía tiene requisitos externos
@@ -39,7 +44,7 @@ antes de abrir registro comunitario y publicar.
 | Acción | Responsable / evidencia requerida |
 | --- | --- |
 | Revisar Preview Web 5.1 final | Titular: aprobar experiencia, idiomas, estados y restricciones; conservar URL/SHA del despliegue verificado |
-| Alojamiento comercial | Autorizar Vercel Pro o resolver elegibilidad con Vercel. Hobby actual limita uso comercial; no basta omitir checkout |
+| Alojamiento comercial | Resolver los bloqueos Cloudflare y medir Free; no contratar Pro. Conservar Vercel únicamente como Preview de revisión por ahora |
 | Correo de identidad | Verificar configuración y entrega de Supabase Auth, remitente y cuotas; configurar redirects del dominio autorizado; probar confirmación y sesión real sin divulgar claves |
 | Abrir cuentas comunitarias | Solo después de la prueba anterior, autorizar cambio de la variable de registro y verificar nuevamente alta, confirmación, acceso y baja |
 | Administración | Designar una cuenta verificada como moderadora mediante procedimiento privado; probar acceso permitido y denegado, revisión de propuestas, votos/reportes y auditoría |

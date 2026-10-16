@@ -1,0 +1,11 @@
+# Copy to .dev.vars for a local, non-sending compatibility trial.
+# Runtime secrets must only be entered into the selected Worker's secret store.
+NEXTJS_ENV=development
+VECTOR_HOSTING_PLATFORM=cloudflare
+VECTOR_DEPLOYMENT_STAGE=preview
+VECTOR_SITE_MODE=preview
+VECTOR_FORMS_ENABLED=false
+VECTOR_FORMS_MODE=preview
+VECTOR_COMMUNITY_AUTH_ENABLED=false
+VECTOR_COMMUNITY_REGISTRATION_ENABLED=false
+VECTOR_MAIL_ENABLED=false

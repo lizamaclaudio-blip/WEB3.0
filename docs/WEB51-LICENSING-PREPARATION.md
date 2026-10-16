@@ -2,7 +2,7 @@
 
 TAKEOFF, HORIZON y COMMANDER son las tres ediciones previstas. COMMANDER es la completa. La distribución funcional que muestra la web es una **propuesta editorial**, pendiente de los derechos definitivos y del contrato de activación de Claude. No se transforma en una autorización de módulos ni en una licencia emitida.
 
-El producto histórico se sigue llamando COPILOTO VECTOR COMPLETE en las capturas y piezas visuales; la futura edición completa se identifica como COMMANDER. CAREER ONLINE no está implementado ni se promete incluido en una licencia local. No hay precios, tablas de importes, descuentos calculados, pruebas gratuitas de 14 días ni SDK de PayPal en el cliente. Los upgrades futuros abonarán la diferencia correspondiente al grupo de compra, sujeto a condiciones por publicar.
+La marca principal es COPILOTO VECTOR. TAKEOFF, HORIZON y COMMANDER son las tres ediciones; COMMANDER es la completa. Las capturas históricas pueden conservar COMPLETE como nombre anterior, sin retocar su evidencia. Encabezados, metadatos y textos actuales usan la nueva identidad. CAREER ONLINE no está implementado ni se promete incluido en una licencia local. No hay precios, tablas de importes, descuentos calculados, pruebas gratuitas de 14 días ni SDK de PayPal en el cliente. Los upgrades futuros abonarán la diferencia correspondiente al grupo de compra, sujeto a condiciones por publicar.
 
 ## Contrato futuro, sin endpoints de activación
 

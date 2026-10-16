@@ -1,0 +1,21 @@
+{
+  "$schema":"node_modules/wrangler/config-schema.json",
+  "name":"patagonia-vector-web51-trial",
+  "main":".open-next/worker.js",
+  "compatibility_date":"2026-10-16",
+  "compatibility_flags":["nodejs_compat","global_fetch_strictly_public"],
+  "workers_dev":true,
+  "preview_urls":false,
+  "assets":{"directory":".open-next/assets","binding":"ASSETS"},
+  "services":[{"binding":"WORKER_SELF_REFERENCE","service":"patagonia-vector-web51-trial"}],
+  "vars":{
+    "VECTOR_HOSTING_PLATFORM":"cloudflare",
+    "VECTOR_DEPLOYMENT_STAGE":"preview",
+    "VECTOR_SITE_MODE":"preview",
+    "VECTOR_FORMS_ENABLED":"false",
+    "VECTOR_FORMS_MODE":"preview",
+    "VECTOR_COMMUNITY_AUTH_ENABLED":"false",
+    "VECTOR_COMMUNITY_REGISTRATION_ENABLED":"false",
+    "VECTOR_MAIL_ENABLED":"false"
+  }
+}

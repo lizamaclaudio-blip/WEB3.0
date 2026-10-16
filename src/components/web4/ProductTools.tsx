@@ -15,7 +15,7 @@ export function ProductTools({ language }: { language: Language }) {
   const t = (es: string, en: string, fr: string) => localized(language, es, en, fr);
   const index = language === "es" ? 0 : language === "en" ? 1 : 2;
   return <section className="pv50-tools" id="herramientas" aria-labelledby="tools-heading"><div className="pw4-wrap">
-    <p className="pw4-eyebrow">COPILOTO VECTOR COMPLETE</p><h2 id="tools-heading">{t("Más caminos para disfrutar del vuelo.", "More ways to enjoy the journey.", "De nouvelles façons de vivre le vol.")}</h2>
+    <p className="pw4-eyebrow">COPILOTO VECTOR</p><h2 id="tools-heading">{t("Más caminos para disfrutar del vuelo.", "More ways to enjoy the journey.", "De nouvelles façons de vivre le vol.")}</h2>
     {benefits.map((item, position) => {
       const capture = galleryCaptures.find(capture => capture.key === item.key);
       return <article key={item.key} className="pv50-tool"><div><p className="pv50-tool-label">{String(position + 1).padStart(2, "0")} / {item.name}</p><h3>{item.title[index]}</h3><p>{item.text[index]}</p><p className="pv50-tool-status">{t("IMPLEMENTADO EN QA · Validación real pendiente · Sin disponibilidad comercial", "IMPLEMENTED IN QA · Live validation pending · Not commercially available", "IMPLÉMENTÉ EN QA · Validation réelle à effectuer · Non disponible commercialement")}</p><Link href={localeHref(language, "/versiones#hitos")}>{t("Consultar alcance y validación", "See scope and validation", "Consulter la portée et la validation")} ↗</Link></div>

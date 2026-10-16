@@ -25,14 +25,14 @@ const id='00000000-0000-4000-8000-000000000001',sid='00000000-0000-4000-8000-000
 const token=()=>Buffer.from('{"alg":"mock"}').toString('base64url')+'.'+Buffer.from(JSON.stringify({sub:id,session_id:sid,role:'authenticated',exp:Math.floor(Date.now()/1000)+3600})).toString('base64url')+'.mock';
 const request=(body,path='/api/vector/community/session',cookie,method='POST')=>new Request('https://vector.example'+path,{method,headers:{origin:'https://vector.example',host:'vector.example','content-type':'application/json',...(cookie?{cookie:server.communityCookie+'='+cookie}:{})},body:JSON.stringify(body)});
 function environment(t,enabled=true){
- const values={VECTOR_FORMS_ENABLED:'true',SUPABASE_URL:'https://example.supabase.co',SUPABASE_SECRET_KEY:'sb_secret_synthetic',VECTOR_FORM_HASH_SECRET:'x'.repeat(32),VECTOR_COMMUNITY_AUTH_ENABLED:enabled?'true':'false',VECTOR_COMMUNITY_REGISTRATION_ENABLED:'true',NEXT_PUBLIC_SUPABASE_ANON_KEY:'sb_publishable_synthetic'};
+ const values={VECTOR_FORMS_ENABLED:'true',SUPABASE_URL:'https://example.supabase.co',SUPABASE_SECRET_KEY:'sb_secret_synthetic',VECTOR_FORM_HASH_SECRET:'x'.repeat(32),VECTOR_COMMUNITY_AUTH_ENABLED:enabled?'true':'false',VECTOR_COMMUNITY_REGISTRATION_ENABLED:'true',VECTOR_COMMUNITY_CONFIRM_ORIGIN:'https://vector.example',NEXT_PUBLIC_SUPABASE_ANON_KEY:'sb_publishable_synthetic'};
  const old=Object.fromEntries(Object.keys(values).map(k=>[k,process.env[k]]));Object.assign(process.env,values);
  t.after(()=>{for(const[k,v]of Object.entries(old))if(v===undefined)delete process.env[k];else process.env[k]=v;});
 }
 function network(t,overrides={}){
  const old=globalThis.fetch;const calls=[];const activeToken=token();
  globalThis.fetch=async(url,options={})=>{
-  const path=new URL(url).pathname;calls.push({path,body:options.body?JSON.parse(options.body):null,headers:options.headers,method:options.method});
+  const parsedUrl=new URL(url);const path=parsedUrl.pathname;calls.push({path,search:parsedUrl.search,body:options.body?JSON.parse(options.body):null,headers:options.headers,method:options.method});
   if(overrides[path])return overrides[path](options,calls);
   if(path.endsWith('/settings'))return Response.json({external:{email:true},mailer_autoconfirm:false,disable_signup:false});
   if(path.endsWith('/signup'))return Response.json({id});
@@ -103,6 +103,22 @@ test('signup refuses unverified-provider configuration and never echoes provider
  environment(t);const {calls}=network(t,{'/auth/v1/settings':()=>Response.json({external:{email:true},mailer_autoconfirm:true})});
  const response=await register.POST(request({email:'qa@example.test',password:'SyntheticPass123',consent:true,locale:'en'},'/api/vector/community/register'));
  assert.equal(response.status,503);assert.ok(!calls.some(c=>c.path.endsWith('/signup')));
+});
+
+test('signup cannot open without a fixed HTTPS confirmation origin',async t=>{
+ environment(t);const {calls}=network(t);delete process.env.VECTOR_COMMUNITY_CONFIRM_ORIGIN;
+ assert.equal((await register.POST(request({email:'qa@example.test',password:'SyntheticPass123',consent:true,locale:'en'},'/api/vector/community/register'))).status,503);
+ assert.equal(calls.length,0);
+ for(const bad of ['http://vector.example','https://user:pass@vector.example','https://vector.example/path','https://vector.example/?next=evil'])assert.equal(server.communityConfirmationUrl('en',{VECTOR_COMMUNITY_CONFIRM_ORIGIN:bad}),null);
+});
+
+test('prepared signup returns only verification-required and chooses the localized server-controlled return URL',async t=>{
+ environment(t);const {calls}=network(t);
+ const response=await register.POST(request({email:'qa@example.test',password:'SyntheticPass123',consent:true,locale:'fr',redirect:'https://evil.example'},'/api/vector/community/register'));
+ assert.equal(response.status,202);assert.deepEqual(await response.json(),{ok:true,code:'VERIFICATION_REQUIRED'});
+ const signup=calls.find(call=>call.path.endsWith('/signup'));
+ assert.equal(new URLSearchParams(signup.search).get('redirect_to'),'https://vector.example/fr/comunidad/cuenta');
+ assert.equal(signup.body.data.locale,'fr');
 });
 test('Founders notice-only storage schedules no commercial mail and stores separate explicit consent',async t=>{
  environment(t);const {calls}=network(t);globalThis.communityMailSchedules=0;

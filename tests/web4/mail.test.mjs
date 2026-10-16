@@ -128,8 +128,9 @@ test('ES/EN/FR templates escape messages and use deterministic private fragment 
     const token = mailActionToken(fixture, configuration.tokenSecret);
     const message = renderMail(fixture, configuration, kind.startsWith('newsletter_') ? link.url : undefined);
     assert.ok(message.subject.length > 10); assert.match(message.html, new RegExp(`<html lang="${locale}">`));
-    assert.match(message.html, /COPILOTO VECTOR COMPLETE/); assert.equal(message.html.includes('<script>Test</script>'), false);
-    assert.equal(message.html.includes('<img src=x'), false); assert.ok(message.text.includes('COPILOTO VECTOR COMPLETE'));
+    assert.match(message.html, /COPILOTO VECTOR/); assert.doesNotMatch(message.html,/COPILOTO VECTOR COMPLETE/); assert.equal(message.html.includes('<script>Test</script>'), false);
+    assert.equal(message.html.includes('<img src=x'), false); assert.ok(message.text.includes('COPILOTO VECTOR'));
+    if(kind==='newsletter_welcome')for(const edition of ['TAKEOFF','HORIZON','COMMANDER'])assert.ok(message.text.includes(edition));
     assert.equal(message.to, kind === 'internal_contact' ? configuration.internalTo : fixture.email);
     assert.equal(message.replyTo, kind === 'internal_contact' ? fixture.email : undefined);
     assert.equal(message.messageId, renderMail(fixture, configuration, kind.startsWith('newsletter_') ? link.url : undefined).messageId);

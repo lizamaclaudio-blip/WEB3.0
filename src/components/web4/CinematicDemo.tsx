@@ -113,7 +113,7 @@ export function CinematicDemo({ language }: { language: Language }) {
         sizes={large ? "96vw" : "(max-width: 760px) 94vw, (max-width: 1200px) 78vw, 1100px"} unoptimized={large}
         onError={() => setFailed(current => ({ ...current, [capture.key]: true }))} />
     : <div className="pv50-demo-brand">
-        <span className="pv50-demo-brand-mark" aria-hidden="true">V</span><span>COPILOTO VECTOR</span><strong>COMPLETE</strong>
+        <span className="pv50-demo-brand-mark" aria-hidden="true">V</span><span>COPILOTO VECTOR</span><strong>TAKEOFF · HORIZON · COMMANDER</strong>
         <p>{scene.capture ? t("La captura se está preparando.", "This screenshot is being prepared.", "Cette capture est en préparation.") : index === demoScenes.length - 1 ? t("PRÓXIMAMENTE", "COMING SOON", "PROCHAINEMENT") : t("UNA EXPERIENCIA PARA CADA ETAPA", "ONE EXPERIENCE FOR EVERY STAGE", "UNE EXPÉRIENCE POUR CHAQUE ÉTAPE")}</p>
       </div>;
 
@@ -123,7 +123,7 @@ export function CinematicDemo({ language }: { language: Language }) {
       <p>{t("36 segundos para recorrer Vector. Capturas auténticas de la aplicación, con datos QA. Tú eliges cuándo empezar.", "36 seconds to explore Vector. Authentic application screenshots with QA data. You choose when to begin.", "36 secondes pour explorer Vector. De véritables captures de l’application avec des données QA. À vous de lancer la découverte.")}</p>
     </div>
     <div className="pv50-demo-theatre" role="group" ref={theatre} tabIndex={0} onKeyDown={event => navigate(event)} aria-label={t("Recorrido de capturas. Espacio para reproducir o pausar; flechas para cambiar de escena.", "Screenshot tour. Space to play or pause; arrow keys to change scenes.", "Parcours de captures. Espace pour lancer ou mettre en pause ; flèches pour changer de scène.")}>
-      <div className="pv50-demo-top"><span><i aria-hidden="true" />COPILOTO VECTOR COMPLETE</span><span>{capture ? qa : t("Presentación del producto", "Product presentation", "Présentation du produit")}</span></div>
+      <div className="pv50-demo-top"><span><i aria-hidden="true" />COPILOTO VECTOR</span><span>{capture ? qa : t("Presentación del producto", "Product presentation", "Présentation du produit")}</span></div>
       <div className="pv50-demo-stage">
         <div className="pv50-demo-screen">{visual()}
           {!playback.playing && playback.seconds === 0 && <button className="pv50-demo-poster-play" type="button" onClick={toggle} aria-label={t("Reproducir recorrido de capturas de 36 segundos", "Play the 36-second screenshot tour", "Lancer le parcours de captures de 36 secondes")}><span aria-hidden="true">▶</span><span>{t("INICIAR RECORRIDO", "START THE TOUR", "LANCER LE PARCOURS")}</span></button>}
@@ -144,7 +144,7 @@ export function CinematicDemo({ language }: { language: Language }) {
     </div>
     <div className="pv50-demo-chapters" role="group" aria-label={t("Elegir una escena del recorrido", "Choose a tour scene", "Choisir une scène du parcours")}>
       {demoScenes.map((item, position) => <button key={item.key} type="button" ref={button => { chapterButtons.current[position] = button; }} aria-pressed={index === position} tabIndex={index === position ? 0 : -1} onClick={() => select(position)} onKeyDown={event => navigate(event, true, position)}>
-        <span>{String(position + 1).padStart(2, "0")}<small>{clock(position * demoSceneSeconds)}</small></span><strong>{item.capture === "home" ? t("Preparación", "Preparation", "Préparation") : item.capture === "dispatch" ? t("Despacho", "Dispatch", "Plan de vol") : item.capture === "cabin" ? t("Cabina", "Cabin", "Cabine") : item.capture === "copilot" ? t("Copiloto", "Copilot", "Copilote") : item.capture === "monitor" ? t("En vuelo", "In flight", "En vol") : item.capture === "landing" ? "Landing Lab" : item.capture === "career" ? "Career Local" : item.key === "complete" ? "Complete" : t("Próximamente", "Coming soon", "Prochainement")}</strong>
+        <span>{String(position + 1).padStart(2, "0")}<small>{clock(position * demoSceneSeconds)}</small></span><strong>{item.capture === "home" ? t("Preparación", "Preparation", "Préparation") : item.capture === "dispatch" ? t("Despacho", "Dispatch", "Plan de vol") : item.capture === "cabin" ? t("Cabina", "Cabin", "Cabine") : item.capture === "copilot" ? t("Copiloto", "Copilot", "Copilote") : item.capture === "monitor" ? t("En vuelo", "In flight", "En vol") : item.capture === "landing" ? "Landing Lab" : item.capture === "career" ? "Career Local" : item.key === "complete" ? "Commander" : t("Próximamente", "Coming soon", "Prochainement")}</strong>
       </button>)}
     </div>
     <p className="pv50-demo-disclosure">{t("Recorrido de capturas QA; no es un vídeo de vuelo real. Sin pista de audio. Puedes pausar, desplazarte por la línea de tiempo o ampliar cada captura.", "A QA screenshot tour, not a real-flight video. No audio track. Pause, scrub the timeline or enlarge any screenshot.", "Un parcours de captures QA, pas une vidéo de vol réel. Sans piste audio. Mettez en pause, parcourez la chronologie ou agrandissez une capture.")} {availableFrames < 7 && t("Algunas escenas están pendientes de material verificado.", "Some scenes are awaiting verified material.", "Certaines scènes attendent des contenus vérifiés.")}</p>

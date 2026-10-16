@@ -31,7 +31,7 @@ export function CompleteEdition({ language }: { language: Language }) {
           <p className="pv44-validation-note">{futureOnlinePlatform.name} · {developmentStatus.future[language]}. {futureOnlinePlatform.summary[language]} {futureOnlinePlatform.limitation[language]}</p>
         </div>
         <aside className="pv43-edition-card" aria-label={completeEdition.name}>
-          <div className="pv43-edition-wordmark"><Glyph name="mountain" size={31} /><span>COPILOTO VECTOR<strong>COMPLETE</strong></span></div>
+          <div className="pv43-edition-wordmark"><Glyph name="mountain" size={31} /><span>COPILOTO VECTOR<strong>COMMANDER</strong></span></div>
           <div className="pv43-edition-price"><span>{copy.priceLabel}</span><strong>{copy.pricePending}</strong><p>{copy.pricingNote}</p></div>
           <Link className="pw4-button pw4-button-primary" href={localeHref(language, "/soporte#novedades")}>{copy.waitlist}<Glyph name="arrow" size={18} /></Link>
           <p className="pv43-edition-waitlist-note">{copy.waitlistNote}</p>

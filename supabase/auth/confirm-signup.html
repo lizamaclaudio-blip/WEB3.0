@@ -1,0 +1,11 @@
+<!doctype html><html><body style="margin:0;background:#061522;color:#eaf6ff;font-family:Arial,sans-serif;padding:32px 16px"><table role="presentation" style="width:100%;max-width:560px;margin:auto;border:1px solid #1d4e68;border-radius:16px;background:#0d2434;padding:28px"><tr><td>
+<p style="color:#00e0c7;letter-spacing:2px;font-size:12px">COPILOTO VECTOR · COMMUNITY LAB</p>
+{{ if eq .Data.locale "fr" }}
+<h1 style="font-size:26px">Confirmez votre adresse e-mail.</h1><p>Vérifiez votre adresse pour rejoindre le Community Lab, proposer des idées et voter. Ce compte ne constitue ni un achat, ni une licence, ni une inscription au concours Founders 10.</p><p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="background:#00e0c7;color:#061522;padding:14px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Confirmer mon adresse</a></p><p>Si vous n’avez pas demandé ce compte, ignorez ce message. Ne partagez pas ce lien personnel.</p>
+{{ else if eq .Data.locale "en" }}
+<h1 style="font-size:26px">Confirm your email address.</h1><p>Verify your address to join Community Lab, suggest ideas and vote. This account is not a purchase, a licence or a Founders 10 competition entry.</p><p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="background:#00e0c7;color:#061522;padding:14px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Confirm my email</a></p><p>If you did not request this account, ignore this message. Do not share this personal link.</p>
+{{ else }}
+<h1 style="font-size:26px">Confirma tu correo electrónico.</h1><p>Verifica tu dirección para entrar a Community Lab, proponer ideas y votar. Esta cuenta no constituye una compra, una licencia ni una participación en Founders 10.</p><p style="margin:28px 0"><a href="{{ .ConfirmationURL }}" style="background:#00e0c7;color:#061522;padding:14px 20px;border-radius:8px;text-decoration:none;font-weight:bold">Confirmar mi correo</a></p><p>Si no solicitaste esta cuenta, ignora el mensaje. No compartas este enlace personal.</p>
+{{ end }}
+<hr style="border:0;border-top:1px solid #1d4e68;margin:24px 0"><p style="color:#b8d0e0;font-size:12px">Patagonia Wings · COPILOTO VECTOR<br>TAKEOFF · HORIZON · COMMANDER</p>
+</td></tr></table></body></html>

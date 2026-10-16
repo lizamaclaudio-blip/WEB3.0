@@ -1,5 +1,5 @@
 import { readInquiryJson } from '@/lib/web4/inquiry-http';
-import { authRequest,communityRegistrationConfigured,communityResponse,failure,rate } from '@/lib/web51/server';
+import { authRequest,communityConfirmationUrl,communityRegistrationConfigured,communityResponse,failure,rate } from '@/lib/web51/server';
 import { cleanText,email,isRecord,locale } from '@/lib/web51/validation';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
@@ -13,7 +13,8 @@ export async function POST(request:Request){
   const settingsResponse=await authRequest('settings');if(!settingsResponse.ok)return failure('SERVICE_UNAVAILABLE',503);
   const settings=await settingsResponse.json();
   if(settings.mailer_autoconfirm!==false||settings.disable_signup===true||settings.external?.email!==true)return failure('SERVICE_UNAVAILABLE',503);
-  const response=await authRequest('signup',{email:v.email.trim().toLowerCase(),password:v.password,data:{locale:v.locale,community_consent_version:'2026-10-community-v1'}});
+  const redirect=communityConfirmationUrl(v.locale)!;
+  const response=await authRequest('signup?redirect_to='+encodeURIComponent(redirect),{email:v.email.trim().toLowerCase(),password:v.password,data:{locale:v.locale,community_consent_version:'2026-10-community-v1'}});
   // Never expose whether an address already exists or return provider tokens.
   if(response.status===429)return failure('RATE_LIMITED',429);
   if(!response.ok)return failure('REGISTRATION_UNAVAILABLE',503);
