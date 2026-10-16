@@ -4,4 +4,3 @@ import { communityAuthConfigured,communityRegistrationConfigured } from "@/lib/w
 export const dynamic = "force-dynamic";
 export const metadata = { ...marketingMetadata("en", "Community Lab access", "Verified VECTOR community account.", "/comunidad/cuenta"), robots: { index: false, follow: false } };
 export default function Page() { return <Shell language="en"><CommunityAccount language="en" enabled={communityAuthConfigured()} registrationEnabled={communityRegistrationConfigured()} /></Shell>; }
-

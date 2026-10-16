@@ -8,7 +8,8 @@ const localeModule = moduleUrl(await readFile(new URL('../../src/components/web4
 const { languages, localeHref, unlocalizedPath } = await import(localeModule);
 const routesModule=moduleUrl(await readFile(new URL('../../src/components/web4/public-routes.ts',import.meta.url),'utf8'));
 const publicIdeasStub=moduleUrl('export async function getPublicProposalIds(){return [];}');
-const loadRoute = async path => import(moduleUrl((await readFile(new URL(path, import.meta.url), 'utf8')).replace('@/components/web4/locale', localeModule).replace('@/components/web4/public-routes',routesModule).replace('@/lib/web51/public-ideas',publicIdeasStub)));
+const sitePolicyModule=moduleUrl(await readFile(new URL('../../src/lib/web51/site-policy.ts',import.meta.url),'utf8'));
+const loadRoute = async path => import(moduleUrl((await readFile(new URL(path, import.meta.url), 'utf8')).replace('@/components/web4/locale', localeModule).replace('@/components/web4/public-routes',routesModule).replace('@/lib/web51/public-ideas',publicIdeasStub).replace('@/lib/web51/site-policy',sitePolicyModule)));
 const { default: sitemap } = await loadRoute('../../src/app/sitemap.ts');
 const { default: robots } = await loadRoute('../../src/app/robots.ts');
 const { completeEdition, completeEditionCopy } = await import(moduleUrl(await readFile(new URL('../../src/components/web4/complete-edition.ts', import.meta.url), 'utf8')));
@@ -29,8 +30,13 @@ test('switching ES, EN and FR keeps the same public page without repeated locale
 
 test('all 36 public locale pages have reciprocal sitemap alternates; previews and private routes stay excluded', async () => {
   const previous = process.env.VERCEL_ENV;
+  const previousMode=process.env.VECTOR_SITE_MODE;
   try {
     process.env.VERCEL_ENV = 'production';
+    delete process.env.VECTOR_SITE_MODE;
+    assert.deepEqual(await sitemap(), []);
+    assert.equal(robots().rules.disallow, '/');
+    process.env.VECTOR_SITE_MODE='public';
     const entries = await sitemap();
     assert.equal(entries.length, 36);
     assert.equal(new Set(entries.map(entry => entry.url)).size, 36);
@@ -46,9 +52,14 @@ test('all 36 public locale pages have reciprocal sitemap alternates; previews an
     process.env.VERCEL_ENV = 'preview';
     assert.deepEqual(await sitemap(), []);
     assert.equal(robots().rules.disallow, '/');
+    delete process.env.VERCEL_ENV;
+    assert.deepEqual(await sitemap(), []);
+    assert.equal(robots().rules.disallow, '/');
   } finally {
     if (previous === undefined) delete process.env.VERCEL_ENV;
     else process.env.VERCEL_ENV = previous;
+    if(previousMode===undefined)delete process.env.VECTOR_SITE_MODE;
+    else process.env.VECTOR_SITE_MODE=previousMode;
   }
 });
 

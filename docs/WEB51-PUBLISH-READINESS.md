@@ -1,6 +1,7 @@
 # WEB 5.1 — preparación para publicación
 
-16 de octubre de 2026, hora de Chile. **Producción no autorizada ni desplegada.**
+16 de octubre de 2026, hora de Chile. **El titular decidió conservar el Preview
+por ahora. Producción no desplegada.** No se contrató un plan comercial.
 La entrega sirve para revisar el prelanzamiento; todavía tiene requisitos externos
 antes de abrir registro comunitario y publicar.
 
@@ -8,8 +9,8 @@ antes de abrir registro comunitario y publicar.
 
 - **Web 5.0 terminado**, commit `6ef705e`,
   [Preview visual](https://web-30-abqlo5jpb-lizamaclaudio-blips-projects.vercel.app/).
-  La transformación visual se conserva. El Preview final Web 5.1 está pendiente
-  al redactar este documento; el informe de verificación debe añadir su URL y SHA.
+  La transformación visual se conserva. El informe de verificación recoge el
+  Preview funcional Web 5.1 y el enlace de rama actualizado.
 - Backend Web 5.1 implementado y comprobado con pruebas SQL con rollback.
   Esas pruebas no sustituyen una sesión real del titular ni la entrega de correo
   de Supabase Auth. No se enviaron correos en esta etapa.
@@ -46,7 +47,7 @@ antes de abrir registro comunitario y publicar.
 | Privacidad | Confirmar identidad legal del responsable, contacto, retención, proveedores y transferencias; revisar menores y requisitos internacionales. No borrar históricos como parte de esta entrega |
 | Dominio e indexación | Confirmar canonical `www`, HTTPS y redirecciones. Configurar Search Console con cuenta del titular; cualquier TXT DNS requiere autorización previa |
 | Recuperación y gasto | Revisar consumo real, presupuesto de buzón/dominio, backup y alertas. Las cuotas nominales de un plan no acreditan capacidad libre |
-| Publicación | Obtener autorización final expresa para producción; verificar metadatos, headers, sitemap y formularios en el origen publicado antes de promocionarlo |
+| Publicación | Obtener autorización final expresa para producción; confirmar variables `VERCEL_ENV=production` y `VECTOR_SITE_MODE=public` antes de habilitar indexación, verificar metadatos, headers, sitemap y formularios en el origen publicado antes de promocionarlo |
 
 La [revisión de costos, SEO y legal](WEB51-COSTS-SEO-LEGAL.md) documenta fuentes
 oficiales, límites y escenarios. Subtotal de infraestructura estimado: **USD20/mes**

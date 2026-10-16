@@ -1,7 +1,15 @@
 # WEB 5.1 — Community Launch: verificación
 
 16 de octubre de 2026. Rama exclusiva: `codex/patagonia-wings-web4`.
-La URL y el SHA finales del Preview se entregan con esta revisión; ningún despliegue de producción está autorizado.
+Implementación `2daa376`; Preview funcional inicial:
+https://web-30-8a8wbzulb-lizamaclaudio-blips-projects.vercel.app/.
+La corrección final de indexación y cierre se publica en la misma rama. El
+[Preview de rama](https://web-30-git-codex-patagonia-52d73e-lizamaclaudio-blips-projects.vercel.app/)
+apunta a la última revisión; la URL inmutable final y SHA se entregan al usuario.
+El titular decidió conservar el Preview por ahora. Producción permanece sin
+desplegar: Vercel sigue en Hobby y no se contrató un plan comercial. La futura
+publicación necesitará además configuración exclusiva de producción, que no
+hereda automáticamente los secretos de los formularios del Preview.
 
 ## Web 5.0 conservado y terminado
 
@@ -79,13 +87,19 @@ del alcance Web 5.1. Esto no constituye una certificación de toda la base hered
 - Build Next.js y TypeScript: correctos. ESLint del código nuevo/modificado: correcto.
 - **72 pruebas Node**: formularios, privacidad, correo/reintentos, locales, galería,
   demo y nuevas rutas comunitarias, sesión, moderación y Founders.
-- **101 comprobaciones HTTP locales**: páginas ES/EN/FR, metadatos, formularios,
+- **103 comprobaciones HTTP locales**: páginas ES/EN/FR, metadatos, formularios,
   errores, acceso privado y rutas de prelanzamiento. Local carece deliberadamente
   de configuración privada; el 503 de escritura local es el comportamiento esperado.
 - `docs/supabase/web51-community.integration.sql`: integración real con rollback,
   RLS, permisos, sesiones expiradas/no verificadas, publicación, reportes, votos
   idempotentes, fusión A→B→C, retirada por ID antiguo, auditoría, roadmap,
   consentimientos Founders/newsletter y renovación. No equivale a estrés concurrente.
+- Preview remoto: envío real del formulario Founders desde navegador y lectura
+  en Postgres confirmaron un único aviso QA pendiente, sin consentimiento de
+  novedades ni nuevos correos. Se retiró solo ese aviso sintético mediante su
+  dirección reservada, alias y fecha exactos; se conserva como QA retirado, sin
+  borrar datos. La cola quedó vacía y los siete correos enviados históricos no
+  cambiaron. Roadmap devolvió 200; administración sin sesión, 401.
 - Cinco suites anteriores de acceso y correo repetidas después de las migraciones:
   RLS heredado (68 aserciones), programador desactivado (42), solicitudes,
   confirmación/baja y reintentos. Todas correctas; sin SMTP ni HTTP del programador.
@@ -104,9 +118,13 @@ Capturas de revisión local y Preview en `artifacts/web51-review/` (ignoradas en
 ## SEO, rendimiento y publicación
 
 Canonical `https://www.patagoniaw.com`, hreflang ES/EN/FR, Open Graph y tarjetas X.
-Sitemap de producción: 36 rutas localizadas más propuestas aprobadas; ninguna
+Sitemap preparado para producción: 36 rutas localizadas más propuestas aprobadas; ninguna
 cuenta, administración, API o propuesta oculta. Preview: sitemap vacío, robots
-disallow y headers noindex. Datos estructurados Website/SoftwareApplication
+disallow y headers noindex. La prueba remota detectó que el entorno de Vercel
+no distinguía correctamente la fase durante la generación de robots. Se corrigió con una
+puerta explícita: solo `VECTOR_SITE_MODE=public` junto a `VERCEL_ENV=production`
+habilitan indexación. Variables ausentes bloquean robots, sitemap y metadatos;
+no se habilitó esa puerta. Datos estructurados Website/SoftwareApplication
 sin ofertas, precios, calificaciones o descargas inventadas. Dominio actual
 comprobado solo lectura: HTTP→HTTPS→www. No se cambió DNS ni Search Console.
 
@@ -119,6 +137,6 @@ autorizada con tráfico real. No se afirma indexación por Google.
 [Costos, comparación Vercel/Cloudflare y requisitos legales](WEB51-COSTS-SEO-LEGAL.md).
 [Contrato comercial pendiente y licencias](WEB51-LICENSING-PREPARATION.md).
 
-La publicación requiere aprobar el Preview, resolver el plan comercial de Vercel,
+La publicación queda aplazada por decisión del titular; falta resolver el plan comercial de Vercel,
 comprobar correo/sesión Auth, designar moderación y completar avisos legales.
-Sin producción, DNS, rotación de credenciales, pagos, correos masivos o WPF.
+No se desplegó producción ni se cambiaron DNS, credenciales, pagos, correos masivos o WPF.
