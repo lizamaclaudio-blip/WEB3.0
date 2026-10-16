@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { inquiryConfigured, inquiryConsentVersion, newsletterConsentVersion, validateInquiry } from "@/lib/web4/inquiry";
+import { inquiryAddressAllowed, inquiryConfigured, inquiryConsentVersion, newsletterConsentVersion, validateInquiry } from "@/lib/web4/inquiry";
 import { inquiryReply, readInquiryJson } from "@/lib/web4/inquiry-http";
 import { inquiryAddressHash, inquiryRpc } from "@/lib/web4/inquiry-storage";
 import { scheduleMailAfterResponse } from "@/lib/web4/mail-after";
@@ -13,6 +13,7 @@ export async function POST(request: Request) {
   if (!body.ok) return body.response;
   const parsed = validateInquiry(body.value);
   if (!parsed.ok) return inquiryReply(parsed.code, 400);
+  if (!inquiryAddressAllowed(parsed.value.email, process.env)) return inquiryReply("SERVICE_UNAVAILABLE", 503);
   if (!inquiryConfigured(process.env)) return inquiryReply("SERVICE_UNAVAILABLE", 503);
   const hash = (value: string) => createHmac("sha256", process.env.VECTOR_FORM_HASH_SECRET!).update(value).digest("hex");
   const { email, name, message, kind, locale, newsletterConsent } = parsed.value;

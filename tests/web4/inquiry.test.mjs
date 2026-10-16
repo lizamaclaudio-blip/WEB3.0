@@ -17,13 +17,28 @@ const afterStub = dataModule('export function after(callback) { if (globalThis._
 const dispatchStub = dataModule('export async function dispatchMail() { return globalThis.__vectorDispatchTest(); }');
 const mailAfterModule = await loadModule('../../src/lib/web4/mail-after.ts', {'next/server':afterStub,'./mail':mailModule,'./mail-dispatch':dispatchStub});
 const references = {'@/lib/web4/inquiry':inquiryModule,'@/lib/web4/inquiry-http':httpModule,'@/lib/web4/inquiry-storage':storageModule,'@/lib/web4/newsletter':newsletterModule,'@/lib/web4/mail-after':mailAfterModule};
-const { validateInquiry, inquiryConfigured, newsletterConsentVersion } = await import(inquiryModule);
+const { validateInquiry, inquiryConfigured, inquiryAddressAllowed, newsletterConsentVersion } = await import(inquiryModule);
 const { inquiryRpc,inquiryAddressHash } = await import(storageModule);
 const { hashUnsubscribeToken, issueUnsubscribeToken, validUnsubscribeToken } = await import(newsletterModule);
 const { POST } = await import(await loadModule('../../src/app/api/vector/inquiry/route.ts', references));
 const { POST: unsubscribe } = await import(await loadModule('../../src/app/api/vector/unsubscribe/route.ts', references));
 const valid = { kind:'interest', email:' Person@Example.com ', name:' Test ', message:'', consent:true, locale:'es', website:'' };
 const request = (body, changes = {}) => new Request('http://localhost:3004/api/vector/inquiry', { method:'POST', headers: { origin:'http://localhost:3004', 'content-type':'application/json', ...changes }, body: typeof body === 'string' ? body : JSON.stringify(body) });
+
+test('isolated Workers QA hash accepts only its synthetic fixture and fails closed elsewhere',()=>{
+ const email='qa-web52-unit@example.test';
+ const env={VECTOR_QA_FORMS_ONLY:'true',VECTOR_HOSTING_PLATFORM:'cloudflare',VECTOR_DEPLOYMENT_STAGE:'preview',VECTOR_QA_FORM_EMAIL:email};
+ assert.equal(inquiryAddressAllowed(email,env),true);
+ for(const address of ['owner@patagoniaw.com','other@example.test','qa-web52-unit@example.test.evil'])assert.equal(inquiryAddressAllowed(address,env),false);
+ for(const change of [{VECTOR_QA_FORM_EMAIL:undefined},{VECTOR_QA_FORM_EMAIL:'owner@patagoniaw.com'},{VECTOR_DEPLOYMENT_STAGE:'production'},{VECTOR_HOSTING_PLATFORM:'vercel'}])assert.equal(inquiryAddressAllowed(email,{...env,...change}),false);
+ assert.equal(inquiryAddressAllowed('owner@patagoniaw.com',{}),true);
+});
+
+test('QA rejects a real inquiry before any storage or mail operation',async t=>{
+ const old=process.env.VECTOR_QA_FORMS_ONLY;process.env.VECTOR_QA_FORMS_ONLY='true';
+ t.after(()=>{if(old===undefined)delete process.env.VECTOR_QA_FORMS_ONLY;else process.env.VECTOR_QA_FORMS_ONLY=old;});
+ const response=await POST(request(valid));assert.equal(response.status,503);
+});
 
 test('Workers rate limits distinguish trusted client IPs and ignore spoofed forwarding headers',()=>{
  const env={VECTOR_FORMS_ENABLED:'true',SUPABASE_URL:'https://synthetic.supabase.co',SUPABASE_SECRET_KEY:'sb_secret_synthetic',VECTOR_FORM_HASH_SECRET:'x'.repeat(32),VECTOR_HOSTING_PLATFORM:'cloudflare',VERCEL:'1'};

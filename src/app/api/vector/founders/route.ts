@@ -1,5 +1,5 @@
 import { createHmac } from 'node:crypto';
-import { inquiryConfigured } from '@/lib/web4/inquiry';
+import { inquiryAddressAllowed,inquiryConfigured } from '@/lib/web4/inquiry';
 import { inquiryAddressHash } from '@/lib/web4/inquiry-storage';
 import { readInquiryJson } from '@/lib/web4/inquiry-http';
 import { scheduleMailAfterResponse } from '@/lib/web4/mail-after';
@@ -11,6 +11,7 @@ export const maxDuration=60;
 export async function POST(request:Request){
  const body=await readInquiryJson(request,4096);if(!body.ok)return body.response;
  if(!validFounder(body.value))return failure('INVALID_INPUT',400);
+ if(!inquiryAddressAllowed(body.value.email.trim().toLowerCase(),process.env))return failure('SERVICE_UNAVAILABLE',503);
  if(!inquiryConfigured(process.env))return failure('SERVICE_UNAVAILABLE',503);
  const v=body.value;
  try{

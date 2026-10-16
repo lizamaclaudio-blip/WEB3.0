@@ -27,7 +27,8 @@ export async function communityRpc(name:string,parameters:Record<string,unknown>
  const key=(env.SUPABASE_SECRET_KEY||env.SUPABASE_SERVICE_ROLE_KEY)!;
  const headers:Record<string,string>={apikey:key,'Content-Type':'application/json'};
  if(!key.startsWith('sb_secret_')) headers.Authorization='Bearer '+key;
- const response=await fetch(new URL('/rest/v1/rpc/'+name,env.SUPABASE_URL),{method:'POST',headers,body:JSON.stringify(parameters),signal:AbortSignal.timeout(8000),cache:'no-store',redirect:'error'});
+ // Never forward privileged headers to a redirect; manual also works in workerd.
+ const response=await fetch(new URL('/rest/v1/rpc/'+name,env.SUPABASE_URL),{method:'POST',headers,body:JSON.stringify(parameters),signal:AbortSignal.timeout(8000),cache:'no-store',redirect:'manual'});
  if(!response.ok) throw new Error('UNAVAILABLE');
  return response.json();
 }
@@ -35,7 +36,7 @@ export async function authRequest(path:string,body?:unknown,token?:string,env:En
  if(!communityAuthConfigured(env)) throw new Error('UNAVAILABLE');
  const headers:Record<string,string>={apikey:publicAuthKey(env)!,'Content-Type':'application/json'};
  if(token)headers.Authorization='Bearer '+token;
- return fetch(new URL('/auth/v1/'+path,env.SUPABASE_URL),{method:body===undefined?'GET':'POST',headers,...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(8000),cache:'no-store',redirect:'error'});
+ return fetch(new URL('/auth/v1/'+path,env.SUPABASE_URL),{method:body===undefined?'GET':'POST',headers,...(body===undefined?{}:{body:JSON.stringify(body)}),signal:AbortSignal.timeout(8000),cache:'no-store',redirect:'manual'});
 }
 export function cookieToken(request:Request){
  const match=request.headers.get('cookie')?.split(';').map(s=>s.trim()).find(s=>s.startsWith(communityCookie+'='));

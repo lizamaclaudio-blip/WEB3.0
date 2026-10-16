@@ -28,3 +28,12 @@ export function inquiryConfigured(env: Record<string, string | undefined>): bool
     return url.protocol === "https:" && !url.username && !url.password && url.pathname === "/" && !url.search && !url.hash;
   } catch { return false; }
 }
+
+// A separate QA hash must never create a second subscription for a real address.
+// This optional restriction is enabled only on the independent Workers trial.
+export function inquiryAddressAllowed(email: string, env: Record<string, string | undefined>): boolean {
+  if (env.VECTOR_QA_FORMS_ONLY !== "true") return true;
+  const fixture = env.VECTOR_QA_FORM_EMAIL || "";
+  return env.VECTOR_HOSTING_PLATFORM === "cloudflare" && env.VECTOR_DEPLOYMENT_STAGE === "preview"
+    && /^qa-web52-[a-z0-9-]+@example\.test$/.test(fixture) && email === fixture;
+}

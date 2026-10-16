@@ -1,5 +1,8 @@
 # Web 5.0 + 5.1 — cierre y preparación de publicación
 
+> Actualización: [Web 5.2 — despliegue remoto real en Cloudflare Free](WEB52-CLOUDFLARE-VERIFICATION.md).
+> Se conserva este informe como evidencia del cierre anterior.
+
 16 de octubre de 2026. Continuación desde `b9bc48c`, rama
 `codex/patagonia-wings-web4`. No se reinició ni descartó trabajo.
 **No se considera abierta ni completamente operativa la comunidad.** Su código

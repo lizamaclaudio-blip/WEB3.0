@@ -32,7 +32,7 @@ function environment(t,enabled=true){
 function network(t,overrides={}){
  const old=globalThis.fetch;const calls=[];const activeToken=token();
  globalThis.fetch=async(url,options={})=>{
-  const parsedUrl=new URL(url);const path=parsedUrl.pathname;calls.push({path,search:parsedUrl.search,body:options.body?JSON.parse(options.body):null,headers:options.headers,method:options.method});
+ const parsedUrl=new URL(url);const path=parsedUrl.pathname;calls.push({path,search:parsedUrl.search,body:options.body?JSON.parse(options.body):null,headers:options.headers,method:options.method,redirect:options.redirect});
   if(overrides[path])return overrides[path](options,calls);
   if(path.endsWith('/settings'))return Response.json({external:{email:true},mailer_autoconfirm:false,disable_signup:false});
   if(path.endsWith('/signup'))return Response.json({id});
@@ -58,6 +58,20 @@ test('community validation requires independent consents, valid categories, boun
  assert.equal(validation.validProposal({title:'A useful idea',description:'A description long enough to explain the proposed improvement.',category:'unknown',consent:true}),false);
  assert.equal(validation.validLaunchDate('2026-02-30'),false);assert.equal(validation.validLaunchDate(null),true);assert.equal(validation.validLaunchDate('2026-12-01'),true);
  assert.equal(validation.validRoadmap([{}]),false);
+});
+
+test('community RPC and Auth reject redirects without forwarding credentials',async t=>{
+ environment(t);const net=network(t,{'/rest/v1/rpc/vector_community_rate':()=>new Response(null,{status:302,headers:{location:'https://untrusted.example'}}),'/auth/v1/settings':()=>new Response(null,{status:302,headers:{location:'https://untrusted.example'}})});
+ await assert.rejects(server.communityRpc('vector_community_rate',{}),/UNAVAILABLE/);
+ assert.equal((await server.authRequest('settings')).status,302);
+ assert.equal(net.calls.length,2);assert.ok(net.calls.every(c=>c.redirect==='manual'));
+});
+
+test('Founders QA restriction rejects real addresses before storage',async t=>{
+ environment(t);const old=process.env.VECTOR_QA_FORMS_ONLY;process.env.VECTOR_QA_FORMS_ONLY='true';
+ t.after(()=>{if(old===undefined)delete process.env.VECTOR_QA_FORMS_ONLY;else process.env.VECTOR_QA_FORMS_ONLY=old;});
+ const net=network(t);const response=await founders.POST(request({name:'Pilot',email:'owner@patagoniaw.com',locale:'es',noticeConsent:true,newsletterConsent:false},'/api/vector/founders'));
+ assert.equal(response.status,503);assert.equal(net.calls.length,0);
 });
 test('disabled account configuration accepts no passwords and calls no provider',async t=>{
  environment(t,false);const {calls}=network(t);

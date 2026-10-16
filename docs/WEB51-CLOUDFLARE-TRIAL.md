@@ -1,5 +1,8 @@
 # Web 5.1 — prueba de aplicación completa en Cloudflare
 
+> El titular ya creó cuenta y autorizó QA: [resultados remotos Web 5.2](WEB52-CLOUDFLARE-VERIFICATION.md).
+> Este documento conserva la prueba local anterior.
+
 16 de octubre de 2026. Base `b9bc48c`, misma rama de desarrollo. Sin DNS,
 producción, contratación, base duplicada ni cambios al programa WPF.
 
