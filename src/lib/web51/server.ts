@@ -21,6 +21,13 @@ export function communityConfirmationUrl(language:'es'|'en'|'fr',env:Environment
  }catch{return null;}
 }
 export function communityRegistrationConfigured(env:Environment=process.env){return communityAuthConfigured(env)&&env.VECTOR_COMMUNITY_REGISTRATION_ENABLED==='true'&&!!communityConfirmationUrl('es',env);}
+export function communityQaRegistrationConfigured(env:Environment=process.env){
+ const expires=Date.parse(env.VECTOR_COMMUNITY_QA_INVITE_EXPIRES||'');
+ return communityAuthConfigured(env)&&env.VECTOR_HOSTING_PLATFORM==='cloudflare'&&env.VECTOR_DEPLOYMENT_STAGE==='preview'
+  &&env.VECTOR_COMMUNITY_QA_REGISTRATION_ENABLED==='true'&&env.VECTOR_COMMUNITY_QA_GUARD_READY==='true'
+  &&(env.VECTOR_COMMUNITY_QA_INVITE_SECRET||'').length>=32&&Number.isFinite(expires)&&expires>Date.now()
+  &&communityConfirmationUrl('es',env)==='https://patagonia-wings-web51-qa.lizamaclaudio.workers.dev/comunidad/cuenta';
+}
 export function fingerprint(request:Request,suffix='',env:Environment=process.env){return createHmac('sha256',env.VECTOR_FORM_HASH_SECRET!).update('community:'+inquiryAddressHash(request,env)+':'+suffix).digest('hex');}
 export async function communityRpc(name:string,parameters:Record<string,unknown>,env:Environment=process.env):Promise<unknown>{
  if(!inquiryConfigured(env)||!/^vector_(community|founders)_[a-z_]+$/.test(name)) throw new Error('UNAVAILABLE');

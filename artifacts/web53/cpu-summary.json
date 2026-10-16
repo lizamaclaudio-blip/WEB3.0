@@ -1,0 +1,290 @@
+{
+  "checkedAt": "2026-10-16T19:18:24.047Z",
+  "public": {
+    "requests": 800,
+    "observedEvents": 300,
+    "concurrency": 2,
+    "summary": [
+      {
+        "path": "/",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 4,
+        "wallP95": 150,
+        "wallMax": 251
+      },
+      {
+        "path": "/en",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 4,
+        "wallP95": 6,
+        "wallMax": 285
+      },
+      {
+        "path": "/fr",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 5,
+        "wallP95": 36,
+        "wallMax": 233
+      },
+      {
+        "path": "/ediciones",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 4,
+        "wallP95": 154,
+        "wallMax": 224
+      },
+      {
+        "path": "/versiones",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 4,
+        "wallP95": 162,
+        "wallMax": 207
+      },
+      {
+        "path": "/soporte",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 4,
+        "wallP95": 6,
+        "wallMax": 224
+      },
+      {
+        "path": "/founders-10",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 4,
+        "wallP95": 33,
+        "wallMax": 212
+      },
+      {
+        "path": "/roadmap",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 4,
+        "wallP95": 13,
+        "wallMax": 211
+      },
+      {
+        "path": "/comunidad",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 4,
+        "wallP95": 33,
+        "wallMax": 233
+      },
+      {
+        "path": "/api/vector/community/roadmap",
+        "samples": 25,
+        "median": 1,
+        "p95": 3,
+        "p99": null,
+        "max": 3,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 70,
+        "wallP95": 366,
+        "wallMax": 809
+      },
+      {
+        "path": "/api/vector/community/proposals",
+        "samples": 25,
+        "median": 1,
+        "p95": 1,
+        "p99": null,
+        "max": 1,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 140,
+        "wallP95": 301,
+        "wallMax": 812
+      },
+      {
+        "path": "/api/vector/community/session",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 2,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0,
+        "wallMedian": 0,
+        "wallP95": 1,
+        "wallMax": 2
+      }
+    ],
+    "versions": [
+      "73a669ae-1c62-48f9-b753-f1e4b827daa5",
+      "4aef4ac2-df2a-4e83-b7f8-bc2db17be0cd"
+    ]
+  },
+  "privateRead": {
+    "requests": 101,
+    "observedEvents": 38,
+    "concurrency": 2,
+    "summary": [
+      {
+        "path": "/comunidad/cuenta",
+        "samples": 9,
+        "median": 8,
+        "p95": null,
+        "p99": null,
+        "max": 154,
+        "over10": 2,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/en/comunidad/cuenta",
+        "samples": 8,
+        "median": 9,
+        "p95": null,
+        "p99": null,
+        "max": 20,
+        "over10": 3,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/fr/comunidad/cuenta",
+        "samples": 10,
+        "median": 7,
+        "p95": null,
+        "p99": null,
+        "max": 14,
+        "over10": 1,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/api/vector/community/admin",
+        "samples": 10,
+        "median": 3,
+        "p95": null,
+        "p99": null,
+        "max": 25,
+        "over10": 1,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      }
+    ],
+    "validCpuObservations": 37
+  },
+  "caveats": [
+    "CPU integer milliseconds; zero means below reporting resolution.",
+    "First observed does not prove a cold isolate.",
+    "No per-route p99: fewer than 100 observations.",
+    "Tail does not expose peak memory.",
+    "Private read requests exceeded 10ms, including a 154ms sample.",
+    "No authenticated/write/SMTP full CPU distribution measured."
+  ]
+}

@@ -28,9 +28,9 @@ const copy = {
   },
 };
 
-export function renderMail(job: MailJob, configuration: MailConfiguration, actionUrl?: string): MailMessage {
+export function renderMail(job: MailJob, configuration: MailConfiguration, actionUrl?: string, presentation?: readonly [string, string, string]): MailMessage {
   const t = copy[job.locale];
-  const [subject, title, body] = t[job.kind];
+  const [subject, title, body] = presentation || t[job.kind];
   const internal = job.kind === "internal_contact";
   const confirmation = job.kind === "newsletter_confirm";
   const welcome = job.kind === "newsletter_welcome";
@@ -47,4 +47,12 @@ export function renderMail(job: MailJob, configuration: MailConfiguration, actio
     text: ["COPILOTO VECTOR", title, body, details, actionUrl ? `${label}: ${actionUrl}` : "", note, `${t.reference}: ${job.id}`, t.footer].filter(Boolean).join("\n\n"),
     messageId: `<vector-${job.id}@${configuration.from.split("@")[1].toLowerCase()}>`,
   };
+}
+
+export function renderQaMail(configuration: MailConfiguration): MailMessage {
+  const now = new Date().toISOString();
+  return renderMail({ id: '4d10be98-5830-4c25-8c51-f622035c35a3', kind: 'contact_receipt', locale: 'es', email: 'patagonia@patagoniaw.com',
+    email_hash: '0'.repeat(64), name: '', message: '', created_at: now, first_attempt_at: now, attempts: 1 }, configuration, undefined,
+    ['[PRUEBA ÚNICA QA WEB 5.3] COPILOTO VECTOR', 'Prueba técnica de entrega.',
+      'Este es el único mensaje de prueba SMTP autorizado desde Cloudflare QA hacia tu buzón. Comprueba su recepción y los resultados SPF, DKIM y DMARC en sus cabeceras. No crea una cuenta, consulta, suscripción ni licencia, y no activa envíos automáticos.']);
 }

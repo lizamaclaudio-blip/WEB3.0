@@ -1,0 +1,47 @@
+[
+  {
+    "resource": "vector_public_roadmap",
+    "status": 200,
+    "ok": true
+  },
+  {
+    "resource": "vector_community_proposals",
+    "status": 200,
+    "ok": true
+  },
+  {
+    "resource": "vector_inquiries",
+    "status": 401,
+    "ok": true
+  },
+  {
+    "resource": "vector_newsletter_subscriptions",
+    "status": 401,
+    "ok": true
+  },
+  {
+    "resource": "vector_mail_outbox",
+    "status": 401,
+    "ok": true
+  },
+  {
+    "resource": "pw_v_airline_hubs",
+    "status": 401,
+    "ok": true
+  },
+  {
+    "resource": "pw_v_public_stats",
+    "status": 401,
+    "ok": true
+  },
+  {
+    "resource": "vector_community_qa_register_intent",
+    "status": 401,
+    "ok": true
+  },
+  {
+    "resource": "vector_before_user_created_qa",
+    "status": 401,
+    "ok": true
+  }
+]

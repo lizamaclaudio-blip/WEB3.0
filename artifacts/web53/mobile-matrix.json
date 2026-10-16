@@ -1,0 +1,200 @@
+[
+  {
+    "client": 375,
+    "enabledInputs": 6,
+    "formInputs": 6,
+    "h1": "VECTORFOUNDERS 10",
+    "height": 844,
+    "lang": "es",
+    "path": "/founders-10",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "El próximo capítulose construye contigo.",
+    "height": 844,
+    "lang": "es",
+    "path": "/roadmap",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "Tu próxima idea podría volar con VECTOR.",
+    "height": 844,
+    "lang": "es",
+    "path": "/comunidad",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 5,
+    "formInputs": 5,
+    "h1": "Soporte y novedades",
+    "height": 844,
+    "lang": "es",
+    "path": "/soporte",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "DON’T JUST FLY.LIVE THE JOURNEY.",
+    "height": 844,
+    "lang": "en",
+    "path": "/en",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "Find your next horizon.",
+    "height": 844,
+    "lang": "en",
+    "path": "/en/ediciones",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 6,
+    "formInputs": 6,
+    "h1": "VECTORFOUNDERS 10",
+    "height": 844,
+    "lang": "en",
+    "path": "/en/founders-10",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "The next chapteris built with you.",
+    "height": 844,
+    "lang": "en",
+    "path": "/en/roadmap",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "Your next idea could fly with VECTOR.",
+    "height": 844,
+    "lang": "en",
+    "path": "/en/comunidad",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 5,
+    "formInputs": 5,
+    "h1": "Support & updates",
+    "height": 844,
+    "lang": "en",
+    "path": "/en/soporte",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "PLUS QU’UN VOL.TOUTE UNE AVENTURE.",
+    "height": 844,
+    "lang": "fr",
+    "path": "/fr",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "Trouvez votre prochain horizon.",
+    "height": 844,
+    "lang": "fr",
+    "path": "/fr/ediciones",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 6,
+    "formInputs": 6,
+    "h1": "VECTORFOUNDERS 10",
+    "height": 844,
+    "lang": "fr",
+    "path": "/fr/founders-10",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "Le prochain chapitrese construit avec vous.",
+    "height": 844,
+    "lang": "fr",
+    "path": "/fr/roadmap",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "Votre prochaine idée pourrait prendre son envol avec VECTOR.",
+    "height": 844,
+    "lang": "fr",
+    "path": "/fr/comunidad",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 5,
+    "formInputs": 5,
+    "h1": "Assistance et actualités",
+    "height": 844,
+    "lang": "fr",
+    "path": "/fr/soporte",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "Confirmez votre inscription.",
+    "height": 844,
+    "lang": "fr",
+    "path": "/fr/confirmar-novedades",
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "client": 375,
+    "enabledInputs": 0,
+    "formInputs": 0,
+    "h1": "Your news. Your choice.",
+    "height": 844,
+    "lang": "en",
+    "path": "/en/cancelar-novedades",
+    "scroll": 375,
+    "width": 390
+  }
+]

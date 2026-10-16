@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { localized, localeHref, type Language } from "./locale";
+import { useFormAvailability } from './useFormAvailability';
 
-export function FounderInterestForm({ language, enabled = false, preview = true }: { language: Language; enabled?: boolean; preview?: boolean }) {
+export function FounderInterestForm({ language, enabled: initialEnabled = false, preview: initialPreview = true }: { language: Language; enabled?: boolean; preview?: boolean }) {
+  const { enabled, preview } = useFormAvailability({ enabled: initialEnabled, preview: initialPreview });
   const t = (es: string, en: string, fr: string) => localized(language, es, en, fr);
   const [pending, setPending] = useState(false);
   const [status, setStatus] = useState("");

@@ -1,6 +1,7 @@
 import{spawn}from'node:child_process';
 import{fileURLToPath}from'node:url';
 import{sanitizeCloudflareBuildEnvironment}from'./sanitize-env.mjs';
+import{exportPublicAssets}from'./public-assets.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const cli=fileURLToPath(new URL('../cli/index.js',import.meta.resolve('@opennextjs/cloudflare')));
 const args=process.platform==='win32'?['--import',new URL('./windows-junctions.mjs',import.meta.url).href]:[];
@@ -9,5 +10,5 @@ const child=spawn(process.execPath,args,{cwd:root,stdio:'inherit',env:{...proces
 child.on('error',()=>{console.error('CLOUDFLARE_BUILD_UNAVAILABLE');process.exitCode=1;});
 child.on('exit',async code=>{
  process.exitCode=code??1;
- if(code===0)try{await sanitizeCloudflareBuildEnvironment(new URL('../../',import.meta.url));}catch{console.error('CLOUDFLARE_BUILD_ENVIRONMENT_UNSAFE');process.exitCode=1;}
+ if(code===0)try{await sanitizeCloudflareBuildEnvironment(new URL('../../',import.meta.url));await exportPublicAssets(new URL('../../',import.meta.url));}catch(error){console.error('CLOUDFLARE_BUILD_UNSAFE',error.message);process.exitCode=1;}
 });

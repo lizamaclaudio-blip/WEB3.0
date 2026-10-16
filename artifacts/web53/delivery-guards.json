@@ -1,0 +1,117 @@
+[
+  {
+    "path": "/",
+    "rsc": false,
+    "status": 200,
+    "delivery": "precompiled-html",
+    "type": "text/html; charset=utf-8",
+    "noindex": true,
+    "noCookie": true,
+    "ok": true
+  },
+  {
+    "path": "/",
+    "rsc": true,
+    "status": 200,
+    "delivery": "precompiled-rsc",
+    "type": "text/x-component; charset=utf-8",
+    "noindex": true,
+    "noCookie": true,
+    "ok": true
+  },
+  {
+    "path": "/en/ediciones",
+    "rsc": false,
+    "status": 200,
+    "delivery": "precompiled-html",
+    "type": "text/html; charset=utf-8",
+    "noindex": true,
+    "noCookie": true,
+    "ok": true
+  },
+  {
+    "path": "/en/ediciones",
+    "rsc": true,
+    "status": 200,
+    "delivery": "precompiled-rsc",
+    "type": "text/x-component; charset=utf-8",
+    "noindex": true,
+    "noCookie": true,
+    "ok": true
+  },
+  {
+    "path": "/fr/soporte",
+    "rsc": false,
+    "status": 200,
+    "delivery": "precompiled-html",
+    "type": "text/html; charset=utf-8",
+    "noindex": true,
+    "noCookie": true,
+    "ok": true
+  },
+  {
+    "path": "/fr/soporte",
+    "rsc": true,
+    "status": 200,
+    "delivery": "precompiled-rsc",
+    "type": "text/x-component; charset=utf-8",
+    "noindex": true,
+    "noCookie": true,
+    "ok": true
+  },
+  {
+    "path": "/roadmap",
+    "rsc": false,
+    "status": 200,
+    "delivery": "precompiled-html",
+    "type": "text/html; charset=utf-8",
+    "noindex": true,
+    "noCookie": true,
+    "ok": true
+  },
+  {
+    "path": "/roadmap",
+    "rsc": true,
+    "status": 200,
+    "delivery": "precompiled-rsc",
+    "type": "text/x-component; charset=utf-8",
+    "noindex": true,
+    "noCookie": true,
+    "ok": true
+  },
+  {
+    "path": "/comunidad",
+    "rsc": false,
+    "status": 200,
+    "delivery": "precompiled-html",
+    "type": "text/html; charset=utf-8",
+    "noindex": true,
+    "noCookie": true,
+    "ok": true
+  },
+  {
+    "path": "/comunidad",
+    "rsc": true,
+    "status": 200,
+    "delivery": "precompiled-rsc",
+    "type": "text/x-component; charset=utf-8",
+    "noindex": true,
+    "noCookie": true,
+    "ok": true
+  },
+  {
+    "path": "/_vector-public/index.html",
+    "status": 404,
+    "ok": true
+  },
+  {
+    "path": "/api/vector/community/qa-register",
+    "status": 503,
+    "ok": true
+  },
+  {
+    "path": "/api/vector/mail/qa-single",
+    "status": 401,
+    "ok": true
+  }
+]

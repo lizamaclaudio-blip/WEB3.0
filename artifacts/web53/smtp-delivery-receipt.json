@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-16T18:38:46.968Z",
+  "checkOnly": false,
+  "status": 200,
+  "code": "SMTP_ACCEPTED_INBOX_UNVERIFIED",
+  "ownerInboxConfirmed": true,
+  "ownerConfirmationDate": "2026-10-16",
+  "authenticationHeadersVerified": false
+}

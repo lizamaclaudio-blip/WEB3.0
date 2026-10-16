@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import { localeHref, localized, type Language } from "./locale";
+import { useFormAvailability } from './useFormAvailability';
 
-export function InquiryForm({ language, enabled, preview = false, mailEnabled = false }: { language: Language; enabled: boolean; preview?: boolean; mailEnabled?: boolean }) {
+export function InquiryForm({ language, enabled: initialEnabled, preview: initialPreview = false, mailEnabled: initialMail = false }: { language: Language; enabled: boolean; preview?: boolean; mailEnabled?: boolean }) {
+  const { enabled, preview, mailEnabled } = useFormAvailability({ enabled: initialEnabled, preview: initialPreview, mailEnabled: initialMail });
   const t = (es: string, en: string, fr: string) => localized(language, es, en, fr);
   const [kind, setKind] = useState("interest");
   const [pending, setPending] = useState(false);

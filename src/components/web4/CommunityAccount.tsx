@@ -4,13 +4,20 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { localized, localeHref, type Language } from "./locale";
 
-export function CommunityAccount({ language, enabled = false, registrationEnabled=false }: { language: Language; enabled?: boolean; registrationEnabled?:boolean }) {
+export function CommunityAccount({ language, enabled = false, registrationEnabled=false, qaRegistration=false }: { language: Language; enabled?: boolean; registrationEnabled?:boolean; qaRegistration?:boolean }) {
   const t = (es: string, en: string, fr: string) => localized(language, es, en, fr);
-  const [register, setRegister] = useState(false);
+  const [register, setRegister] = useState(qaRegistration);
   const [pending, setPending] = useState(false);
   const [status, setStatus] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
   const [checking, setChecking] = useState(enabled);
+  useEffect(() => {
+    // Verification redirects must not leave bearer tokens in browser history.
+    // A redirect is not proof of confirmation: login still checks Supabase.
+    if (/(?:access_token|refresh_token|error|token_type)=/.test(window.location.hash)) {
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  }, []);
   useEffect(() => {
     if (!enabled) return;
     const controller = new AbortController();
@@ -38,7 +45,8 @@ export function CommunityAccount({ language, enabled = false, registrationEnable
       try {
         const credentials = { email: data.get("email"), password: data.get("password") };
         const payload = register ? { ...credentials, consent: data.get("consent") === "on", locale: language, website: data.get("website") || "" } : credentials;
-        const response = await fetch(register ? "/api/vector/community/register" : "/api/vector/community/session", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+        const qa = register && qaRegistration;
+        const response = await fetch(register ? qa ? "/api/vector/community/qa-register" : "/api/vector/community/register" : "/api/vector/community/session", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json", ...(qa ? {Authorization: "Bearer " + String(data.get("invitation") || "")} : {}) }, body: JSON.stringify(payload) });
         const result = await response.json();
         if (response.ok && result.ok) {
           form.reset();
@@ -56,6 +64,7 @@ export function CommunityAccount({ language, enabled = false, registrationEnable
         <h2>{t("Tu cuenta está verificada.", "Your account is verified.", "Votre compte est vérifié.")}</h2><p>{t("Puedes participar en el Community Lab. Si registraste tu interés en Founders 10, puedes confirmar o cancelar exclusivamente su aviso de apertura.", "You can contribute to the Community Lab. If you registered interest in Founders 10, you can confirm or cancel its opening notice separately.", "Vous pouvez contribuer au Community Lab. Si vous avez enregistré votre intérêt pour Founders 10, vous pouvez confirmer ou annuler séparément son avis d’ouverture.")}</p><button className="pw4-button pw4-button-primary" type="button" disabled={pending} onClick={() => founderNotice(true)}>{t("Confirmar aviso Founders 10", "Confirm Founders 10 notice", "Confirmer l’avis Founders 10")}</button><button className="pw4-button" type="button" disabled={pending} onClick={() => founderNotice(false)}>{t("Cancelar aviso Founders 10", "Cancel Founders 10 notice", "Annuler l’avis Founders 10")}</button><p className="pv51-help">{t("El concurso sigue cerrado. Confirmar el aviso no es participar en el sorteo ni garantiza una licencia.", "The competition remains closed. Confirming the notice is not entering the draw and does not guarantee a licence.", "Le concours reste fermé. Confirmer l’avis ne constitue pas une participation au tirage et ne garantit pas de licence.")}</p><Link className="pw4-button" href={localeHref(language, "/comunidad")}>{t("Explorar ideas", "Explore ideas", "Découvrir les idées")}</Link>
       </> : register&&!registrationEnabled ? <div className="pv51-notice" role="status"><h2>{t("Registro en preparación", "Registration is being prepared", "Inscription en préparation")}</h2><p>{t("Estamos comprobando el correo de verificación antes de abrir cuentas nuevas. Si ya tienes una cuenta verificada de Patagonia Wings, puedes iniciar sesión. Por ahora no te pediremos una contraseña nueva.", "We are checking verification email delivery before opening new accounts. If you already have a verified Patagonia Wings account, you can sign in. We will not ask for a new password yet.", "Nous vérifions l’envoi des e-mails de confirmation avant d’ouvrir les nouvelles inscriptions. Si vous avez déjà un compte Patagonia Wings vérifié, vous pouvez vous connecter. Aucun nouveau mot de passe n’est demandé pour le moment.")}</p></div> : <>
         <h2>{register ? t("Únete al Community Lab.", "Join the Community Lab.", "Rejoignez le Community Lab.") : t("Bienvenido de nuevo.", "Welcome back.", "Heureux de vous retrouver.")}</h2>
+        {register && qaRegistration && <label>{t("Invitación privada QA", "Private QA invitation", "Invitation QA privée")}<input name="invitation" type="password" autoComplete="off" required minLength={32} maxLength={128} /></label>}
         <label>{t("Correo electrónico", "Email", "Adresse e-mail")}<input name="email" type="email" autoComplete="username" required maxLength={254} /></label>
         <label>{t("Contraseña", "Password", "Mot de passe")}<input key={register ? "new" : "current"} name="password" type="password" autoComplete={register ? "new-password" : "current-password"} required minLength={register ? 12 : undefined} maxLength={128} aria-describedby={register ? "pv51-password-help" : undefined} /></label>
         {register && <><p className="pv51-help" id="pv51-password-help">{t("Utiliza al menos 12 caracteres y una contraseña exclusiva. Se requiere verificación por correo; no se crea una suscripción comercial.", "Use at least 12 characters and a unique password. Email verification is required; no marketing subscription is created.", "Utilisez au moins 12 caractères et un mot de passe unique. La vérification par e-mail est requise ; aucun abonnement commercial n’est créé.")}</p><label className="pv51-consent"><input type="checkbox" name="consent" required /><span>{t("Acepto el tratamiento de mis datos de cuenta según la ", "I agree to processing of my account information under the ", "J’accepte le traitement de mes données de compte conformément à la ")}<Link href={localeHref(language, "/privacidad")}>{t("información de privacidad", "privacy notice", "notice de confidentialité")}</Link>.</span></label></>}

@@ -16,7 +16,12 @@ const newsletterModule = await loadModule('../../src/lib/web4/newsletter.ts', { 
 const mailModule = await loadModule('../../src/lib/web4/mail.ts', { './inquiry': inquiryModule });
 const templatesModule = await loadModule('../../src/lib/web4/mail-templates.ts');
 const nodemailerStub = dataModule('export default { createTransport(options) { return globalThis.__vectorSmtpTest(options); } };');
-const smtpModule = await loadModule('../../src/lib/web4/mail-smtp.ts', { nodemailer: nodemailerStub });
+const nativeSocketModule = await loadModule('../../src/lib/web4/mail-native-socket.ts');
+const smtpModule = await loadModule('../../src/lib/web4/mail-smtp.ts', { nodemailer: nodemailerStub, './mail-native-socket': nativeSocketModule });
+const qaServerStub = dataModule('export function communityResponse(body,status=200){return Response.json(body,{status});} export const failure=(code,status)=>communityResponse({ok:false,code},status); export async function communityRpc(name,parameters){return globalThis.__vectorQaMailRpc(name,parameters);}');
+const qaSingleModule = await loadModule('../../src/app/api/vector/mail/qa-single/route.ts', {
+ '@/lib/web4/mail':mailModule,'@/lib/web4/mail-smtp':smtpModule,'@/lib/web4/mail-templates':templatesModule,'@/lib/web51/server':qaServerStub,
+});
 const dispatchModule = await loadModule('../../src/lib/web4/mail-dispatch.ts', {
   './inquiry-storage': storageModule, './newsletter': newsletterModule, './mail': mailModule,
   './mail-templates': templatesModule, './mail-smtp': smtpModule,
@@ -67,6 +72,30 @@ const job = {
 const request = (body, extra = {}) => new Request('https://preview.site-provider.com/api/vector/newsletter/confirm', {
   method: 'POST', headers: { origin: 'https://preview.site-provider.com', 'content-type': 'application/json', ...extra },
   body: typeof body === 'string' ? body : JSON.stringify(body),
+});
+
+test('single owner SMTP QA requires approval, an atomic durable claim, fixed recipient and disabled automatic mail',async()=>{
+ const {POST}=await import(qaSingleModule);
+ const qaEnv={...env,VECTOR_HOSTING_PLATFORM:'cloudflare',VECTOR_DEPLOYMENT_STAGE:'preview',VECTOR_MAIL_ENABLED:'false',VECTOR_QA_SMTP_TEST_APPROVED:'false',VECTOR_SMTP_USER:'patagonia@patagoniaw.com',VECTOR_MAIL_FROM:'patagonia@patagoniaw.com',VECTOR_MAIL_PREVIEW_RECIPIENTS:'patagonia@patagoniaw.com'};
+ const saved=Object.fromEntries(Object.keys(qaEnv).map(key=>[key,process.env[key]]));Object.assign(process.env,qaEnv);
+ let claimed=false,claims=0,sends=0,finishes=0;
+ globalThis.__vectorQaMailRpc=async(name,p)=>{assert.equal(name,'vector_community_qa_mail');if(p.p_action==='claim'){claims++;if(claimed)return'already_attempted';claimed=true;return'claimed';}assert.equal(p.p_action,'finish');assert.equal(p.p_result,'sent');finishes++;return'recorded';};
+ globalThis.__vectorSmtpTest=()=>({async sendMail(message){sends++;assert.equal(message.to,'patagonia@patagoniaw.com');assert.deepEqual(message.envelope.to,['patagonia@patagoniaw.com']);assert.equal(message.subject,'[PRUEBA ÚNICA QA WEB 5.3] COPILOTO VECTOR');return{accepted:[message.to],rejected:[]};},close(){}});
+ const make=(host='patagonia-wings-web51-qa.lizamaclaudio.workers.dev',key=env.VECTOR_MAIL_WORKER_SECRET)=>new Request('https://'+host+'/api/vector/mail/qa-single',{method:'POST',headers:{authorization:'Bearer '+key}});
+ try{
+  assert.equal((await POST(make())).status,403);assert.equal(claims,0);assert.equal(sends,0);
+  process.env.VECTOR_QA_SMTP_TEST_APPROVED='true';
+  const diagnostic=make();diagnostic.headers.set('x-vector-qa-check-only','true');
+  assert.equal((await POST(diagnostic)).status,409);assert.equal(claims,0);assert.equal(sends,0);
+  assert.equal((await POST(make(undefined,'invalid'))).status,401);
+  assert.equal((await POST(make('www.patagoniaw.com'))).status,403);assert.equal(claims,0);
+  process.env.VECTOR_HOSTING_PLATFORM='node'; // Transport is mocked; route must still reject this platform.
+  assert.equal((await POST(make())).status,403);process.env.VECTOR_HOSTING_PLATFORM='cloudflare';
+  // Native connector presence is checked before handing the mocked transport its options.
+  const {nativeSmtpConnector}=await import(nativeSocketModule);globalThis[nativeSmtpConnector]=()=>{throw Error('mock transport must not connect');};
+  assert.equal((await POST(make())).status,200);assert.equal((await POST(make())).status,409);
+  assert.equal(sends,1);assert.equal(finishes,1);assert.equal(claims,2);delete globalThis[nativeSmtpConnector];
+ }finally{delete globalThis.__vectorQaMailRpc;delete globalThis.__vectorSmtpTest;for(const[key,value]of Object.entries(saved)){if(value===undefined)delete process.env[key];else process.env[key]=value;}}
 });
 
 test('same-document newsletter links replace old tokens, clean the URL and invalidate late responses without a GET mutation', async () => {

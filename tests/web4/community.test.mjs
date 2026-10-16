@@ -5,7 +5,7 @@ import ts from 'typescript';
 const moduleUrl=s=>'data:text/javascript;base64,'+Buffer.from(ts.transpileModule(s,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText).toString('base64');
 const files={
  validation:'src/lib/web51/validation.ts',inquiry:'src/lib/web4/inquiry.ts',http:'src/lib/web4/inquiry-http.ts',storage:'src/lib/web4/inquiry-storage.ts',server:'src/lib/web51/server.ts',handlers:'src/lib/web51/handlers.ts',
- session:'src/app/api/vector/community/session/route.ts',register:'src/app/api/vector/community/register/route.ts',founders:'src/app/api/vector/founders/route.ts',confirm:'src/app/api/vector/founders/confirm/route.ts',
+ registration:'src/lib/web51/registration.ts',session:'src/app/api/vector/community/session/route.ts',register:'src/app/api/vector/community/register/route.ts',founders:'src/app/api/vector/founders/route.ts',confirm:'src/app/api/vector/founders/confirm/route.ts',
 };
 const modules={};
 const mailStub=moduleUrl('export function scheduleMailAfterResponse(){globalThis.communityMailSchedules=(globalThis.communityMailSchedules||0)+1;}');
@@ -13,7 +13,7 @@ for(const [key,file]of Object.entries(files)){
  let source=await readFile(new URL('../../'+file,import.meta.url),'utf8');
  source=source.replace(/import ['"]server-only['"];?/g,'');
  const substitutions={
- './validation':'validation','../web4/inquiry':'inquiry','./inquiry':'inquiry','../web4/inquiry-storage':'storage','../web4/inquiry-http':'http','./server':'server',
+ './validation':'validation','../web4/inquiry':'inquiry','./inquiry':'inquiry','../web4/inquiry-storage':'storage','../web4/inquiry-http':'http','./server':'server','@/lib/web51/registration':'registration',
  '@/lib/web4/inquiry':'inquiry','@/lib/web4/inquiry-http':'http','@/lib/web4/inquiry-storage':'storage','@/lib/web51/server':'server','@/lib/web51/validation':'validation',
  };
  for(const [name,target]of Object.entries(substitutions))if(modules[target])source=source.replaceAll('"'+name+'"',JSON.stringify(modules[target])).replaceAll("'"+name+"'",JSON.stringify(modules[target]));
@@ -117,6 +117,19 @@ test('signup refuses unverified-provider configuration and never echoes provider
  environment(t);const {calls}=network(t,{'/auth/v1/settings':()=>Response.json({external:{email:true},mailer_autoconfirm:true})});
  const response=await register.POST(request({email:'qa@example.test',password:'SyntheticPass123',consent:true,locale:'en'},'/api/vector/community/register'));
  assert.equal(response.status,503);assert.ok(!calls.some(c=>c.path.endsWith('/signup')));
+});
+
+test('private QA registration needs unexpired invitation configuration and a ready provider guard',()=>{
+ const env={VECTOR_FORMS_ENABLED:'true',SUPABASE_URL:'https://example.supabase.co',SUPABASE_SECRET_KEY:'sb_secret_synthetic',VECTOR_FORM_HASH_SECRET:'x'.repeat(32),VECTOR_COMMUNITY_PUBLIC_KEY:'sb_publishable_synthetic',VECTOR_COMMUNITY_AUTH_ENABLED:'true',VECTOR_HOSTING_PLATFORM:'cloudflare',VECTOR_DEPLOYMENT_STAGE:'preview',VECTOR_COMMUNITY_QA_REGISTRATION_ENABLED:'true',VECTOR_COMMUNITY_QA_GUARD_READY:'true',VECTOR_COMMUNITY_QA_INVITE_SECRET:'q'.repeat(48),VECTOR_COMMUNITY_QA_INVITE_EXPIRES:new Date(Date.now()+60000).toISOString(),VECTOR_COMMUNITY_CONFIRM_ORIGIN:'https://patagonia-wings-web51-qa.lizamaclaudio.workers.dev'};
+ assert.equal(server.communityQaRegistrationConfigured(env),true);
+ for(const [key,value] of [['VECTOR_COMMUNITY_QA_GUARD_READY','false'],['VECTOR_DEPLOYMENT_STAGE','production'],['VECTOR_COMMUNITY_QA_INVITE_EXPIRES','2020-01-01'],['VECTOR_COMMUNITY_CONFIRM_ORIGIN','https://other.example'],['VECTOR_COMMUNITY_QA_INVITE_SECRET','short']])assert.equal(server.communityQaRegistrationConfigured({...env,[key]:value}),false);
+});
+
+test('QA handler cannot fall back to public registration for another identity',async t=>{
+ environment(t);const {calls}=network(t);
+ const registration=await import(modules.registration);
+ const response=await registration.registerCommunity(request({email:'other@example.test',password:'SyntheticPass123',consent:true,locale:'es'}),true);
+ assert.equal(response.status,503);assert.equal(calls.length,0);
 });
 
 test('signup cannot open without a fixed HTTPS confirmation origin',async t=>{

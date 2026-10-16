@@ -1,0 +1,10 @@
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+const checkOnly=process.argv[2]==='--check-only';
+if(!checkOnly&&process.argv[2]!=='--owner-approved')throw Error('EXPLICIT_OWNER_APPROVAL_REQUIRED');
+const key=(await readFile('.dev.vars.web53','utf8')).match(/^VECTOR_MAIL_WORKER_SECRET=(.+)$/m)?.[1];
+if(!key)throw Error('QA_AUTHORIZATION_UNAVAILABLE');
+const response=await fetch('https://patagonia-wings-web51-qa.lizamaclaudio.workers.dev/api/vector/mail/qa-single',{method:'POST',headers:{authorization:'Bearer '+key,...(checkOnly?{'x-vector-qa-check-only':'true'}:{})},redirect:'manual',signal:AbortSignal.timeout(30000)});
+const value=await response.json();
+const safe={checkedAt:new Date().toISOString(),checkOnly,status:response.status,code:value.code};
+await mkdir('artifacts/web53',{recursive:true});await writeFile('artifacts/web53/smtp-single-'+(checkOnly?'blocked':'result')+'.json',JSON.stringify(safe,null,2));console.log(JSON.stringify(safe));
+if(checkOnly?response.status!==403:response.status!==200)process.exitCode=1;

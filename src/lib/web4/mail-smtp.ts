@@ -1,6 +1,9 @@
 import "server-only";
 import nodemailer from "nodemailer";
+import type { SMTPTransportGetSocket } from "nodemailer/lib/smtp-transport";
+import type { Socket } from 'node:net';
 import type { MailConfiguration, MailMessage, MailResult } from "./mail";
+import { nativeSmtpConnector, openNativeSmtpSocket, type NativeTlsConnect } from "./mail-native-socket";
 
 // Also used by dispatcher admission control. Do not raise independently of the
 // serverless budget or the last persistence acknowledgement can be interrupted.
@@ -23,14 +26,32 @@ export function smtpFailure(error: unknown): MailResult {
 }
 
 // Sending and credential preflight use identical transport/TLS requirements.
-function smtpTransport(configuration: MailConfiguration) {
-  return nodemailer.createTransport({
+function smtpTransport(configuration: MailConfiguration, onDataCommand?: () => void) {
+  const native = process.env.VECTOR_HOSTING_PLATFORM === 'cloudflare';
+  const connect = (globalThis as typeof globalThis & { [nativeSmtpConnector]?: NativeTlsConnect })[nativeSmtpConnector];
+  if (native && !connect) throw Object.assign(new Error('SMTP_NATIVE_TRANSPORT_UNAVAILABLE'), { code: 'ECONNECTION', command: 'CONN' });
+  const sockets = new Set<Socket>();
+  let closed = false;
+  const getSocket: SMTPTransportGetSocket | undefined = native && connect ? (_options, callback) => {
+    openNativeSmtpSocket(connect, configuration.host, configuration.port, onDataCommand)
+      .then(connection => {
+        if (closed) { connection.destroy(); callback(new Error('SMTP_TRANSPORT_CLOSED')); return; }
+        sockets.add(connection); connection.once('close', () => sockets.delete(connection));
+        callback(null, { connection, secured: true });
+      })
+      .catch(() => callback(Object.assign(new Error('SMTP_NATIVE_TLS_UNAVAILABLE'), { code: 'ETLS', command: 'CONN' })));
+  } : undefined;
+  const transport = nodemailer.createTransport({
     host: configuration.host, port: configuration.port, secure: configuration.port === 465,
     requireTLS: true, auth: { user: configuration.user, pass: configuration.password },
     tls: { minVersion: "TLSv1.2", rejectUnauthorized: true, servername: configuration.host },
     connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: SMTP_TIMEOUT_MS, dnsTimeout: 5000,
     logger: false, debug: false, disableFileAccess: true, disableUrlAccess: true,
+    ...(getSocket ? { getSocket } : {}),
   });
+  const close = transport.close.bind(transport);
+  transport.close = () => { closed = true; for (const socket of sockets) socket.destroy(); close(); };
+  return transport;
 }
 
 function smtpVerificationError(error: unknown): string {
@@ -66,8 +87,10 @@ export async function verifySmtp(configuration: MailConfiguration): Promise<{ ve
 // content, attachments, pooling, arbitrary TLS overrides or recipient lists.
 export async function sendSmtp(message: MailMessage, configuration: MailConfiguration): Promise<MailResult> {
   let deadline: ReturnType<typeof setTimeout> | undefined;
-  const transport = smtpTransport(configuration);
+  let transport: ReturnType<typeof smtpTransport> | undefined;
+  let dataStarted = false;
   try {
+    transport = smtpTransport(configuration, () => { dataStarted = true; });
     const delivery = transport.sendMail({ ...message, from: { name: "Patagonia Wings · COPILOTO VECTOR", address: message.from },
       envelope: { from: message.from, to: [message.to] }, disableFileAccess: true, disableUrlAccess: true }).then<MailResult>(info => {
         if (info.accepted.length === 1 && info.rejected.length === 0) return { result: "sent", providerId: message.messageId, errorCode: null };
@@ -75,11 +98,18 @@ export async function sendSmtp(message: MailMessage, configuration: MailConfigur
       });
     const limit = new Promise<MailResult>(resolve => {
       deadline = setTimeout(() => {
-        transport.close();
+        transport?.close();
         resolve({ result: "delivery_unknown", providerId: null, errorCode: "SMTP_DELIVERY_UNKNOWN" });
       }, SMTP_TIMEOUT_MS);
     });
     return await Promise.race([delivery, limit]);
-  } catch (error) { return smtpFailure(error); }
-  finally { if (deadline) clearTimeout(deadline); transport.close(); }
+  } catch (error) {
+    const responseCode = error && typeof error === 'object' ? (error as { responseCode?: number }).responseCode : undefined;
+    // Nodemailer can label a broken native stream CONN after DATA. The actual
+    // write boundary takes precedence: an ambiguous delivery must never retry.
+    if (dataStarted && !(responseCode && responseCode >= 400 && responseCode < 600))
+      return { result: 'delivery_unknown', providerId: null, errorCode: 'SMTP_DELIVERY_UNKNOWN' };
+    return smtpFailure(error);
+  }
+  finally { if (deadline) clearTimeout(deadline); transport?.close(); }
 }
