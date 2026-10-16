@@ -22,6 +22,7 @@ export function marketingMetadata(language: Language, title: string, description
     title, description,
     alternates: { canonical: path, languages: { es: localeHref("es", route), en: localeHref("en", route), fr: localeHref("fr", route), "x-default": localeHref("es", route) } },
     openGraph: { title, description, url: path, siteName: "COPILOTO VECTOR COMPLETE · Patagonia Wings", locale: localized(language, "es_CL", "en_US", "fr_FR"), type: "website", images: [{ url: productCapture?.src || "/vector/current/copilot.webp", width: productCapture?.size.width || 1920, height: productCapture?.size.height || 1080, alt: "Copiloto Vector" }] },
+    twitter: {card:'summary_large_image',title,description,images:[productCapture?.src||'/vector/current/copilot.webp']},
   };
 }
 export function Shell({ language, children }: { language: Language; children: React.ReactNode }) {
@@ -102,7 +103,8 @@ function Questions({ language }: { language: Language }) {
   return <section className="pw4-section" id="preguntas"><div className="pw4-wrap"><Heading number="07" label={t("PREGUNTAS", "QUESTIONS", "QUESTIONS")} title={t("Antes de tu próxima salida.", "Before your next departure.", "Avant votre prochain départ.")} /><div className="pw4-faq">{items.map(([question, answer]) => <details key={question}><summary>{question}<span aria-hidden="true">+</span></summary><p>{answer}</p></details>)}</div></div></section>;
 }
 export function Home({ language = "es" }: { language?: Language }) {
-  return <Shell language={language}><CinematicHome language={language} /></Shell>;
+  const schema={'@context':'https://schema.org','@graph':[{'@type':'WebSite',name:'Patagonia Wings',url:'https://www.patagoniaw.com',inLanguage:['es','en','fr']},{'@type':'SoftwareApplication',name:'COPILOTO VECTOR',applicationCategory:'GameApplication',operatingSystem:'Windows x64',url:'https://www.patagoniaw.com'+localeHref(language,'/copiloto-vector'),creativeWorkStatus:'In development',description:localized(language,'Software de simulación de vuelo en desarrollo. Implementaciones en QA y validación real pendiente.','Flight simulation software in development. QA implementations with live validation pending.','Logiciel de simulation de vol en développement. Implémentations en QA et validation réelle à effectuer.')}]};
+  return <Shell language={language}><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/><CinematicHome language={language} /></Shell>;
 }
 export function Product({ language = "es" }: { language?: Language }) {
   const t = (es: string, en: string, fr: string) => localized(language, es, en, fr);

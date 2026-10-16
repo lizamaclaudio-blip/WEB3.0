@@ -6,7 +6,9 @@ import ts from 'typescript';
 const moduleUrl = source => 'data:text/javascript;base64,' + Buffer.from(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText).toString('base64');
 const localeModule = moduleUrl(await readFile(new URL('../../src/components/web4/locale.ts', import.meta.url), 'utf8'));
 const { languages, localeHref, unlocalizedPath } = await import(localeModule);
-const loadRoute = async path => import(moduleUrl((await readFile(new URL(path, import.meta.url), 'utf8')).replace('@/components/web4/locale', localeModule)));
+const routesModule=moduleUrl(await readFile(new URL('../../src/components/web4/public-routes.ts',import.meta.url),'utf8'));
+const publicIdeasStub=moduleUrl('export async function getPublicProposalIds(){return [];}');
+const loadRoute = async path => import(moduleUrl((await readFile(new URL(path, import.meta.url), 'utf8')).replace('@/components/web4/locale', localeModule).replace('@/components/web4/public-routes',routesModule).replace('@/lib/web51/public-ideas',publicIdeasStub)));
 const { default: sitemap } = await loadRoute('../../src/app/sitemap.ts');
 const { default: robots } = await loadRoute('../../src/app/robots.ts');
 const { completeEdition, completeEditionCopy } = await import(moduleUrl(await readFile(new URL('../../src/components/web4/complete-edition.ts', import.meta.url), 'utf8')));
@@ -25,21 +27,24 @@ test('switching ES, EN and FR keeps the same public page without repeated locale
   assert.equal(localeHref('fr', '/soporte#novedades'), '/fr/soporte#novedades');
 });
 
-test('all 18 public locale pages have reciprocal sitemap alternates; previews stay excluded', () => {
+test('all 36 public locale pages have reciprocal sitemap alternates; previews and private routes stay excluded', async () => {
   const previous = process.env.VERCEL_ENV;
   try {
     process.env.VERCEL_ENV = 'production';
-    const entries = sitemap();
-    assert.equal(entries.length, 18);
-    assert.equal(new Set(entries.map(entry => entry.url)).size, 18);
+    const entries = await sitemap();
+    assert.equal(entries.length, 36);
+    assert.equal(new Set(entries.map(entry => entry.url)).size, 36);
     for (const entry of entries) {
       assert.deepEqual(Object.keys(entry.alternates.languages), ['es', 'en', 'fr']);
       for (const alternate of Object.values(entry.alternates.languages)) assert.ok(entries.some(item => item.url === alternate));
     }
     assert.ok(robots().rules.allow.includes('/fr/soporte$'));
     assert.ok(!robots().rules.allow.some(path => path.includes('dispatch')));
+    assert.ok(robots().rules.disallow.includes('/fr/comunidad/admin'));
+    assert.ok(robots().rules.disallow.includes('/api/'));
+    assert.ok(entries.every(entry=>!entry.url.includes('/admin')&&!entry.url.includes('/cuenta')));
     process.env.VERCEL_ENV = 'preview';
-    assert.deepEqual(sitemap(), []);
+    assert.deepEqual(await sitemap(), []);
     assert.equal(robots().rules.disallow, '/');
   } finally {
     if (previous === undefined) delete process.env.VERCEL_ENV;
@@ -57,9 +62,9 @@ test('COMPLETE presents one future licence in all languages without an active co
   assert.ok(!completeEdition.areas.some(area => area.id === 'career-online'));
   assert.deepEqual(Object.keys(completeEditionCopy), languages);
   const expected = {
-    es: ['Una licencia', 'implementadas en QA', 'Por anunciar', 'validación real sigue pendiente'],
-    en: ['One licence', 'implemented in QA', 'To be announced', 'live validation is pending'],
-    fr: ['Une licence', 'implémentés en QA', 'À annoncer', 'validation réelle reste à effectuer'],
+    es: ['COMMANDER', 'implementadas en QA', 'Por anunciar', 'validación real sigue pendiente'],
+    en: ['COMMANDER', 'implemented in QA', 'To be announced', 'live validation is pending'],
+    fr: ['COMMANDER', 'implémentés en QA', 'À annoncer', 'validation réelle reste à effectuer'],
   };
   for (const language of languages) {
     const copy = completeEditionCopy[language];

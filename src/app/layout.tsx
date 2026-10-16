@@ -7,6 +7,10 @@ import "./web50-home.css";
 import "./web50-demo.css";
 import "./web50-product.css";
 import "./web50.css";
+import "./web51-launch.css";
+import "./web51-community.css";
+import "./web51-roadmap.css";
+import "./web51.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const rajdhani = Rajdhani({ subsets: ["latin"], weight: ["500", "700"], variable: "--font-rajdhani" });

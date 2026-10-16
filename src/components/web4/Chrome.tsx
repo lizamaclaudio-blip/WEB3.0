@@ -18,10 +18,13 @@ export function WebHeader({ language = "es" }: { language?: Language }) {
   }
   const t = <T,>(es: T, en: T, fr: T) => localized(language, es, en, fr);
   const links = [
-    ["Copiloto Vector", "/copiloto-vector"],
-    [t("Galería", "Gallery", "Galerie"), "/copiloto-vector#galeria"],
-    [t("Disponibilidad", "Availability", "Disponibilité"), "/versiones"],
-    [t("Soporte", "Support", "Assistance"), "/soporte"],
+    [t("Inicio", "Home", "Accueil"), ""],
+    [t("Descubre Vector", "Discover Vector", "Découvrir Vector"), "/copiloto-vector"],
+    [t("Ediciones", "Editions", "Éditions"), "/ediciones"],
+    [t("Roadmap", "Roadmap", "Feuille de route"), "/roadmap"],
+    [t("Comunidad", "Community", "Communauté"), "/comunidad"],
+    ["Founders 10", "/founders-10"],
+    [t("Novedades", "News", "Actualités"), "/novedades"],
   ];
   return <header className="pw4-header" lang={language} onKeyDown={event => {
     if (open && event.key === "Escape") {
@@ -50,7 +53,7 @@ export function WebFooter({ language = "es" }: { language?: Language }) {
     <div className="pw4-footer-top"><Link href={localeHref(language)} className="pw4-brand"><Glyph name="mountain" size={35} /><span>COPILOTO <strong>VECTOR</strong><small>{t("DESDE EL SUR. HACIA LO QUE VIENE.", "FROM THE SOUTH. TOWARDS WHAT'S NEXT.", "DEPUIS LE SUD. VERS L’AVENIR.")}</small></span></Link><p>{t("Una pasión por volar. Una nueva forma de acompañarte.", "A passion for flight. A new way to accompany it.", "La passion du vol. Une nouvelle façon de vous accompagner.")}</p></div>
     <div className="pw4-footer-links">
       <div><h3>COPILOTO VECTOR COMPLETE</h3><Link href={localeHref(language, "/copiloto-vector")}>{t("Conoce el producto", "Explore the product", "Découvrir le produit")}</Link><Link href={localeHref(language, "/copiloto-vector#modulos")}>{t("Seis módulos", "Six modules", "Six modules")}</Link><Link href={localeHref(language, "/versiones#complete")}>{t("COMPLETE y disponibilidad", "COMPLETE & availability", "COMPLETE et disponibilité")}</Link></div>
-      <div><h3>{t("EXPLORAR", "EXPLORE", "EXPLORER")}</h3><Link href={localeHref(language, "/copiloto-vector#galeria")}>{t("Capturas reales", "Real screenshots", "Captures réelles")}</Link><Link href={localeHref(language, "/copiloto-vector#compatibilidad")}>{t("Compatibilidad", "Compatibility", "Compatibilité")}</Link><Link href={localeHref(language, "/copiloto-vector#preguntas")}>{t("Preguntas frecuentes", "Frequently asked questions", "Questions fréquentes")}</Link></div>
+      <div><h3>{t("EXPLORAR", "EXPLORE", "EXPLORER")}</h3><Link href={localeHref(language, "/descubre")}>{t("VECTOR en un vistazo · compartir", "VECTOR at a glance · share", "VECTOR en bref · partager")}</Link><Link href={localeHref(language, "/copiloto-vector#galeria")}>{t("Capturas reales", "Real screenshots", "Captures réelles")}</Link><Link href={localeHref(language, "/copiloto-vector#compatibilidad")}>{t("Compatibilidad", "Compatibility", "Compatibilité")}</Link><Link href={localeHref(language, "/copiloto-vector#preguntas")}>{t("Preguntas frecuentes", "Frequently asked questions", "Questions fréquentes")}</Link></div>
       <div><h3>{t("INFORMACIÓN", "INFORMATION", "INFORMATIONS")}</h3><Link href={localeHref(language, "/soporte")}>{t("Soporte y contacto", "Support & contact", "Assistance et contact")}</Link><Link href={localeHref(language, "/privacidad")}>{t("Privacidad", "Privacy", "Confidentialité")}</Link><Link href={localeHref(language, "/condiciones")}>{t("Condiciones", "Terms", "Conditions d’utilisation")}</Link></div>
       <div className="pw4-footer-state"><span className="pw4-dot" />{t("PRODUCTO EN DESARROLLO", "PRODUCT IN DEVELOPMENT", "PRODUIT EN DÉVELOPPEMENT")}<p>{t("Software para simulación de vuelo. No apto para operaciones aéreas reales.", "Flight simulation software. Not for real-world flight operations.", "Logiciel de simulation de vol. Non destiné aux opérations aériennes réelles.")}</p></div>
     </div>
