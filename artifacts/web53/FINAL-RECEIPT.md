@@ -10,7 +10,7 @@ Final deployment `a0f64490-5a84-4030-8c91-00de204d4629`.
 
 Verified:
 
-- 36 public HTML/RSC routes precompiled; 300 public CPU samples, 25 per measured route, maximum 3 ms among the measured public routes/reads.
+- 36 public HTML/RSC routes precompiled; two public read batches total 596 valid CPU observations. Initial batch: 25 per route, max 3 ms. Final repetition: 23–25 per route, max 4 ms, no HTTP errors or 429 responses.
 - Private-read sampling still includes a 154 ms CPU request. No forced-cold guarantee or peak-memory measurement.
 - Native TLS SMTP authenticated; one explicitly approved owner message delivered and acknowledged. Test closed afterward. Seven historical deliveries preserved.
 - Owner Auth account created, email confirmed, actual session present and one proposal persisted pending moderation. Zero moderators. QA intent consumed once.

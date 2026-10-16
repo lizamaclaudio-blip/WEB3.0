@@ -35,6 +35,8 @@ Zero is the platform's integer-millisecond reporting resolution, not literally z
 
 Samples span two versions with the same performance implementation; differences were privacy copy and the QA mail presentation. Per-route p99 is deliberately omitted (n=25). The first observed request is not proof of a fresh isolate. Forced-cold coverage and peak memory were **not** established.
 
+Final repetition after owner Auth verification and invitation closure: **811 read requests, 296 valid CPU observations**, 23–25 per route, across versions `55029134` and final `a0f64490`. Zero HTTP failures, zero 429 responses and no observed resource terminations. HTML CPU remains 0 ms at integer resolution; roadmap API median 1/p95 3/max 4 ms, proposals median 1/p95 2/max 4, anonymous session median 0/p95 0/max 1. This adds evidence for the final public dispatcher; it still does not establish a private/write or forced-cold distribution. Both batches total 596 valid public CPU observations.
+
 Additional private-read sample: 37 valid CPU observations. Account ES: n=9, median 8, max 154 ms; EN: n=8, median 9, max 20; FR: n=10, median 7, max 14. Anonymous admin denial: n=10, median 3, max 25. These distributions have insufficient samples for p95/p99. No terminations observed, but several exceed 10 ms. No claim that all private operations meet Free limits.
 
 The last deployment reports startup 20 ms, distinct from request CPU. Bundle: 10,128.27 KiB, gzip 1,919.25 KiB; 204 assets. Tail does not expose peak memory. Free documents 10 ms CPU, 128 MB per isolate, 100,000 dynamic requests/day, 50 subrequests/request and six simultaneous outbound connections. [Limits](https://developers.cloudflare.com/workers/platform/limits/).

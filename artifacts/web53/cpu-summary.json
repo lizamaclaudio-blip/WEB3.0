@@ -286,5 +286,184 @@
     "Tail does not expose peak memory.",
     "Private read requests exceeded 10ms, including a 154ms sample.",
     "No authenticated/write/SMTP full CPU distribution measured."
-  ]
+  ],
+  "finalPublic": {
+    "requests": 811,
+    "observedEvents": 297,
+    "validCpuObservations": 296,
+    "summary": [
+      {
+        "path": "/",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/en",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/fr",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/ediciones",
+        "samples": 23,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/versiones",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/soporte",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/founders-10",
+        "samples": 23,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/roadmap",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/comunidad",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 0,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/api/vector/community/roadmap",
+        "samples": 25,
+        "median": 1,
+        "p95": 3,
+        "p99": null,
+        "max": 4,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/api/vector/community/proposals",
+        "samples": 25,
+        "median": 1,
+        "p95": 2,
+        "p99": null,
+        "max": 4,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      },
+      {
+        "path": "/api/vector/community/session",
+        "samples": 25,
+        "median": 0,
+        "p95": 0,
+        "p99": null,
+        "max": 1,
+        "over10": 0,
+        "outcomes": [
+          "ok"
+        ],
+        "httpErrors": 0,
+        "rateLimited": 0
+      }
+    ],
+    "versions": [
+      "55029134-5e3e-4db5-8b6c-60d4c9a53da4",
+      "a0f64490-5a84-4030-8c91-00de204d4629"
+    ]
+  }
 }
