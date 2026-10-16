@@ -2,6 +2,8 @@
 
 Fecha: 16 de octubre de 2026, America/Santiago. Rama: `codex/patagonia-wings-web4`. Base de comparación: Web 4.5, commit `6e32a700b4f67229eac22335c19a15f3e37148d1`, Preview `https://web-30-cp7mnb886-lizamaclaudio-blips-projects.vercel.app/`.
 
+**Cierre de fase antes de Web 5.1:** implementación `6ef705e1bfe0430bc3ff1e8c5017cc439f1ad5d4`, enviada a la rama web. Preview READY: `https://web-30-abqlo5jpb-lizamaclaudio-blips-projects.vercel.app/`, destino Preview, sin promoción a producción. Se comprobaron visualmente sus imágenes cargadas, el rechazo del worker sin autorización (401) y el rechazo de formularios sin consentimiento (400). Las capturas del Preview están en `artifacts/web50-review/preview-desktop.jpg`.
+
 ## Cambio visual y comercial
 
 La Home abandona la composición de texto junto a una captura y los bloques técnicos repetidos. La nueva portada ocupa una escena amplia, con titular expresivo, arte aeronáutico original y una interfaz WPF integrada. La ruta aérea es ambiental y decorativa, sin presentarse como seguimiento de un vuelo. La llamada principal conduce a la lista de interesados existente; la secundaria abre la demostración.
