@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "./PublicLink";
 import { useEffect, useState } from "react";
 import { communityCategory, communityStatuses, communityStatus, type CommunityProposal } from "./CommunityLab";
 import { languages, localized, localeHref, type Language } from "./locale";

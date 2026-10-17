@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import Link from './PublicLink';
 import {inquiryConfigured} from '@/lib/web4/inquiry';
 import {mailConfiguration} from '@/lib/web4/mail';
 import {InquiryForm} from './InquiryForm';

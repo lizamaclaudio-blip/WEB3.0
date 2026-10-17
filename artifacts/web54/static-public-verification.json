@@ -1,0 +1,461 @@
+{
+  "checkedAt": "2026-10-17T16:11:36.337Z",
+  "origin": "https://www.patagoniaw.com",
+  "pages": [
+    {
+      "path": "/",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/copiloto-vector",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/ediciones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/integraciones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/versiones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/soporte",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/privacidad",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/condiciones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/founders-10",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/novedades",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/descubre",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/roadmap",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/comunidad",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/copiloto-vector",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/ediciones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/integraciones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/versiones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/soporte",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/privacidad",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/condiciones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/founders-10",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/novedades",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/descubre",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/roadmap",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/en/comunidad",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/copiloto-vector",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/ediciones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/integraciones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/versiones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/soporte",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/privacidad",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/condiciones",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/founders-10",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/novedades",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/descubre",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/roadmap",
+      "status": 200,
+      "delivery": "static-assets-first"
+    },
+    {
+      "path": "/fr/comunidad",
+      "status": 200,
+      "delivery": "static-assets-first"
+    }
+  ],
+  "resources": [
+    {
+      "path": "/_next/static/media/3206eb66b875a5b3-s.p.201eoo3y6c5_i.woff2",
+      "status": 200,
+      "type": "font/woff2"
+    },
+    {
+      "path": "/_next/static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2",
+      "status": 200,
+      "type": "font/woff2"
+    },
+    {
+      "path": "/_next/static/media/a079e02bba5bf7ab-s.p.3f6zc4f4lqyuc.woff2",
+      "status": 200,
+      "type": "font/woff2"
+    },
+    {
+      "path": "/vector/web50/hero-aviation.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/_next/static/chunks/0aes2mxe4hc9a.css",
+      "status": 200,
+      "type": "text/css"
+    },
+    {
+      "path": "/_next/static/chunks/0s5rna8uva6d9.css",
+      "status": 200,
+      "type": "text/css"
+    },
+    {
+      "path": "/_next/static/chunks/09wybmvtjxgxg.css",
+      "status": 200,
+      "type": "text/css"
+    },
+    {
+      "path": "/_next/static/chunks/1ckvzn7sfprko.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/2r4s4h5xul1n-.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/209aaqjv6z8gh.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/2e268anpfvdoc.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/turbopack-2c3mg3r-05n1w.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/0umf92h1sb77c.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/0x1nz9t8rgczx.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/3_qnj99de54qf.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/0cz1d0mv5g_q7.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/vector/m29/copilot.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/m29/dispatch.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/current/cabin.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/current/monitor.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/current/landing.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/current/journal.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/m29/home.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/web50/academy.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/web50/performance.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/web50/studio.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/web50/career.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/web50/acars.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/m29/settings.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/current/icons/monitor.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/current/icons/ofp.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/current/icons/passengers.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/current/icons/airport.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/m29/operations.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/current/icons/copilot.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/current/icons/clock.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/vector/current/weather.webp",
+      "status": 200,
+      "type": "image/webp"
+    },
+    {
+      "path": "/_next/static/chunks/38ncdpahprmoz.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/0_bbki_u6tv35.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/1vm3rrmiseump.js",
+      "status": 200,
+      "type": "text/javascript"
+    },
+    {
+      "path": "/_next/static/chunks/0htwtn6shzo_s.js",
+      "status": 200,
+      "type": "text/javascript"
+    }
+  ],
+  "cache": [
+    {
+      "path": "/vector/web50/hero-aviation.webp",
+      "conditionalStatus": 304
+    },
+    {
+      "path": "/_next/static/chunks/0aes2mxe4hc9a.css",
+      "conditionalStatus": 304
+    },
+    {
+      "path": "/_next/static/chunks/0s5rna8uva6d9.css",
+      "conditionalStatus": 304
+    },
+    {
+      "path": "/_next/static/chunks/09wybmvtjxgxg.css",
+      "conditionalStatus": 304
+    }
+  ],
+  "api": [
+    {
+      "path": "/api/vector/availability",
+      "status": 429,
+      "quotaExceeded": true
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "status": 429,
+      "quotaExceeded": true
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "status": 429,
+      "quotaExceeded": true
+    },
+    {
+      "path": "/api/vector/community/session",
+      "status": 429,
+      "quotaExceeded": true
+    }
+  ],
+  "alternate": [
+    {
+      "host": "patagoniaw.com",
+      "status": 200,
+      "noindex": true
+    },
+    {
+      "host": "patagonia-wings-web54-public.lizamaclaudio.workers.dev",
+      "status": 200,
+      "noindex": true
+    }
+  ],
+  "dynamicAvailable": false
+}

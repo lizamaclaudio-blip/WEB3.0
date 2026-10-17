@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "./PublicLink";
 import { completeEdition, completeEditionCopy } from "./complete-edition";
 import { developmentMilestones, developmentStatus, futureOnlinePlatform } from "./development-milestones";
 import { Glyph } from "./Glyph";

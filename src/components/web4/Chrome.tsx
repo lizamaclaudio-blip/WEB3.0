@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "./PublicLink";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Glyph } from "./Glyph";
@@ -21,6 +21,7 @@ export function WebHeader({ language = "es" }: { language?: Language }) {
     [t("Inicio", "Home", "Accueil"), ""],
     [t("Descubre Vector", "Discover Vector", "Découvrir Vector"), "/copiloto-vector"],
     [t("Ediciones", "Editions", "Éditions"), "/ediciones"],
+    [t("Integraciones", "Integrations", "Intégrations"), "/integraciones"],
     [t("Roadmap", "Roadmap", "Feuille de route"), "/roadmap"],
     [t("Comunidad", "Community", "Communauté"), "/comunidad"],
     ["Founders 10", "/founders-10"],
@@ -34,7 +35,7 @@ export function WebHeader({ language = "es" }: { language?: Language }) {
   }}>
     <a className="pw4-skip" href="#main-content">{t("Saltar al contenido", "Skip to content", "Aller au contenu")}</a>
     <div className="pw4-wrap pw4-nav">
-      <Link href={localeHref(language)} className="pw4-brand" aria-label="COPILOTO VECTOR"><Glyph name="mountain" size={31} /><span>COPILOTO <strong>VECTOR</strong><small>BY PATAGONIA PROJECT</small></span></Link>
+      <Link href={localeHref(language)} className="pw4-brand" aria-label="COPILOTO VECTOR"><Glyph name="mountain" size={31} /><span>COPILOTO <strong>VECTOR</strong><small>BY PATAGONIA WINGS</small></span></Link>
       <button ref={menuButton} className="pw4-menu-button" type="button" aria-expanded={open} aria-controls="pw4-navigation" onClick={() => setOpen(!open)}>{open ? t("Cerrar", "Close", "Fermer") : t("Menú", "Menu", "Menu")} <span aria-hidden="true">{open ? "−" : "+"}</span></button>
       <nav id="pw4-navigation" className={open ? "pw4-links is-open" : "pw4-links"} aria-label={t("Navegación principal", "Main navigation", "Navigation principale")}>
         {links.map(([label, href]) => <Link key={href} href={localeHref(language, href)} aria-current={pathname === localeHref(language, href) ? "page" : undefined} onClick={closeMenu}>{label}</Link>)}

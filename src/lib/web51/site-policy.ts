@@ -6,3 +6,8 @@ export function publicSiteEnabled(env:Record<string,string|undefined>=process.en
   ? env.VECTOR_DEPLOYMENT_STAGE==='production'
   : env.VERCEL_ENV==='production';
 }
+export function publicSiteOrigin(env:Record<string,string|undefined>=process.env){
+ const origin=env.VECTOR_PUBLIC_ORIGIN;
+ return publicSiteEnabled(env)&&origin==='https://patagonia-wings-web54-public.lizamaclaudio.workers.dev'
+  ? origin : 'https://www.patagoniaw.com';
+}

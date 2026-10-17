@@ -35,7 +35,7 @@ test('Cloudflare trials cannot inherit Vercel production indexing and need their
  assert.equal(publicSiteEnabled({VECTOR_HOSTING_PLATFORM:'cloudflare',VECTOR_SITE_MODE:'public',VECTOR_DEPLOYMENT_STAGE:'production'}),true);
 });
 
-test('all 36 public locale pages have reciprocal sitemap alternates; previews and private routes stay excluded', async () => {
+test('all 39 public locale pages including integrations have reciprocal alternates; previews stay excluded', async () => {
   const previous = process.env.VERCEL_ENV;
   const previousMode=process.env.VECTOR_SITE_MODE;
   try {
@@ -45,8 +45,9 @@ test('all 36 public locale pages have reciprocal sitemap alternates; previews an
     assert.equal(robots().rules.disallow, '/');
     process.env.VECTOR_SITE_MODE='public';
     const entries = await sitemap();
-    assert.equal(entries.length, 36);
-    assert.equal(new Set(entries.map(entry => entry.url)).size, 36);
+    assert.equal(entries.length, 39);
+    assert.equal(new Set(entries.map(entry => entry.url)).size, 39);
+    assert.ok(entries.some(entry=>entry.url.endsWith('/en/integraciones')));
     for (const entry of entries) {
       assert.deepEqual(Object.keys(entry.alternates.languages), ['es', 'en', 'fr']);
       for (const alternate of Object.values(entry.alternates.languages)) assert.ok(entries.some(item => item.url === alternate));

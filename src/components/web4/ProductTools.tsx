@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "./PublicLink";
 import { galleryCaptures } from "./gallery-data";
 import { localized, localeHref, type Language } from "./locale";
 

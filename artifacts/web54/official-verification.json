@@ -1,0 +1,508 @@
+{
+  "checkedAt": "2026-10-16T23:56:06.287Z",
+  "origin": "https://www.patagoniaw.com",
+  "dnsResolution": "Fresh Google public A records with TLS verification",
+  "addresses": {
+    "www.patagoniaw.com": "172.67.197.150",
+    "patagoniaw.com": "104.21.36.166"
+  },
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com",
+      "bytes": 69712
+    },
+    {
+      "path": "/copiloto-vector",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/copiloto-vector",
+      "bytes": 139113
+    },
+    {
+      "path": "/ediciones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/ediciones",
+      "bytes": 37188
+    },
+    {
+      "path": "/integraciones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/integraciones",
+      "bytes": 23443
+    },
+    {
+      "path": "/versiones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/versiones",
+      "bytes": 47564
+    },
+    {
+      "path": "/soporte",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/soporte",
+      "bytes": 21424
+    },
+    {
+      "path": "/novedades",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/novedades",
+      "bytes": 30714
+    },
+    {
+      "path": "/founders-10",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/founders-10",
+      "bytes": 28070
+    },
+    {
+      "path": "/roadmap",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/roadmap",
+      "bytes": 35302
+    },
+    {
+      "path": "/comunidad",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/comunidad",
+      "bytes": 18902
+    },
+    {
+      "path": "/descubre",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/descubre",
+      "bytes": 22990
+    },
+    {
+      "path": "/privacidad",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/privacidad",
+      "bytes": 24437
+    },
+    {
+      "path": "/condiciones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/condiciones",
+      "bytes": 19110
+    },
+    {
+      "path": "/en",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en",
+      "bytes": 70186
+    },
+    {
+      "path": "/en/copiloto-vector",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/copiloto-vector",
+      "bytes": 136949
+    },
+    {
+      "path": "/en/ediciones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/ediciones",
+      "bytes": 37419
+    },
+    {
+      "path": "/en/integraciones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/integraciones",
+      "bytes": 23717
+    },
+    {
+      "path": "/en/versiones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/versiones",
+      "bytes": 47072
+    },
+    {
+      "path": "/en/soporte",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/soporte",
+      "bytes": 21869
+    },
+    {
+      "path": "/en/novedades",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/novedades",
+      "bytes": 30731
+    },
+    {
+      "path": "/en/founders-10",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/founders-10",
+      "bytes": 28306
+    },
+    {
+      "path": "/en/roadmap",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/roadmap",
+      "bytes": 35386
+    },
+    {
+      "path": "/en/comunidad",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/comunidad",
+      "bytes": 19241
+    },
+    {
+      "path": "/en/descubre",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/descubre",
+      "bytes": 23109
+    },
+    {
+      "path": "/en/privacidad",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/privacidad",
+      "bytes": 23807
+    },
+    {
+      "path": "/en/condiciones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/en/condiciones",
+      "bytes": 19419
+    },
+    {
+      "path": "/fr",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr",
+      "bytes": 71937
+    },
+    {
+      "path": "/fr/copiloto-vector",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/copiloto-vector",
+      "bytes": 142520
+    },
+    {
+      "path": "/fr/ediciones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/ediciones",
+      "bytes": 38141
+    },
+    {
+      "path": "/fr/integraciones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/integraciones",
+      "bytes": 24205
+    },
+    {
+      "path": "/fr/versiones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/versiones",
+      "bytes": 49222
+    },
+    {
+      "path": "/fr/soporte",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/soporte",
+      "bytes": 22373
+    },
+    {
+      "path": "/fr/novedades",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/novedades",
+      "bytes": 31477
+    },
+    {
+      "path": "/fr/founders-10",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/founders-10",
+      "bytes": 29046
+    },
+    {
+      "path": "/fr/roadmap",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/roadmap",
+      "bytes": 36317
+    },
+    {
+      "path": "/fr/comunidad",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/comunidad",
+      "bytes": 19659
+    },
+    {
+      "path": "/fr/descubre",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/descubre",
+      "bytes": 24073
+    },
+    {
+      "path": "/fr/privacidad",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/privacidad",
+      "bytes": 25322
+    },
+    {
+      "path": "/fr/condiciones",
+      "status": 200,
+      "canonical": "https://www.patagoniaw.com/fr/condiciones",
+      "bytes": 20148
+    }
+  ],
+  "assets": [
+    {
+      "path": "/_next/static/media/3206eb66b875a5b3-s.p.201eoo3y6c5_i.woff2",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/media/a079e02bba5bf7ab-s.p.3f6zc4f4lqyuc.woff2",
+      "status": 200
+    },
+    {
+      "path": "/vector/web50/hero-aviation.webp",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/0aes2mxe4hc9a.css",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/0s5rna8uva6d9.css",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/09wybmvtjxgxg.css",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/1ckvzn7sfprko.js",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/2r4s4h5xul1n-.js",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/209aaqjv6z8gh.js",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/2e268anpfvdoc.js",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/turbopack-2c3mg3r-05n1w.js",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/0umf92h1sb77c.js",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/0x1nz9t8rgczx.js",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/3wgnsylp5n-lu.js",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/0cz1d0mv5g_q7.js",
+      "status": 200
+    },
+    {
+      "path": "/vector/m29/copilot.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/m29/dispatch.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/current/cabin.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/current/monitor.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/current/landing.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/current/journal.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/m29/home.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/web50/academy.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/web50/performance.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/web50/studio.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/web50/career.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/web50/acars.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/m29/settings.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/current/icons/monitor.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/current/icons/ofp.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/current/icons/passengers.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/current/icons/airport.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/m29/operations.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/current/icons/copilot.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/current/icons/clock.webp",
+      "status": 200
+    },
+    {
+      "path": "/vector/current/weather.webp",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/0nw_ds_vo7jwu.js",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/2w8zlrsrg172y.js",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/1rogdgrk6miml.js",
+      "status": 200
+    },
+    {
+      "path": "/_next/static/chunks/0kfpq4rjhedai.js",
+      "status": 200
+    }
+  ],
+  "api": [
+    {
+      "path": "/api/vector/availability",
+      "status": 200
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "status": 200,
+      "ok": true,
+      "source": "database",
+      "items": 16
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "status": 200,
+      "ok": true,
+      "items": 0,
+      "authenticated": false,
+      "admin": false
+    },
+    {
+      "path": "/api/vector/community/session",
+      "status": 200,
+      "ok": true,
+      "authenticated": false,
+      "admin": false
+    },
+    {
+      "path": "/api/vector/inquiry",
+      "method": "POST",
+      "status": 403
+    },
+    {
+      "path": "/api/vector/founders",
+      "method": "POST",
+      "status": 403
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "method": "POST",
+      "status": 403
+    },
+    {
+      "path": "/api/vector/community/session",
+      "method": "POST",
+      "status": 403
+    },
+    {
+      "path": "/api/vector/mail/retry",
+      "method": "POST",
+      "status": 403
+    }
+  ],
+  "robots": "User-Agent: *\nAllow: /$\nAllow: /en$\nAllow: /fr$\nAllow: /copiloto-vector$\nAllow: /en/copiloto-vector$\nAllow: /fr/copiloto-vector$\nAllow: /descubre$\nAllow: /en/descubre$\nAllow: /fr/descubre$\nAllow: /ediciones$\nAllow: /en/ediciones$\nAllow: /fr/ediciones$\nAllow: /integraciones$\nAllow: /en/integraciones$\nAllow: /fr/integraciones$\nAllow: /roadmap$\nAllow: /en/roadmap$\nAllow: /fr/roadmap$\nAllow: /comunidad$\nAllow: /en/comunidad$\nAllow: /fr/comunidad$\nAllow: /founders-10$\nAllow: /en/founders-10$\nAllow: /fr/founders-10$\nAllow: /novedades$\nAllow: /en/novedades$\nAllow: /fr/novedades$\nAllow: /versiones$\nAllow: /en/versiones$\nAllow: /fr/versiones$\nAllow: /soporte$\nAllow: /en/soporte$\nAllow: /fr/soporte$\nAllow: /privacidad$\nAllow: /en/privacidad$\nAllow: /fr/privacidad$\nAllow: /condiciones$\nAllow: /en/condiciones$\nAllow: /fr/condiciones$\nAllow: /_next/\nAllow: /vector/\nDisallow: /\nDisallow: /api/\nDisallow: /dashboard\nDisallow: /login\nDisallow: /register\nDisallow: /comunidad/admin\nDisallow: /comunidad/cuenta\nDisallow: /confirmar-novedades\nDisallow: /cancelar-novedades\nDisallow: /en/comunidad/admin\nDisallow: /en/comunidad/cuenta\nDisallow: /en/confirmar-novedades\nDisallow: /en/cancelar-novedades\nDisallow: /fr/comunidad/admin\nDisallow: /fr/comunidad/cuenta\nDisallow: /fr/confirmar-novedades\nDisallow: /fr/cancelar-novedades\n\nSitemap: https://www.patagoniaw.com/sitemap.xml\n",
+  "sitemapLocations": [
+    "https://www.patagoniaw.com/",
+    "https://www.patagoniaw.com/en",
+    "https://www.patagoniaw.com/fr",
+    "https://www.patagoniaw.com/copiloto-vector",
+    "https://www.patagoniaw.com/en/copiloto-vector",
+    "https://www.patagoniaw.com/fr/copiloto-vector",
+    "https://www.patagoniaw.com/descubre",
+    "https://www.patagoniaw.com/en/descubre",
+    "https://www.patagoniaw.com/fr/descubre",
+    "https://www.patagoniaw.com/ediciones",
+    "https://www.patagoniaw.com/en/ediciones",
+    "https://www.patagoniaw.com/fr/ediciones",
+    "https://www.patagoniaw.com/integraciones",
+    "https://www.patagoniaw.com/en/integraciones",
+    "https://www.patagoniaw.com/fr/integraciones",
+    "https://www.patagoniaw.com/roadmap",
+    "https://www.patagoniaw.com/en/roadmap",
+    "https://www.patagoniaw.com/fr/roadmap",
+    "https://www.patagoniaw.com/comunidad",
+    "https://www.patagoniaw.com/en/comunidad",
+    "https://www.patagoniaw.com/fr/comunidad",
+    "https://www.patagoniaw.com/founders-10",
+    "https://www.patagoniaw.com/en/founders-10",
+    "https://www.patagoniaw.com/fr/founders-10",
+    "https://www.patagoniaw.com/novedades",
+    "https://www.patagoniaw.com/en/novedades",
+    "https://www.patagoniaw.com/fr/novedades",
+    "https://www.patagoniaw.com/versiones",
+    "https://www.patagoniaw.com/en/versiones",
+    "https://www.patagoniaw.com/fr/versiones",
+    "https://www.patagoniaw.com/soporte",
+    "https://www.patagoniaw.com/en/soporte",
+    "https://www.patagoniaw.com/fr/soporte",
+    "https://www.patagoniaw.com/privacidad",
+    "https://www.patagoniaw.com/en/privacidad",
+    "https://www.patagoniaw.com/fr/privacidad",
+    "https://www.patagoniaw.com/condiciones",
+    "https://www.patagoniaw.com/en/condiciones",
+    "https://www.patagoniaw.com/fr/condiciones"
+  ],
+  "qaStillNoindex": true,
+  "officialStillLegacy": false
+}

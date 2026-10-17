@@ -1,0 +1,40 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "patagonia-wings-web54-public",
+  "main": "scripts/cloudflare/worker-public.mjs",
+  "compatibility_date": "2026-10-16",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "workers_dev": true,
+  "preview_urls": false,
+  "assets": {
+    "directory": ".open-next/public-site",
+    "binding": "ASSETS",
+    "run_worker_first": false,
+    "html_handling": "auto-trailing-slash"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "redact_query_string": true
+  },
+  "vars": {
+    "VECTOR_HOSTING_PLATFORM": "cloudflare",
+    "VECTOR_DEPLOYMENT_STAGE": "production",
+    "VECTOR_SITE_MODE": "public",
+    "VECTOR_PUBLIC_ORIGIN": "https://www.patagoniaw.com",
+    "VECTOR_PUBLIC_READ_ONLY": "true",
+    "VECTOR_FORMS_MODE": "public",
+    "VECTOR_FORMS_ENABLED": "false",
+    "VECTOR_COMMUNITY_AUTH_ENABLED": "false",
+    "VECTOR_COMMUNITY_REGISTRATION_ENABLED": "false",
+    "VECTOR_COMMUNITY_QA_REGISTRATION_ENABLED": "false",
+    "VECTOR_MAIL_ENABLED": "false",
+    "VECTOR_QA_SMTP_TEST_APPROVED": "false",
+    "SUPABASE_URL": "https://donguccheqjqyzudowuy.supabase.co",
+    "VECTOR_COMMUNITY_PUBLIC_KEY": "sb_publishable_Qkp0JTh6VwPkdfvYVe5qSg_9N-8yAmR",
+    "VECTOR_CANONICAL_REDIRECT_ENABLED": "false"
+  }
+}

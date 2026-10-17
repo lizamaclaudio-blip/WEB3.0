@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "./PublicLink";
 import { Glyph } from "./Glyph";
 import { localized, localeHref, type Language } from "./locale";
 import { publicRoadmapSeed, publicRoadmapStatuses, type PublicRoadmapItem, type PublicRoadmapStatus } from "./public-roadmap";

@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "./PublicLink";
 import { useEffect, useState } from "react";
 import { localized, localeHref, type Language } from "./locale";
 

@@ -1,0 +1,1603 @@
+{
+  "label": "official-launch",
+  "createdAt": "2026-10-16T23:38:12.339Z",
+  "concurrency": 2,
+  "parseErrors": 0,
+  "events": 64,
+  "requests": [
+    {
+      "path": "/",
+      "phase": "tail-probe",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 71
+    },
+    {
+      "path": "/",
+      "phase": "first-observed",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/en",
+      "phase": "first-observed",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/fr",
+      "phase": "first-observed",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "first-observed",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 29
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "first-observed",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 340
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "first-observed",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 115
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 70
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 35
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 95
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 198
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 35
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 37
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 87
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 89
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 35
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 29
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 98
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 101
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 91
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 92
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 91
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 94
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 29
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 98
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 97
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 28
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 88
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 98
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 29
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 86
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 93
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 35
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 92
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 95
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 29
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 90
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 89
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 35
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 29
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 88
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 94
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 36
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 102
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 102
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 87
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 105
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 28
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 93
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 93
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 92
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 97
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 36
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 97
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 101
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 89
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 94
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 96
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 98
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 93
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 98
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 36
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 38
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 92
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 95
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 28
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 92
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 93
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 31
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 91
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 97
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 32
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 36
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 33
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 34
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 90
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 91
+    },
+    {
+      "path": "/en",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 37
+    },
+    {
+      "path": "/",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 38
+    },
+    {
+      "path": "/en/integraciones",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/fr",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": "informational-assets",
+      "elapsedMs": 30
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 93
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "phase": "warm-concurrency-2",
+      "status": 200,
+      "delivery": null,
+      "elapsedMs": 93
+    }
+  ],
+  "rows": [
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193827935,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 5,
+      "outcome": "ok",
+      "timestamp": 1792193828977,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193829009,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/fr",
+      "cpuMs": 0,
+      "wallMs": 5,
+      "outcome": "ok",
+      "timestamp": 1792193829042,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 5,
+      "outcome": "ok",
+      "timestamp": 1792193829072,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "cpuMs": 1,
+      "wallMs": 315,
+      "outcome": "ok",
+      "timestamp": 1792193829102,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "cpuMs": 0,
+      "wallMs": 93,
+      "outcome": "ok",
+      "timestamp": 1792193829440,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 5,
+      "outcome": "ok",
+      "timestamp": 1792193829557,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193829594,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193830239,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/fr",
+      "cpuMs": 0,
+      "wallMs": 8,
+      "outcome": "ok",
+      "timestamp": 1792193830239,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/fr",
+      "cpuMs": 0,
+      "wallMs": 5,
+      "outcome": "ok",
+      "timestamp": 1792193832332,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "cpuMs": 1,
+      "wallMs": 66,
+      "outcome": "ok",
+      "timestamp": 1792193832966,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193834303,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "cpuMs": 1,
+      "wallMs": 72,
+      "outcome": "ok",
+      "timestamp": 1792193834942,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/fr",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193836295,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "cpuMs": 0,
+      "wallMs": 67,
+      "outcome": "ok",
+      "timestamp": 1792193836933,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 8,
+      "outcome": "ok",
+      "timestamp": 1792193838278,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193839614,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193840246,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193841589,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193842228,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193843565,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193844198,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 7,
+      "outcome": "ok",
+      "timestamp": 1792193845537,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 9,
+      "outcome": "ok",
+      "timestamp": 1792193846175,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 7,
+      "outcome": "ok",
+      "timestamp": 1792193847516,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/fr",
+      "cpuMs": 0,
+      "wallMs": 7,
+      "outcome": "ok",
+      "timestamp": 1792193848150,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 8,
+      "outcome": "ok",
+      "timestamp": 1792193849489,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193850127,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 7,
+      "outcome": "ok",
+      "timestamp": 1792193851466,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/fr",
+      "cpuMs": 0,
+      "wallMs": 10,
+      "outcome": "ok",
+      "timestamp": 1792193852106,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 7,
+      "outcome": "ok",
+      "timestamp": 1792193853469,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/fr",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193854104,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193855467,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193856100,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193857441,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 7,
+      "outcome": "ok",
+      "timestamp": 1792193858079,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 7,
+      "outcome": "ok",
+      "timestamp": 1792193859415,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 9,
+      "outcome": "ok",
+      "timestamp": 1792193860052,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193861400,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/fr",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193862039,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 5,
+      "outcome": "ok",
+      "timestamp": 1792193863377,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 7,
+      "outcome": "ok",
+      "timestamp": 1792193864013,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193865352,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en/integraciones",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193866000,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 9,
+      "outcome": "ok",
+      "timestamp": 1792193867341,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/fr",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193867992,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193869334,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "cpuMs": 1,
+      "wallMs": 69,
+      "outcome": "ok",
+      "timestamp": 1792193870606,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193871306,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "cpuMs": 1,
+      "wallMs": 69,
+      "outcome": "ok",
+      "timestamp": 1792193872590,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/en",
+      "cpuMs": 0,
+      "wallMs": 6,
+      "outcome": "ok",
+      "timestamp": 1792193873305,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "cpuMs": 1,
+      "wallMs": 69,
+      "outcome": "ok",
+      "timestamp": 1792193874578,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/",
+      "cpuMs": 0,
+      "wallMs": 11,
+      "outcome": "ok",
+      "timestamp": 1792193875285,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "cpuMs": 3,
+      "wallMs": 69,
+      "outcome": "ok",
+      "timestamp": 1792193876574,
+      "version": "62c1f78b-fe72-4b0b-a822-30a692f9f3ed"
+    }
+  ],
+  "summary": [
+    {
+      "path": "/",
+      "samples": 12,
+      "median": 0,
+      "p95": null,
+      "p99": null,
+      "max": 0,
+      "over10": 0,
+      "outcomes": [
+        "ok"
+      ],
+      "httpErrors": 0,
+      "rateLimited": 0
+    },
+    {
+      "path": "/en",
+      "samples": 12,
+      "median": 0,
+      "p95": null,
+      "p99": null,
+      "max": 0,
+      "over10": 0,
+      "outcomes": [
+        "ok"
+      ],
+      "httpErrors": 0,
+      "rateLimited": 0
+    },
+    {
+      "path": "/fr",
+      "samples": 9,
+      "median": 0,
+      "p95": null,
+      "p99": null,
+      "max": 0,
+      "over10": 0,
+      "outcomes": [
+        "ok"
+      ],
+      "httpErrors": 0,
+      "rateLimited": 0
+    },
+    {
+      "path": "/en/integraciones",
+      "samples": 14,
+      "median": 0,
+      "p95": null,
+      "p99": null,
+      "max": 0,
+      "over10": 0,
+      "outcomes": [
+        "ok"
+      ],
+      "httpErrors": 0,
+      "rateLimited": 0
+    },
+    {
+      "path": "/api/vector/community/roadmap",
+      "samples": 4,
+      "median": 1,
+      "p95": null,
+      "p99": null,
+      "max": 3,
+      "over10": 0,
+      "outcomes": [
+        "ok"
+      ],
+      "httpErrors": 0,
+      "rateLimited": 0
+    },
+    {
+      "path": "/api/vector/community/proposals",
+      "samples": 5,
+      "median": 1,
+      "p95": null,
+      "p99": null,
+      "max": 1,
+      "over10": 0,
+      "outcomes": [
+        "ok"
+      ],
+      "httpErrors": 0,
+      "rateLimited": 0
+    }
+  ],
+  "memoryPeak": "Not exposed by Tail; limit 128 MB. First observed is not proof of a cold isolate."
+}

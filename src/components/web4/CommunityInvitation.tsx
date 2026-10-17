@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from './PublicLink';
 import { localeHref,localized,type Language } from './locale';
 export function CommunityInvitation({language}:{language:Language}){
  const t=(es:string,en:string,fr:string)=>localized(language,es,en,fr);

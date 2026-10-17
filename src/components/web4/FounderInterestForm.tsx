@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "./PublicLink";
 import { useState } from "react";
 import { localized, localeHref, type Language } from "./locale";
 import { useFormAvailability } from './useFormAvailability';

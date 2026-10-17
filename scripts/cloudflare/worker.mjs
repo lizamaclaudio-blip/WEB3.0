@@ -1,4 +1,5 @@
 import publicAssets from '../../.open-next/public-assets.mjs';
+import buildProfile from '../../.open-next/build-profile.mjs';
 import { connect } from 'cloudflare:sockets';
 import { runWithCloudflareRequestContext } from '../../.open-next/cloudflare/init.js';
 // Only the immutable connector is shared; sockets and credentials are created
@@ -10,6 +11,7 @@ export { DOQueueHandler, DOShardedTagCache, BucketCachePurge } from '../../.open
 // Every sensitive/dynamic operation retains the existing OpenNext handler.
 export default {
   async fetch(request, env, ctx) {
+    if(buildProfile!=='preview')return new Response('Build profile mismatch',{status:503,headers:{'X-Robots-Tag':'noindex, nofollow'}});
     const url = new URL(request.url);
     if (request.method === 'GET' && ['/api/vector/availability', '/api/vector/community/roadmap', '/api/vector/community/proposals', '/api/vector/community/session'].includes(url.pathname)) {
       return runWithCloudflareRequestContext(request, env, ctx, async () => {
